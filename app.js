@@ -15,7 +15,9 @@ const state = {
   eta: 31,
   products: [],
   categories: [],
-  settings: { freeDelivery: 499, deliveryFee: 49 }
+  settings: { freeDelivery: 499, deliveryFee: 49 },
+  user: null,
+  authMode: "login"
 };
 
 const grocerySubcats = [
@@ -49,6 +51,10 @@ const dom = {
   modalClose: $("#modalClose"), locModal: $("#locationModal"),
   detectBtn: $("#detectLocationBtn"), manualAddr: $("#manualAddress"),
   saveAddrBtn: $("#saveAddressBtn"), requestTab: $("#requestTab"),
+  authScreen: $("#authScreen"), authEmail: $("#authEmail"), authPass: $("#authPass"),
+  authPrimaryBtn: $("#authPrimaryBtn"), authSubtitle: $("#authSubtitle"),
+  toggleAuthMode: $("#toggleAuthMode"), loginGoogle: $("#loginGoogle"),
+  loginFacebook: $("#loginFacebook"), skipAuth: $("#skipAuth"),
 };
 
 // ─── UTILS ───
@@ -61,6 +67,10 @@ function cartTotal() { let t=0; state.cart.forEach((q,id)=>{const p=state.produc
 // ─── SUPABASE DATA FETCH ───
 async function fetchData() {
   try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) state.user = session.user;
+    else if (!sessionStorage.getItem("auth_skipped")) dom.authScreen.classList.add("show");
+
     const { data: cats } = await supabase.from('categories').select('*').order('id');
     const { data: prods } = await supabase.from('products').select('*').order('created_at', { ascending: false });
     const { data: sets } = await supabase.from('settings').select('*');
@@ -78,6 +88,50 @@ async function fetchData() {
     console.error("Supabase error:", err);
     toast("Error loading data from server");
   }
+}
+
+// ─── AUTH ACTIONS ───
+async function handleAuth() {
+  const email = dom.authEmail.value;
+  const password = dom.authPass.value;
+  if(!email || !password) { toast("Fill all fields"); return; }
+  
+  dom.authPrimaryBtn.disabled = true;
+  dom.authPrimaryBtn.textContent = "Loading...";
+
+  try {
+    if(state.authMode === "login") {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if(error) throw error;
+      state.user = data.user;
+      toast(`Welcome back!`);
+    } else {
+      const { data, error } = await supabase.auth.signUp({ email, password });
+      if(error) throw error;
+      toast("Check your email for confirmation!");
+    }
+    dom.authScreen.classList.remove("show");
+  } catch(err) {
+    toast(err.message);
+  } finally {
+    dom.authPrimaryBtn.disabled = false;
+    dom.authPrimaryBtn.textContent = state.authMode === "login" ? "Sign In" : "Sign Up";
+  }
+}
+
+async function socialLogin(provider) {
+  const { error } = await supabase.auth.signInWithOAuth({ provider });
+  if(error) toast(error.message);
+}
+
+function toggleAuth() {
+  state.authMode = state.authMode === "login" ? "signup" : "login";
+  dom.authSubtitle.textContent = state.authMode === "login" ? "Experience premium fresh delivery" : "Join the MagicMeat community";
+  dom.authPrimaryBtn.textContent = state.authMode === "login" ? "Sign In" : "Sign Up";
+  dom.toggleAuthMode.textContent = state.authMode === "login" ? "Sign Up" : "Sign In";
+  $(".auth-toggle").innerHTML = state.authMode === "login" ? `Don't have an account? <a href="#" id="toggleAuthMode">Sign Up</a>` : `Already have an account? <a href="#" id="toggleAuthMode">Sign In</a>`;
+  // Re-bind because we replaced HTML
+  $("#toggleAuthMode").onclick = (e) => { e.preventDefault(); toggleAuth(); };
 }
 
 // ─── NAV ───
@@ -99,7 +153,10 @@ function cardHTML(p, delay=0) {
          <button data-cadd="${p.id}">+</button>
        </div>`;
   return `<div class="product-card" style="animation-delay:${delay}ms" data-product-id="${p.id}">
-    <div class="product-image" style="--card-bg:${p.bg};--card-accent:${p.color}"><span class="unit-tag">${p.unit}</span></div>
+    <div class="product-image" style="--card-bg:${p.bg};--card-accent:${p.color}">
+      ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" loading="lazy">` : ''}
+      <span class="unit-tag">${p.unit}</span>
+    </div>
     <h3>${p.name}</h3><p class="product-note">${p.note}</p>
     <div class="product-footer"><span class="product-price">${fmt(p.price)}</span>${stepper}</div>
   </div>`;
@@ -226,8 +283,22 @@ function detectLoc(){
 // ─── EVENTS ───
 dom.tabs.forEach(t=>t.addEventListener("click",()=>{if(t.dataset.view)switchView(t.dataset.view)}));
 dom.requestTab.addEventListener("click",()=>{
-  window.open("https://wa.me/919999999999?text=Hi%20MagicMeat!%20I%20want%20to%20place%20a%20custom%20order.","_blank");
+  if(!state.user) {
+    dom.authScreen.classList.add("show");
+    return;
+  }
+  const msg = `User: ${state.user.email}\nI want to place a custom order.`;
+  window.open(`https://wa.me/919999999999?text=${encodeURIComponent(msg)}`,"_blank");
 });
+
+dom.authPrimaryBtn.onclick = handleAuth;
+dom.toggleAuthMode.onclick = (e) => { e.preventDefault(); toggleAuth(); };
+dom.loginGoogle.onclick = () => socialLogin('google');
+dom.loginFacebook.onclick = () => socialLogin('facebook');
+dom.skipAuth.onclick = () => {
+  sessionStorage.setItem("auth_skipped", "1");
+  dom.authScreen.classList.remove("show");
+};
 
 document.addEventListener("click",e=>{
   const qcat=e.target.closest("[data-catview]");
@@ -263,7 +334,8 @@ dom.checkoutBtn.addEventListener("click", async ()=>{
       items: orderItems,
       total: total + df,
       address: state.address || "Not set",
-      status: "pending"
+      status: "pending",
+      user_email: state.user ? state.user.email : "Guest User"
     });
     
     if (error) throw error;

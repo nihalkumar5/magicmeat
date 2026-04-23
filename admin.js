@@ -112,7 +112,7 @@ function renderProducts() {
   }
   $("#productsTable").innerHTML = `<table><thead><tr><th>Color</th><th>Name</th><th>Category</th><th>Price</th><th>Unit</th><th>Stock</th><th>Actions</th></tr></thead><tbody>${
     products.map((p, i) => `<tr>
-      <td><span class="product-color" style="background:${p.color}"></span></td>
+      <td><div class="admin-thumb" style="background:${p.color}22">${p.image_url ? `<img src="${p.image_url}"/>` : `<span class="product-color" style="background:${p.color}"></span>`}</div></td>
       <td><strong>${p.name}</strong><br><span style="color:var(--muted);font-size:12px">${p.note || ""}</span></td>
       <td>${p.category}</td>
       <td>₹${p.price}</td>
@@ -132,6 +132,7 @@ function openProductModal(idx) {
   $("#modalTitle").textContent = p ? "Edit Product" : "Add Product";
   $("#pCategory").innerHTML = categories.map(c => `<option value="${c.id}" ${p && p.category === c.id ? 'selected' : ''}>${c.icon} ${c.label}</option>`).join("");
   $("#pName").value = p ? p.name : "";
+  $("#pImage").value = p ? (p.image_url || "") : "";
   $("#pPrice").value = p ? p.price : "";
   $("#pUnit").value = p ? p.unit : "";
   $("#pNote").value = p ? p.note : "";
@@ -142,6 +143,7 @@ function openProductModal(idx) {
 
 async function saveProduct() {
   const name = $("#pName").value.trim();
+  const image_url = $("#pImage").value.trim();
   const price = parseFloat($("#pPrice").value);
   const unit = $("#pUnit").value.trim();
   const category = $("#pCategory").value;
@@ -152,7 +154,7 @@ async function saveProduct() {
   if (!name || isNaN(price) || !unit) { toast("Fill name, price, and unit"); return; }
   const slug = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
 
-  const payload = { id: slug, name, price, unit, category, note, color, stock, bg: `linear-gradient(135deg,${color}15,#fff)` };
+  const payload = { id: slug, name, price, unit, category, note, color, stock, image_url, bg: `linear-gradient(135deg,${color}15,#fff)` };
 
   try {
     if (editingProduct !== null) {
@@ -208,7 +210,7 @@ function renderCategories() {
   if (!categories.length) { $("#catGrid").innerHTML = `<div class="table-empty" style="grid-column:1/-1">No categories.</div>`; return; }
   $("#catGrid").innerHTML = categories.map((c, i) => `
     <div class="cat-card">
-      <span class="cat-emoji">${c.icon}</span>
+      <div class="cat-thumb">${c.image_url ? `<img src="${c.image_url}"/>` : `<span class="cat-emoji">${c.icon}</span>`}</div>
       <div class="cat-info"><strong>${c.label}</strong><span>${c.id}</span></div>
       <div class="cat-actions">
         <button class="icon-btn" data-edit-c="${i}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
@@ -219,13 +221,14 @@ function renderCategories() {
 
 async function saveCat() {
   const label = $("#cLabel").value.trim();
+  const image_url = $("#cImage").value.trim();
   const id = $("#cId").value.trim().toLowerCase().replace(/\s+/g,"-");
   const icon = $("#cEmoji").value.trim();
   const color = $("#cColor").value;
   const bg = $("#cBg").value;
   if (!label || !id) { toast("Fill label and ID"); return; }
   
-  const payload = { id, label, icon, color, bg };
+  const payload = { id, label, icon, color, bg, image_url };
   try {
     if (editingCat !== null) {
       const oldId = categories[editingCat].id;
