@@ -183,12 +183,13 @@ function renderOrders() {
     $("#ordersTable").innerHTML = `<div class="table-empty">No orders yet.</div>`;
     return;
   }
-  $("#ordersTable").innerHTML = `<table><thead><tr><th>#</th><th>Items</th><th>Qty</th><th>Total</th><th>Address</th><th>Time</th><th>Status</th><th>Action</th></tr></thead><tbody>${
+  $("#ordersTable").innerHTML = `<table><thead><tr><th>#</th><th>Items</th><th>Qty</th><th>Total</th><th>Payment ID</th><th>Address</th><th>Time</th><th>Status</th><th>Action</th></tr></thead><tbody>${
     orders.map((o, i) => `<tr>
       <td>${o.id}</td>
       <td>${o.items?.map(it => it.name).join(", ") || "—"}</td>
       <td>${o.items?.reduce((s, it) => s + it.qty, 0) || 0}</td>
       <td>₹${(parseFloat(o.total) || 0).toLocaleString("en-IN")}</td>
+      <td><span style="font-size:11px;color:var(--muted)">${o.payment_id || "COD/Manual"}</span></td>
       <td>${o.address || "—"}</td>
       <td>${new Date(o.created_at).toLocaleString("en-IN",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"})}</td>
       <td>
