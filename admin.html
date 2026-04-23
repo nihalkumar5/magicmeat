@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>MagicMeat — Admin Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="./admin.css"/>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen" class="login-screen">
+  <div class="login-card">
+    <div class="login-logo">🥩</div>
+    <h1>MagicMeat Admin</h1>
+    <p>Enter your admin password</p>
+    <input type="password" id="loginPass" placeholder="Password" autocomplete="off"/>
+    <button id="loginBtn">Sign In</button>
+    <span class="login-hint">Default: admin123</span>
+  </div>
+</div>
+
+<!-- ADMIN SHELL -->
+<div id="adminShell" class="admin-shell hidden">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand"><span class="brand-icon">🥩</span><span class="brand-text">MagicMeat</span><span class="brand-tag">Admin</span></div>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-page="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</button>
+      <button class="nav-item" data-page="products"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Products</button>
+      <button class="nav-item" data-page="orders"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Orders</button>
+      <button class="nav-item" data-page="categories"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Categories</button>
+      <button class="nav-item" data-page="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</button>
+    </nav>
+    <button class="nav-item logout-btn" id="logoutBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Logout</button>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-area">
+    <header class="top-header">
+      <button class="hamburger" id="menuToggle">☰</button>
+      <h2 id="pageTitle">Dashboard</h2>
+      <div class="header-right"><span class="admin-avatar">NK</span></div>
+    </header>
+
+    <!-- DASHBOARD PAGE -->
+    <div class="page active" id="pg-dashboard">
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-icon" style="background:#C6282820;color:#C62828">📦</div><div class="stat-info"><span class="stat-val" id="statProducts">0</span><span class="stat-label">Products</span></div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:#2563eb20;color:#2563eb">📋</div><div class="stat-info"><span class="stat-val" id="statOrders">0</span><span class="stat-label">Orders</span></div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:#16a34a20;color:#16a34a">💰</div><div class="stat-info"><span class="stat-val" id="statRevenue">₹0</span><span class="stat-label">Revenue</span></div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:#f59e0b20;color:#f59e0b">📂</div><div class="stat-info"><span class="stat-val" id="statCats">0</span><span class="stat-label">Categories</span></div></div>
+      </div>
+      <div class="panel">
+        <h3>Recent Orders</h3>
+        <div id="recentOrders" class="table-wrap"></div>
+      </div>
+    </div>
+
+    <!-- PRODUCTS PAGE -->
+    <div class="page" id="pg-products">
+      <div class="page-toolbar"><h3 id="prodCount">All Products</h3><button class="primary-btn" id="addProductBtn">+ Add Product</button></div>
+      <div class="table-wrap" id="productsTable"></div>
+    </div>
+
+    <!-- ORDERS PAGE -->
+    <div class="page" id="pg-orders">
+      <div class="page-toolbar"><h3 id="orderCount">All Orders</h3><button class="secondary-btn" id="clearOrdersBtn">Clear All</button></div>
+      <div class="table-wrap" id="ordersTable"></div>
+    </div>
+
+    <!-- CATEGORIES PAGE -->
+    <div class="page" id="pg-categories">
+      <div class="page-toolbar"><h3>Manage Categories</h3><button class="primary-btn" id="addCatBtn">+ Add Category</button></div>
+      <div class="cat-grid" id="catGrid"></div>
+    </div>
+
+    <!-- SETTINGS PAGE -->
+    <div class="page" id="pg-settings">
+      <div class="panel" style="max-width:500px">
+        <h3>Store Settings</h3>
+        <div class="form-group"><label>Store Name</label><input type="text" id="storeName" value="MagicMeat"/></div>
+        <div class="form-group"><label>WhatsApp Number</label><input type="tel" id="waNumber" value="+919999999999"/></div>
+        <div class="form-group"><label>Free Delivery Above (₹)</label><input type="number" id="freeDelivery" value="499"/></div>
+        <div class="form-group"><label>Delivery Fee (₹)</label><input type="number" id="deliveryFee" value="49"/></div>
+        <div class="form-group"><label>Admin Password</label><input type="password" id="newPass" placeholder="Change password"/></div>
+        <button class="primary-btn" id="saveSettingsBtn">Save Settings</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- PRODUCT MODAL -->
+<div class="modal-overlay" id="productModal">
+  <div class="modal-box">
+    <div class="modal-header"><h3 id="modalTitle">Add Product</h3><button class="close-modal" id="closeProductModal">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Name</label><input type="text" id="pName" placeholder="e.g. Mutton Curry Cut"/></div>
+      <div class="form-row">
+        <div class="form-group"><label>Price (₹)</label><input type="number" id="pPrice" placeholder="529"/></div>
+        <div class="form-group"><label>Unit</label><input type="text" id="pUnit" placeholder="500g"/></div>
+      </div>
+      <div class="form-group"><label>Category</label><select id="pCategory"></select></div>
+      <div class="form-group"><label>Description</label><textarea id="pNote" rows="2" placeholder="Short product description…"></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label>Card Color</label><input type="color" id="pColor" value="#C62828"/></div>
+        <div class="form-group"><label>In Stock</label><select id="pStock"><option value="1">Yes</option><option value="0">No</option></select></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="secondary-btn" id="cancelProduct">Cancel</button><button class="primary-btn" id="saveProduct">Save Product</button></div>
+  </div>
+</div>
+
+<!-- CATEGORY MODAL -->
+<div class="modal-overlay" id="catModal">
+  <div class="modal-box" style="max-width:420px">
+    <div class="modal-header"><h3 id="catModalTitle">Add Category</h3><button class="close-modal" id="closeCatModal">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Label</label><input type="text" id="cLabel" placeholder="e.g. Fruits"/></div>
+      <div class="form-row">
+        <div class="form-group"><label>ID (slug)</label><input type="text" id="cId" placeholder="fruits"/></div>
+        <div class="form-group"><label>Emoji</label><input type="text" id="cEmoji" placeholder="🍎"/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Color</label><input type="color" id="cColor" value="#2E7D32"/></div>
+        <div class="form-group"><label>BG Color</label><input type="color" id="cBg" value="#E8F5E9"/></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="secondary-btn" id="cancelCat">Cancel</button><button class="primary-btn" id="saveCat">Save</button></div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal-box" style="max-width:380px;text-align:center">
+    <div style="font-size:48px;margin-bottom:12px">⚠️</div>
+    <h3 id="deleteMsg">Delete this item?</h3>
+    <p style="color:#8E8E93;margin:8px 0 20px;font-size:14px">This action cannot be undone.</p>
+    <div class="modal-footer" style="justify-content:center"><button class="secondary-btn" id="cancelDelete">Cancel</button><button class="danger-btn" id="confirmDelete">Delete</button></div>
+  </div>
+</div>
+
+<script src="./admin.js"></script>
+</body>
+</html>
