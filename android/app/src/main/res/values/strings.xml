@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">MagicMeat</string>
+    <string name="title_activity_main">MagicMeat</string>
+    <string name="package_name">com.magicmeat.app</string>
+    <string name="custom_url_scheme">com.magicmeat.app</string>
+</resources>
