@@ -1,9 +1,16 @@
 console.log("MagicMeat App Loading...");
 
-// ─── SUPABASE CONFIG ───
+let supabase = null;
+function initSupabase() {
+  if (window.supabase && !supabase) {
+    supabase = window.supabase.createClient(SB_URL, SB_KEY);
+    return true;
+  }
+  return !!supabase;
+}
+
 const SB_URL = "https://cchrlbgffpqauwgzszia.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNjaHJsYmdmZnBxYXV3Z3pzemlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NjIwNzgsImV4cCI6MjA5MjUzODA3OH0.UQAQohGU9VQ6R6z9rRMZFLuZxt2KFVAusOaU5GydlXA";
-const supabase = window.supabase.createClient(SB_URL, SB_KEY);
 
 const state = { 
   currentView: "home", 
@@ -82,11 +89,12 @@ function haptic() {
   }
 }
 
-// ─── SUPABASE DATA FETCH ───
 async function fetchData() {
   console.log("Starting fetchData...");
-  
-  // 1. Fetch Categories
+  if (!initSupabase()) {
+    console.warn("Supabase library not loaded yet or failed.");
+    return;
+  }
   try {
     const { data: cats, error } = await supabase.from('categories').select('*').order('id');
     if (error) throw error;
