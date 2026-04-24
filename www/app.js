@@ -77,6 +77,47 @@ function haptic() {
 
 // ─── SUPABASE DATA FETCH ───
 async function fetchData() {
+  console.log("Starting fetchData...");
+  
+  // 1. Fetch Categories
+  try {
+    const { data: cats, error } = await supabase.from('categories').select('*').order('id');
+    if (error) throw error;
+    state.categories = cats || [];
+    console.log("Categories loaded:", state.categories.length);
+    renderQuickCats();
+  } catch (e) { console.error("Cats fetch error:", e); }
+
+  // 2. Fetch Products
+  try {
+    const { data: prods, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    state.products = prods || [];
+    console.log("Products loaded:", state.products.length);
+    renderFeatured();
+    renderGroceryGrid();
+  } catch (e) { console.error("Prods fetch error:", e); }
+
+  // 3. Fetch Promos
+  try {
+    const { data: prms, error } = await supabase.from('promos').select('*').eq('is_active', true).order('created_at', { ascending: false });
+    if (error) throw error;
+    state.promos = prms || [];
+    console.log("Promos loaded:", state.promos.length);
+    renderPromo();
+  } catch (e) { console.error("Promos fetch error:", e); }
+
+  // 4. Fetch Settings
+  try {
+    const { data: sets } = await supabase.from('settings').select('*');
+    if (sets) {
+      sets.forEach(s => {
+        if (s.key === 'store_settings') state.settings = s.value;
+      });
+    }
+  } catch (e) {}
+
+  // 5. Auth Check (Background)
   try {
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
@@ -87,27 +128,7 @@ async function fetchData() {
     } else if (!sessionStorage.getItem("auth_skipped")) {
       dom.authScreen.classList.add("show");
     }
-
-    const { data: cats } = await supabase.from('categories').select('*').order('id');
-    const { data: prods } = await supabase.from('products').select('*').order('created_at', { ascending: false });
-    const { data: sets } = await supabase.from('settings').select('*');
-    const { data: prms } = await supabase.from('promos').select('*').eq('is_active', true).order('created_at', { ascending: false });
-    
-    if (cats) state.categories = cats;
-    if (prods) state.products = prods;
-    if (prms) state.promos = prms;
-    if (sets) {
-      sets.forEach(s => {
-        if (s.key === 'store_settings') state.settings = s.value;
-      });
-    }
-    
-    console.log("Data loaded:", { cats: state.categories.length, prods: state.products.length });
-    renderAll();
-  } catch (err) {
-    console.error("Supabase error:", err);
-    toast("Error loading data. Check console.");
-  }
+  } catch (e) { console.warn("Auth check failed, continuing as guest"); }
 }
 
 async function fetchOrders() {
@@ -283,16 +304,16 @@ function renderFeatured() {
       p.category.toLowerCase().includes(q)
     );
   } else {
-    // Default featured: first 10
     list = state.products.slice(0, 10);
   }
 
+  if (!list.length && state.products.length > 0) {
+    dom.featuredGrid.innerHTML = `<div class="grid-empty"><h3>No results found</h3></div>`;
+    return;
+  }
+  
   if (!list.length) {
-    dom.featuredGrid.innerHTML = `
-      <div class="grid-empty" style="padding:40px 20px;text-align:center">
-        <h3 style="color:var(--ink-soft)">No products found</h3>
-        <p style="font-size:14px;color:var(--muted)">Try searching for meat, fish, or chicken.</p>
-      </div>`;
+    dom.featuredGrid.innerHTML = `<div class="grid-empty"><h3>Loading products...</h3></div>`;
     return;
   }
 
