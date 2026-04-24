@@ -162,3 +162,18 @@ tr:hover td{background:var(--surface2)}
 .cat-info {
   flex: 1;
 }
+
+/* Dashboard Enhancements */
+.chart-panel {
+  margin-bottom: 24px;
+  height: 350px;
+  padding: 20px;
+}
+#revenueChart {
+  max-height: 280px;
+}
+
+/* Customer Table */
+#customersTable table td {
+  padding: 14px 16px;
+}

@@ -33,6 +33,11 @@ async function fetchAll() {
     if (prods) products = prods;
     if (cats) categories = cats;
     if (ords) orders = ords;
+    
+    // Process Chart Data
+    renderRevenueChart();
+    renderCustomers();
+    
     if (sets) {
       sets.forEach(s => {
         if (s.key === 'store_settings') settings = { ...settings, ...s.value };
@@ -98,6 +103,81 @@ function renderDashboard() {
       <td>${o.address || "—"}</td>
       <td>${new Date(o.created_at).toLocaleString("en-IN",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"})}</td>
       <td><span class="status-badge ${o.status || 'pending'}">${o.status || "pending"}</span></td>
+    </tr>`).join("")
+  }</tbody></table>`;
+}
+
+// ─── REVENUE CHART ───
+let revChart = null;
+function renderRevenueChart() {
+  const canvas = document.getElementById('revenueChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  
+  const last7Days = [...Array(7)].map((_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    return d.toISOString().split('T')[0];
+  }).reverse();
+
+  const dailyRev = last7Days.map(date => {
+    return orders
+      .filter(o => o.created_at.startsWith(date))
+      .reduce((sum, o) => sum + (parseFloat(o.total) || 0), 0);
+  });
+
+  if (revChart) revChart.destroy();
+  revChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: last7Days.map(d => new Date(d).toLocaleDateString('en-IN', { weekday: 'short' })),
+      datasets: [{
+        label: 'Daily Revenue (₹)',
+        data: dailyRev,
+        borderColor: '#C62828',
+        backgroundColor: 'rgba(198, 40, 40, 0.1)',
+        fill: true,
+        tension: 0.4,
+        borderWidth: 3,
+        pointRadius: 4,
+        pointBackgroundColor: '#C62828'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+}
+
+// ─── RENDER CUSTOMERS ───
+function renderCustomers() {
+  const customerMap = new Map();
+  orders.forEach(o => {
+    if(!o.user_email) return;
+    const email = o.user_email;
+    if(!customerMap.has(email)) {
+      customerMap.set(email, { email, orders: 0, spent: 0, lastOrder: o.created_at });
+    }
+    const c = customerMap.get(email);
+    c.orders++;
+    c.spent += (parseFloat(o.total) || 0);
+    if(new Date(o.created_at) > new Date(c.lastOrder)) c.lastOrder = o.created_at;
+  });
+
+  const list = Array.from(customerMap.values()).sort((a,b) => b.spent - a.spent);
+  
+  $("#customersTable").innerHTML = `<table><thead><tr><th>Email</th><th>Total Orders</th><th>Total Spent</th><th>Last Order</th></tr></thead><tbody>${
+    list.map(c => `<tr>
+      <td><strong>${c.email}</strong></td>
+      <td>${c.orders}</td>
+      <td>₹${c.spent.toLocaleString("en-IN")}</td>
+      <td>${new Date(c.lastOrder).toLocaleDateString()}</td>
     </tr>`).join("")
   }</tbody></table>`;
 }
@@ -323,4 +403,4 @@ document.addEventListener("change", async e => {
   }
 });
 
-function renderAll() { renderDashboard(); renderProducts(); renderOrders(); renderCategories(); loadSettings(); }
+function renderAll() { renderDashboard(); renderProducts(); renderOrders(); renderCategories(); renderCustomers(); loadSettings(); }
