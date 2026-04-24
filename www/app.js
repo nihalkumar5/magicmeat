@@ -90,19 +90,27 @@ async function fetchData() {
   try {
     const { data: cats, error } = await supabase.from('categories').select('*').order('id');
     if (error) throw error;
-    state.categories = cats || [];
-    console.log("Categories loaded:", state.categories.length);
-    renderQuickCats();
+    if (cats && cats.length > 0) {
+      state.categories = cats;
+      console.log("Categories loaded from Supabase:", state.categories.length);
+      renderQuickCats();
+    } else {
+      console.log("No categories in Supabase, keeping demo data.");
+    }
   } catch (e) { console.error("Cats fetch error:", e); }
 
   // 2. Fetch Products
   try {
     const { data: prods, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
     if (error) throw error;
-    state.products = prods || [];
-    console.log("Products loaded:", state.products.length);
-    renderFeatured();
-    renderGroceryGrid();
+    if (prods && prods.length > 0) {
+      state.products = prods;
+      console.log("Products loaded from Supabase:", state.products.length);
+      renderFeatured();
+      renderGroceryGrid();
+    } else {
+      console.log("No products in Supabase, keeping demo data.");
+    }
   } catch (e) { console.error("Prods fetch error:", e); }
 
   // 3. Fetch Promos
@@ -468,8 +476,8 @@ dom.locBtn.onclick = () => dom.locModal.classList.add("show");
 dom.detectBtn.onclick = () => { haptic(); /* detect logic... */ };
 dom.saveAddrBtn.onclick = () => {
   haptic();
-  const a=dom.manualAddress.value.trim();
-  if(a){state.address=a; dom.locationAddress.textContent=a; dom.locModal.classList.remove("show"); toast("Address saved");}
+  const a = dom.manualAddr.value.trim();
+  if(a){state.address=a; dom.locAddress.textContent=a; dom.locModal.classList.remove("show"); toast("Address saved");}
 };
 
 // ─── INIT ───
