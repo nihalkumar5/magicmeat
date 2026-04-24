@@ -272,11 +272,30 @@ function renderQuickCats() {
 }
 
 function renderFeatured() {
-  const q=state.query.trim().toLowerCase();
-  let list=state.products;
-  if(q) list=state.products.filter(p=>p.name.toLowerCase().includes(q)||p.note.toLowerCase().includes(q)||p.category.includes(q));
-  if(!list.length){dom.featuredGrid.innerHTML=`<div class="grid-empty"><h3>No results</h3></div>`;return}
-  dom.featuredGrid.innerHTML=list.slice(0,6).map((p,i)=>cardHTML(p,i*50)).join("");
+  const q = state.query.trim().toLowerCase();
+  let list = state.products;
+  
+  if (q) {
+    list = state.products.filter(p => 
+      p.name.toLowerCase().includes(q) || 
+      (p.note && p.note.toLowerCase().includes(q)) || 
+      p.category.toLowerCase().includes(q)
+    );
+  } else {
+    // Default featured: first 10
+    list = state.products.slice(0, 10);
+  }
+
+  if (!list.length) {
+    dom.featuredGrid.innerHTML = `
+      <div class="grid-empty" style="padding:40px 20px;text-align:center">
+        <h3 style="color:var(--ink-soft)">No products found</h3>
+        <p style="font-size:14px;color:var(--muted)">Try searching for meat, fish, or chicken.</p>
+      </div>`;
+    return;
+  }
+
+  dom.featuredGrid.innerHTML = list.map((p, i) => cardHTML(p, i * 40)).join("");
 }
 
 function renderGrocerySubcats() {
