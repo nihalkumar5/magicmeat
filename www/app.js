@@ -1,11 +1,10 @@
-/* MagicMeat — Premium Fresh Delivery App (PRO EDITION) */
+console.log("MagicMeat App Loading...");
 
 // ─── SUPABASE CONFIG ───
 const SB_URL = "https://cchrlbgffpqauwgzszia.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNjaHJsYmdmZnBxYXV3Z3pzemlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NjIwNzgsImV4cCI6MjA5MjUzODA3OH0.UQAQohGU9VQ6R6z9rRMZFLuZxt2KFVAusOaU5GydlXA";
 const supabase = window.supabase.createClient(SB_URL, SB_KEY);
 
-// ─── STATE ───
 const state = { 
   currentView: "home", 
   grocerySub: "all", 
@@ -13,8 +12,16 @@ const state = {
   cart: new Map(), 
   address: "", 
   eta: 31,
-  products: [],
-  categories: [],
+  products: [
+    { id: 'demo1', name: 'Premium Chicken Cut', price: 299, unit: '500g', category: 'meat', note: 'Fresh & antibiotic free', color: '#C62828', bg: '#FFE5E5', image_url: 'https://images.unsplash.com/photo-1587593810167-a84920ea0781?w=400' },
+    { id: 'demo2', name: 'Fresh Salmon Fillet', price: 899, unit: '250g', category: 'fish', note: 'Rich in Omega-3', color: '#1976D2', bg: '#E3F2FD', image_url: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400' },
+    { id: 'demo3', name: 'Organic Broccoli', price: 99, unit: '250g', category: 'veggies', note: 'Farm fresh green', color: '#2E7D32', bg: '#E8F5E9', image_url: 'https://images.unsplash.com/photo-1584270354949-c26b0d5b4a0c?w=400' }
+  ],
+  categories: [
+    { id: 'meat', label: 'Meat', icon: '🥩', color: '#C62828', bg: '#FFE5E5' },
+    { id: 'fish', label: 'Fish', icon: '🐟', color: '#1976D2', bg: '#E3F2FD' },
+    { id: 'veggies', label: 'Veggies', icon: '🥬', color: '#2E7D32', bg: '#E8F5E9' }
+  ],
   settings: { freeDelivery: 499, deliveryFee: 49 },
   user: null,
   authMode: "login",
@@ -466,6 +473,10 @@ dom.saveAddrBtn.onclick = () => {
 };
 
 // ─── INIT ───
-dom.greetText.textContent=greeting();
-renderPromo();
-fetchData();
+try {
+  dom.greetText.textContent = greeting();
+  renderAll(); // Initial render with demo data
+  fetchData(); // Then try to fetch from Supabase
+} catch (e) {
+  console.error("Initialization error:", e);
+}
