@@ -177,8 +177,26 @@ function renderAll() {
 function handleStepper(e, id) {
   e.stopPropagation();
   const q = state.cart.get(id) || 0;
-  if (e.target.hasAttribute('data-a')) state.cart.set(id, q + 1);
-  if (e.target.hasAttribute('data-m')) { if (q <= 1) state.cart.delete(id); else state.cart.set(id, q - 1); }
+  if (e.target.hasAttribute('data-a')) {
+    state.cart.set(id, q + 1);
+    // Add micro-animations
+    const badge = $("#cartBadge");
+    if(badge) {
+      badge.classList.remove("pop");
+      void badge.offsetWidth; // Trigger reflow
+      badge.classList.add("pop");
+    }
+    const card = e.target.closest(".product-card");
+    if(card) {
+      card.classList.add("bounce");
+      setTimeout(() => card.classList.remove("bounce"), 400);
+    }
+    toast("+1 added to basket");
+  }
+  if (e.target.hasAttribute('data-m')) { 
+    if (q <= 1) state.cart.delete(id); 
+    else state.cart.set(id, q - 1); 
+  }
   renderAll();
 }
 
