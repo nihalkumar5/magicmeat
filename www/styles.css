@@ -297,3 +297,23 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 .order-timeline::before { content: ""; position: absolute; top: 5px; left: 10px; right: 10px; height: 2px; background: rgba(0,0,0,0.05); z-index: 1; }
 .t-dot { width: 12px; height: 12px; border-radius: 50%; background: #ddd; z-index: 2; position: relative; border: 2px solid #fff; }
 .t-dot.active { background: var(--green); box-shadow: 0 0 0 4px var(--green-soft); }
+
+/* Dynamic Promo Styles */
+.promo-card {
+  position: relative;
+  overflow: hidden;
+}
+.promo-side-img {
+  position: absolute;
+  right: -10px;
+  bottom: -10px;
+  height: 110%;
+  width: auto;
+  opacity: 0.8;
+  pointer-events: none;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.2));
+  transition: transform 0.3s ease;
+}
+.promo-card:hover .promo-side-img {
+  transform: scale(1.05) rotate(-2deg);
+}

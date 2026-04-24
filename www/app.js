@@ -18,7 +18,8 @@ const state = {
   settings: { freeDelivery: 499, deliveryFee: 49 },
   user: null,
   authMode: "login",
-  orders: []
+  orders: [],
+  promos: []
 };
 
 const grocerySubcats = [
@@ -90,9 +91,11 @@ async function fetchData() {
     const { data: cats } = await supabase.from('categories').select('*').order('id');
     const { data: prods } = await supabase.from('products').select('*').order('created_at', { ascending: false });
     const { data: sets } = await supabase.from('settings').select('*');
+    const { data: prms } = await supabase.from('promos').select('*').eq('is_active', true).order('created_at', { ascending: false });
     
     if (cats) state.categories = cats;
     if (prods) state.products = prods;
+    if (prms) state.promos = prms;
     if (sets) {
       sets.forEach(s => {
         if (s.key === 'store_settings') state.settings = s.value;
@@ -240,13 +243,22 @@ function cardHTML(p, delay=0) {
 }
 
 function renderPromo() {
-  if (!dom.promoCarousel) return;
-  const n=dom.promoCarousel.children.length;
+  if (!dom.promoCarousel || !state.promos.length) return;
+  
+  dom.promoCarousel.innerHTML = state.promos.map(p => `
+    <div class="promo-card" style="background:${p.bg_color};color:${p.text_color}">
+      ${p.badge_text ? `<div class="promo-badge">${p.badge_text}</div>` : ''}
+      <h2>${p.title}</h2>
+      <p>${p.subtitle || ''}</p>
+      ${p.image_url ? `<img src="${p.image_url}" class="promo-side-img" alt="promo">` : ''}
+    </div>`).join("");
+
+  const n=state.promos.length;
   dom.promoDots.innerHTML=Array.from({length:n},(_,i)=>`<span class="${i===0?'active':''}"></span>`).join("");
-  dom.promoCarousel.addEventListener("scroll",()=>{
+  dom.promoCarousel.onscroll = () => {
     const idx=Math.round(dom.promoCarousel.scrollLeft/dom.promoCarousel.offsetWidth);
     dom.promoDots.querySelectorAll("span").forEach((d,i)=>d.classList.toggle("active",i===idx));
-  });
+  };
 }
 
 function renderQuickCats() {

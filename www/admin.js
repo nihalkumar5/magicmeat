@@ -9,6 +9,7 @@ const supabase = window.supabase.createClient(SB_URL, SB_KEY);
 let products = [];
 let categories = [];
 let orders = [];
+let promos = [];
 let settings = { storeName: "MagicMeat", waNumber: "+919999999999", freeDelivery: 499, deliveryFee: 49, password: "admin123" };
 
 // ─── DOM ───
@@ -28,11 +29,13 @@ async function fetchAll() {
     const { data: prods } = await supabase.from('products').select('*').order('created_at', { ascending: false });
     const { data: cats } = await supabase.from('categories').select('*').order('id');
     const { data: ords } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
+    const { data: prms } = await supabase.from('promos').select('*').order('created_at', { ascending: false });
     const { data: sets } = await supabase.from('settings').select('*');
 
     if (prods) products = prods;
     if (cats) categories = cats;
     if (ords) orders = ords;
+    if (prms) promos = prms;
     
     // Process Chart Data
     renderRevenueChart();
@@ -328,6 +331,54 @@ async function saveCat() {
 
 $("#addCatBtn").addEventListener("click", () => { editingCat=null; $("#catModal").classList.add("show"); });
 $("#saveCat").addEventListener("click", saveCat);
+$("#closeCatModal").onclick = () => $("#catModal").classList.remove("show");
+
+// ─── RENDER PROMOS ───
+let editingPromo = null;
+function renderPromos() {
+  if (!promos.length) { $("#promosTable").innerHTML = `<div class="table-empty">No banners yet.</div>`; return; }
+  $("#promosTable").innerHTML = `<table><thead><tr><th>Banner</th><th>Title</th><th>Badge</th><th>Active</th><th>Actions</th></tr></thead><tbody>${
+    promos.map((p, i) => `<tr>
+      <td><div class="admin-thumb" style="background:${p.bg_color};border-radius:8px"></div></td>
+      <td><strong>${p.title}</strong></td>
+      <td><span class="status-badge" style="background:${p.bg_color};color:${p.text_color}">${p.badge_text || "—"}</span></td>
+      <td><span class="status-badge ${p.is_active ? 'active' : 'out'}">${p.is_active ? 'Yes' : 'No'}</span></td>
+      <td>
+        <button class="icon-btn" data-edit-pr="${i}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        <button class="icon-btn" data-del-pr="${i}"><svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+      </td>
+    </tr>`).join("")
+  }</tbody></table>`;
+}
+
+async function savePromo() {
+  const payload = {
+    title: $("#promoTitle").value.trim(),
+    subtitle: $("#promoSub").value.trim(),
+    badge_text: $("#promoBadge").value.trim(),
+    image_url: $("#promoImage").value.trim(),
+    bg_color: $("#promoBg").value,
+    text_color: $("#promoText").value,
+    is_active: $("#promoActive").value === "1"
+  };
+  if(!payload.title) { toast("Enter title"); return; }
+  try {
+    if(editingPromo !== null) {
+      await supabase.from('promos').update(payload).eq('id', promos[editingPromo].id);
+      toast("Banner updated");
+    } else {
+      await supabase.from('promos').insert(payload);
+      toast("Banner added");
+    }
+    fetchAll();
+    $("#promoModal").classList.remove("show");
+  } catch(e) { toast("Error saving promo"); }
+}
+
+$("#addPromoBtn").onclick = () => { editingPromo = null; $("#promoModal").classList.add("show"); };
+$("#savePromo").onclick = savePromo;
+$("#closePromoModal").onclick = () => $("#promoModal").classList.remove("show");
+$("#cancelPromo").onclick = () => $("#promoModal").classList.remove("show");
 
 // ─── SETTINGS ───
 function loadSettings() {
@@ -381,6 +432,31 @@ document.addEventListener("click", async e => {
     }
     return;
   }
+
+  const epr = e.target.closest("[data-edit-pr]");
+  if (epr) {
+    editingPromo = parseInt(epr.dataset.editPr);
+    const p = promos[editingPromo];
+    $("#promoTitle").value = p.title;
+    $("#promoSub").value = p.subtitle;
+    $("#promoBadge").value = p.badge_text;
+    $("#promoImage").value = p.image_url;
+    $("#promoBg").value = p.bg_color;
+    $("#promoText").value = p.text_color;
+    $("#promoActive").value = p.is_active ? "1" : "0";
+    $("#promoModal").classList.add("show");
+    return;
+  }
+
+  const dpr = e.target.closest("[data-del-pr]");
+  if (dpr) {
+    const i = parseInt(dpr.dataset.delPr);
+    if (confirm(`Delete banner "${promos[i].title}"?`)) {
+      await supabase.from('promos').delete().eq('id', promos[i].id);
+      fetchAll();
+    }
+    return;
+  }
   
   const dor = e.target.closest("[data-del-o]");
   if (dor) {
@@ -403,4 +479,4 @@ document.addEventListener("change", async e => {
   }
 });
 
-function renderAll() { renderDashboard(); renderProducts(); renderOrders(); renderCategories(); renderCustomers(); loadSettings(); }
+function renderAll() { renderDashboard(); renderProducts(); renderOrders(); renderCategories(); renderCustomers(); renderPromos(); loadSettings(); }
