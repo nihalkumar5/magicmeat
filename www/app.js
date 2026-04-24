@@ -262,10 +262,12 @@ function renderPromo() {
 }
 
 function renderQuickCats() {
-  dom.quickCats.innerHTML = state.categories.slice(0,6).map(c=>`
-    <div class="qcat-card" data-catview="${c.id}" style="--qcat-bg:${c.bg};--qcat-border:${c.color}22;--qcat-shadow:${c.color}18">
-      <div class="qcat-icon" style="background:${c.color}18"><span style="font-size:28px">${c.icon}</span></div>
-      <span>${c.label.split(" ")[0]}</span>
+  dom.quickCats.innerHTML = state.categories.map(c=>`
+    <div class="qcat-card" data-catview="${c.id}" data-cat="${c.id}">
+      <div class="qcat-icon" style="background:${c.bg || ''}; border-color:${c.color ? c.color+'22' : ''}">
+        <span>${c.icon}</span>
+      </div>
+      <span>${c.label}</span>
     </div>`).join("");
 }
 
