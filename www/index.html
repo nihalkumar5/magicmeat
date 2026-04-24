@@ -258,8 +258,36 @@ function switchView(id) {
 
 document.querySelectorAll(".tab-item").forEach(t => t.onclick = () => switchView(t.dataset.view));
 
+async function detectLocation() {
+  const locText = $("#locationAddress");
+  if (!locText) return;
+  locText.textContent = "Detecting...";
+  
+  if (!navigator.geolocation) {
+    locText.textContent = "Mumbai, India";
+    return;
+  }
+  
+  navigator.geolocation.getCurrentPosition(async pos => {
+    try {
+      const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${pos.coords.latitude}&longitude=${pos.coords.longitude}&localityLanguage=en`);
+      const data = await res.json();
+      const area = data.locality || data.city || "Your Location";
+      locText.textContent = area;
+    } catch(e) {
+      locText.textContent = "Mumbai, India";
+    }
+  }, err => {
+    locText.textContent = "Bandra West, Mumbai";
+  });
+}
+
 window.onload = () => {
   renderAll();
+  detectLocation();
+  const locBtn = $("#locationBtn");
+  if (locBtn) locBtn.onclick = detectLocation;
+  
   if (window.supabase) {
     const supabase = window.supabase.createClient(SB_URL, SB_KEY);
     // Fetch products
