@@ -94,8 +94,20 @@
   </nav>
 
   <!-- MODALS -->
+  <div class="auth-overlay" id="authScreen">
+    <div class="auth-card">
+      <div class="auth-header"><div class="auth-logo">🥩</div><h2>MagicMeat</h2><p id="authSubtitle">Login to track orders</p></div>
+      <div class="auth-form">
+        <div class="input-group"><input type="email" id="authEmail" placeholder="Email address"></div>
+        <div class="input-group"><input type="password" id="authPass" placeholder="Password"></div>
+        <button id="authBtn" class="primary-btn">Sign In / Sign Up</button>
+      </div>
+      <button class="text-btn" id="closeAuthBtn" style="margin-top:12px">Cancel</button>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="orderModal">
-    <div class="modal-card"><h2>Success!</h2><p>Order placed successfully.</p><button class="checkout-btn" id="modalClose">Done</button></div>
+    <div class="modal-card"><h2>Success!</h2><p>Your order has been placed successfully.</p><button class="checkout-btn" id="modalClose">Done</button></div>
   </div>
   <div class="toast" id="toast"></div>
 
@@ -111,6 +123,8 @@ const state = {
   grocerySub: "all",
   query: "",
   cart: new Map(),
+  user: null,
+  orders: [],
   products: [
     { id: 'demo1', name: 'Premium Chicken Cut', price: 249, unit: '500g', category: 'meat', note: 'Fresh, antibiotic-free chicken cuts.', color: '#C62828', bg: '#FFE5E5', image_url: 'https://images.unsplash.com/photo-1587593810167-a84920ea0781?w=400' },
     { id: 'demo2', name: 'Mutton Biryani Cut', price: 549, unit: '500g', category: 'meat', note: 'Premium goat meat for perfect biryani.', color: '#C62828', bg: '#FFE5E5', image_url: '' },
@@ -282,6 +296,96 @@ async function detectLocation() {
   });
 }
 
+async function checkout() {
+  if (state.cart.size === 0) return;
+  const btn = $("#checkoutButton");
+  btn.disabled = true;
+  btn.textContent = "Processing...";
+  
+  const items = [];
+  let total = 0;
+  state.cart.forEach((qty, id) => {
+    const p = state.products.find(x => x.id === id);
+    if(p) { items.push({...p, qty}); total += p.price * qty; }
+  });
+  
+  if (total < 499) total += 49; // Delivery fee
+
+  const payload = {
+    items: items,
+    total: total,
+    status: 'pending',
+    address: $("#locationAddress").textContent || 'Guest Location',
+    user_email: state.user ? state.user.email : 'guest'
+  };
+
+  try {
+    const { error } = await window.supabaseClient.from('orders').insert(payload);
+    if (error) throw error;
+    state.cart.clear();
+    renderCart();
+    $("#orderModal").classList.add("show");
+    if(state.user) fetchOrders();
+  } catch (err) {
+    toast("Order failed: " + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Place Order";
+  }
+}
+
+$("#checkoutButton").onclick = checkout;
+$("#modalClose").onclick = () => { $("#orderModal").classList.remove("show"); switchView('home'); };
+
+// AUTH & PROFILE
+async function checkAuth() {
+  const { data: { session } } = await window.supabaseClient.auth.getSession();
+  state.user = session ? session.user : null;
+  updateProfileView();
+  if(state.user) fetchOrders();
+}
+
+function updateProfileView() {
+  if (state.user) {
+    $("#profileEmail").textContent = state.user.email;
+    $("#logoutBtn").textContent = "Logout";
+    $("#logoutBtn").onclick = async () => { await window.supabaseClient.auth.signOut(); location.reload(); };
+  } else {
+    $("#profileEmail").textContent = "Guest User";
+    $("#logoutBtn").textContent = "Login / Sign Up";
+    $("#logoutBtn").onclick = () => $("#authScreen").classList.add("show");
+  }
+}
+
+async function fetchOrders() {
+  if(!state.user) return;
+  const { data } = await window.supabaseClient.from('orders').select('*').eq('user_email', state.user.email).order('created_at', { ascending: false });
+  if(data) {
+    $("#activeOrders").innerHTML = data.length ? data.map(o => `
+      <div class="order-card" style="margin-bottom:12px">
+        <div class="order-header"><b>#${o.id.toString().slice(-6)}</b> <span class="status-badge ${o.status}">${o.status}</span></div>
+        <div class="order-body" style="font-size:13px;color:var(--muted)">${o.items.map(i=>`${i.qty}x ${i.name}`).join(", ")}</div>
+        <div class="order-footer" style="margin-top:8px"><b>₹${o.total}</b> <small>${new Date(o.created_at).toLocaleDateString()}</small></div>
+      </div>
+    `).join("") : "<p style='color:var(--muted)'>No previous orders</p>";
+  }
+}
+
+$("#authBtn").onclick = async () => {
+  const email = $("#authEmail").value, pass = $("#authPass").value;
+  if(!email || !pass) return toast("Fill all fields");
+  $("#authBtn").textContent = "Loading...";
+  let { data, error } = await window.supabaseClient.auth.signInWithPassword({ email, password: pass });
+  if (error && error.message.includes("Invalid login")) {
+    const res = await window.supabaseClient.auth.signUp({ email, password: pass });
+    error = res.error; data = res.data;
+  }
+  if (error) { toast(error.message); $("#authBtn").textContent = "Sign In / Sign Up"; }
+  else { toast("Welcome!"); $("#authScreen").classList.remove("show"); checkAuth(); }
+};
+
+$("#closeAuthBtn").onclick = () => $("#authScreen").classList.remove("show");
+
 window.onload = () => {
   renderAll();
   detectLocation();
@@ -289,11 +393,12 @@ window.onload = () => {
   if (locBtn) locBtn.onclick = detectLocation;
   
   if (window.supabase) {
-    const supabase = window.supabase.createClient(SB_URL, SB_KEY);
+    window.supabaseClient = window.supabase.createClient(SB_URL, SB_KEY);
+    checkAuth();
     // Fetch products
-    supabase.from('products').select('*').then(({data}) => { if (data && data.length) { state.products = data; renderAll(); }});
+    window.supabaseClient.from('products').select('*').then(({data}) => { if (data && data.length) { state.products = data; renderAll(); }});
     // Fetch categories
-    supabase.from('categories').select('*').then(({data}) => { if (data && data.length) { state.categories = data; renderAll(); }});
+    window.supabaseClient.from('categories').select('*').then(({data}) => { if (data && data.length) { state.categories = data; renderAll(); }});
   }
 };
 </script>
