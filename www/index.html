@@ -187,6 +187,8 @@ function handleStepper(e, id) {
   const q = state.cart.get(id) || 0;
   if (e.target.hasAttribute('data-a')) {
     state.cart.set(id, q + 1);
+    const p = state.products.find(x => x.id === id);
+    const name = p ? p.name : "Item";
     // Micro-animations
     const badge = $("#cartBadge");
     if(badge) {
@@ -199,7 +201,7 @@ function handleStepper(e, id) {
       card.classList.add("bounce");
       setTimeout(() => card.classList.remove("bounce"), 400);
     }
-    toast("Added to basket! 🛒");
+    toast(`${name} added! 🛒`);
   }
   if (e.target.hasAttribute('data-m')) { 
     if (q <= 1) state.cart.delete(id); 
