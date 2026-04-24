@@ -29,7 +29,7 @@
     <div class="delivery-eta"><span class="eta-dot"></span><span id="etaText">31 min delivery</span></div>
   </header>
 
-  <!-- HOME -->
+  <!-- VIEWS -->
   <section id="home" class="view active">
     <div class="home-greeting"><h1 id="greetingText">Good evening 👋</h1><p class="home-sub">What's cooking tonight?</p></div>
     <div class="search-wrap">
@@ -47,14 +47,12 @@
     <div class="product-grid" id="featuredGrid"></div>
   </section>
 
-  <!-- GROCERY -->
   <section id="grocery" class="view">
     <header class="cat-view-header"><h1>Grocery & More</h1><p class="cat-view-sub">Daily staples, frozen bites, and fresh picks</p></header>
     <div class="subcat-rail" id="grocerySubcats"></div>
     <div class="product-grid" id="groceryGrid"></div>
   </section>
 
-  <!-- CART -->
   <section id="cart" class="view">
     <header class="cat-view-header"><h1>Your Basket</h1><p class="cat-view-sub" id="cartSubtitle">0 items</p></header>
     <div class="cart-view">
@@ -63,140 +61,62 @@
         <div class="summary-row"><span>Subtotal</span><span id="subtotal">₹0</span></div>
         <div class="summary-row"><span>Delivery</span><span class="free-tag" id="deliveryFee">FREE</span></div>
         <div class="summary-row total"><span>Total</span><span id="cartTotal">₹0</span></div>
-        <button class="checkout-btn" id="checkoutButton"><span>Place Cold-Packed Order</span>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </button>
+        <button class="checkout-btn" id="checkoutButton"><span>Place Cold-Packed Order</span></button>
       </div>
     </div>
   </section>
 
-  <!-- PROFILE / MY ORDERS -->
   <section id="profile" class="view">
     <header class="cat-view-header"><h1>My Profile</h1><p class="cat-view-sub" id="profileEmail">Not logged in</p></header>
     <div class="profile-content">
       <div class="section-label">Active Orders</div>
       <div id="activeOrders" class="orders-list"></div>
-      
       <div class="section-label" style="margin-top:24px">Order History</div>
       <div id="orderHistory" class="orders-list"></div>
-
-      <div class="profile-actions" style="margin-top:32px">
-        <button id="logoutBtn" class="text-btn" style="color:var(--accent);width:100%;padding:16px;border:1px solid var(--accent);border-radius:14px;">Logout</button>
-      </div>
+      <button id="logoutBtn" class="text-btn" style="margin-top:32px;color:var(--accent);width:100%;padding:16px;border:1px solid var(--accent);border-radius:14px;">Logout</button>
     </div>
   </section>
 
-  <!-- Auth Screen -->
+  <!-- Modals & Overlay -->
   <div id="authScreen" class="auth-overlay">
     <div class="auth-card">
-      <div class="auth-header">
-        <div class="auth-logo">🥩</div>
-        <h2>MagicMeat</h2>
-        <p id="authSubtitle">Experience premium fresh delivery</p>
-      </div>
-      
-      <div id="emailForm" class="auth-form">
-        <div class="input-group">
-          <label>Email Address</label>
-          <input type="email" id="authEmail" placeholder="name@example.com">
-        </div>
-        <div class="input-group">
-          <label>Password</label>
-          <input type="password" id="authPass" placeholder="••••••••">
-        </div>
-        <button id="authPrimaryBtn" class="primary-btn">Sign In</button>
-        <p class="auth-toggle">Don't have an account? <a href="#" id="toggleAuthMode">Sign Up</a></p>
-      </div>
-
-      <div class="auth-divider"><span>or continue with</span></div>
-
-      <div class="social-login">
-        <button id="loginGoogle" class="social-btn google">
-          <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-          Google
-        </button>
-        <button id="loginFacebook" class="social-btn facebook">
-          <svg viewBox="0 0 24 24"><path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.41 0 12.07c0 6.03 4.39 11.02 10.12 11.93v-8.44H7.08v-3.49h3.04V9.41c0-3.01 1.79-4.67 4.53-4.67 1.31 0 2.68.23 2.68.23v2.95h-1.5c-1.49 0-1.95.93-1.95 1.88v2.26h3.32l-.53 3.49h-2.79v8.44C19.61 23.09 24 18.1 24 12.07z" fill="#1877F2"/></svg>
-          Facebook
-        </button>
-      </div>
-
-      <button id="skipAuth" class="text-btn">Skip for now</button>
+      <div class="auth-header"><div class="auth-logo">🥩</div><h2>MagicMeat</h2><p id="authSubtitle">Experience premium fresh delivery</p></div>
+      <input type="email" id="authEmail" placeholder="name@example.com" class="address-input" style="margin-bottom:12px">
+      <input type="password" id="authPass" placeholder="••••••••" class="address-input" style="margin-bottom:16px">
+      <button id="authPrimaryBtn" class="primary-btn">Sign In</button>
+      <button id="skipAuth" class="text-btn" style="margin-top:12px">Skip for now</button>
     </div>
   </div>
 
-  <!-- Bottom Tab Bar -->
   <nav class="tab-bar">
-    <div class="tab-item active" data-view="home">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      <span>Home</span>
-    </div>
-    <div class="tab-item" data-view="grocery">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-      <span>Grocery</span>
-    </div>
-    <div class="tab-item" data-view="profile">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      <span>Profile</span>
-    </div>
-    <div class="tab-item" data-view="cart">
-      <div class="tab-cart-wrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-        <span id="cartBadge" class="cart-badge">0</span>
-      </div>
-      <span>Cart</span>
-    </div>
+    <div class="tab-item active" data-view="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></div>
+    <div class="tab-item" data-view="grocery"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span>Grocery</span></div>
+    <div class="tab-item" data-view="profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Profile</span></div>
+    <div class="tab-item" data-view="cart"><div class="tab-cart-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><span id="cartBadge" class="cart-badge">0</span></div><span>Cart</span></div>
   </nav>
 
   <div class="toast" id="toast"></div>
 
-  <!-- ORDER MODAL -->
   <div class="modal-overlay" id="orderModal">
-    <div class="modal-card">
-      <div class="modal-check"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-      <h2>Order Placed!</h2>
-      <p>Your cold-packed basket is being prepared.</p>
-      <div class="modal-eta"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>Estimated: <strong id="modalEta">31 min</strong></span></div>
-      <button class="checkout-btn" id="modalClose">Done</button>
-    </div>
+    <div class="modal-card"><h2>Order Placed!</h2><p>Your cold-packed basket is being prepared.</p><button class="checkout-btn" id="modalClose">Done</button></div>
   </div>
 
-  <!-- LOCATION MODAL -->
   <div class="modal-overlay" id="locationModal">
-    <div class="modal-card location-modal-card">
-      <h2>Delivery Address</h2>
-      <p style="color:var(--muted);margin-bottom:20px;">Choose or type your delivery location</p>
-      <button class="detect-btn" id="detectLocationBtn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>Use Current Location</button>
-      <div class="location-divider"><span>or</span></div>
-      <input type="text" id="manualAddress" class="address-input" placeholder="e.g. Bandra West, Mumbai"/>
-      <button class="checkout-btn" id="saveAddressBtn">Save Address</button>
-    </div>
+    <div class="modal-card"><h2>Delivery Address</h2><input type="text" id="manualAddress" class="address-input" placeholder="e.g. Bandra West, Mumbai"/><button class="checkout-btn" id="saveAddressBtn">Save Address</button></div>
   </div>
 
 </div>
-<script>
-/* MagicMeat — Premium Fresh Delivery App (PRO EDITION) */
-console.log("MagicMeat App Loading...");
 
-let supabase = null;
+<script>
+/* MagicMeat CORE ENGINE */
 const SB_URL = "https://cchrlbgffpqauwgzszia.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNjaHJsYmdmZnBxYXV3Z3pzemlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NjIwNzgsImV4cCI6MjA5MjUzODA3OH0.UQAQohGU9VQ6R6z9rRMZFLuZxt2KFVAusOaU5GydlXA";
 
-function initSupabase() {
-  if (window.supabase && !supabase) {
-    supabase = window.supabase.createClient(SB_URL, SB_KEY);
-    return true;
-  }
-  return !!supabase;
-}
-
-const state = { 
-  currentView: "home", 
-  grocerySub: "all", 
-  query: "", 
-  cart: new Map(), 
-  address: "", 
-  eta: 31,
+const state = {
+  currentView: "home",
+  grocerySub: "all",
+  query: "",
+  cart: new Map(),
   products: [
     { id: 'demo1', name: 'Premium Chicken Cut', price: 299, unit: '500g', category: 'meat', note: 'Fresh & antibiotic free', color: '#C62828', bg: '#FFE5E5', image_url: 'https://images.unsplash.com/photo-1587593810167-a84920ea0781?w=400' },
     { id: 'demo2', name: 'Fresh Salmon Fillet', price: 899, unit: '250g', category: 'fish', note: 'Rich in Omega-3', color: '#1976D2', bg: '#E3F2FD', image_url: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400' },
@@ -206,204 +126,86 @@ const state = {
     { id: 'meat', label: 'Meat', icon: '🥩', color: '#C62828', bg: '#FFE5E5' },
     { id: 'fish', label: 'Fish', icon: '🐟', color: '#1976D2', bg: '#E3F2FD' },
     { id: 'veggies', label: 'Veggies', icon: '🥬', color: '#2E7D32', bg: '#E8F5E9' }
-  ],
-  settings: { freeDelivery: 499, deliveryFee: 49 },
-  user: null,
-  authMode: "login",
-  orders: [],
-  promos: []
+  ]
 };
-
-const grocerySubcats = [
-  { id: "all",       label: "All",         emoji: "🛒" },
-  { id: "meat",      label: "Meat",        emoji: "🥩" },
-  { id: "fish",      label: "Fish",        emoji: "🐟" },
-  { id: "grocery",   label: "Grocery",     emoji: "🥚" },
-  { id: "fruits",    label: "Fruits",      emoji: "🍎" },
-  { id: "veggies",   label: "Vegetables",  emoji: "🥬" },
-  { id: "masala",    label: "Masala",      emoji: "🌶️" },
-  { id: "frozen",    label: "Frozen",      emoji: "❄️" },
-  { id: "icecream",  label: "Ice Cream",   emoji: "🍦" },
-  { id: "dairy",     label: "Dairy",       emoji: "🧈" },
-];
 
 const $ = s => document.querySelector(s);
-const $$ = s => document.querySelectorAll(s);
-
-const dom = {
-  views: $$(".view"), tabs: $$(".tab-item"),
-  locAddress: $("#locationAddress"), locBtn: $("#locationBtn"), etaText: $("#etaText"),
-  greetText: $("#greetingText"), searchInput: $("#searchInput"),
-  promoCarousel: $("#promoCarousel"), promoDots: $("#promoDots"),
-  quickCats: $("#quickCategories"), featuredGrid: $("#featuredGrid"),
-  grocerySubcats: $("#grocerySubcats"), groceryGrid: $("#groceryGrid"),
-  cartItems: $("#cartItems"), cartSub: $("#cartSubtitle"),
-  subtotal: $("#subtotal"), deliveryFee: $("#deliveryFee"),
-  cartTotal: $("#cartTotal"), cartBadge: $("#cartBadge"),
-  cartSummary: $("#cartSummaryBlock"), checkoutBtn: $("#checkoutButton"),
-  toast: $("#toast"), orderModal: $("#orderModal"), modalEta: $("#modalEta"),
-  modalClose: $("#modalClose"), locModal: $("#locationModal"),
-  detectBtn: $("#detectLocationBtn"), manualAddr: $("#manualAddress"),
-  saveAddrBtn: $("#saveAddressBtn"),
-  authScreen: $("#authScreen"), authEmail: $("#authEmail"), authPass: $("#authPass"),
-  authPrimaryBtn: $("#authPrimaryBtn"), authSubtitle: $("#authSubtitle"),
-  toggleAuthMode: $("#toggleAuthMode"), loginGoogle: $("#loginGoogle"),
-  loginFacebook: $("#loginFacebook"), skipAuth: $("#skipAuth"),
-  profileEmail: $("#profileEmail"), activeOrders: $("#activeOrders"),
-  orderHistory: $("#orderHistory"), logoutBtn: $("#logoutBtn")
-};
-
 const fmt = v => `₹${v.toLocaleString("en-IN")}`;
-let tt; function toast(m) { dom.toast.textContent=m; dom.toast.classList.add("visible"); clearTimeout(tt); tt=setTimeout(()=>dom.toast.classList.remove("visible"),2200); }
-function greeting() { const h=new Date().getHours(); return h<12?"Good morning ☀️":h<17?"Good afternoon 🌤️":h<21?"Good evening 🌙":"Late night cravings? 🌃"; }
-function cartCount() { return [...state.cart.values()].reduce((s,q)=>s+q,0); }
-function cartTotal() { let t=0; state.cart.forEach((q,id)=>{const p=state.products.find(x=>x.id===id);if(p)t+=p.price*q}); return t; }
 
-function haptic() {
-  if (window.Capacitor && window.Capacitor.Plugins.Haptics) {
-    window.Capacitor.Plugins.Haptics.impact({ style: 'LIGHT' });
-  }
-}
-
-async function fetchData() {
-  console.log("Starting fetchData...");
-  if (!initSupabase()) {
-    console.warn("Supabase library not loaded yet.");
-    return;
-  }
+function renderAll() {
   try {
-    const { data: cats } = await supabase.from('categories').select('*').order('id');
-    if (cats && cats.length > 0) { state.categories = cats; renderQuickCats(); }
-    const { data: prods } = await supabase.from('products').select('*').order('created_at', { ascending: false });
-    if (prods && prods.length > 0) { state.products = prods; renderFeatured(); renderGroceryGrid(); }
-    const { data: prms } = await supabase.from('promos').select('*').eq('is_active', true).order('created_at', { ascending: false });
-    if (prms) { state.promos = prms; renderPromo(); }
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
-      state.user = session.user;
-      dom.profileEmail.textContent = state.user.email;
-      fetchOrders(); subscribeOrders();
-    } else if (!sessionStorage.getItem("auth_skipped")) {
-      dom.authScreen.classList.add("show");
+    // 1. Greet
+    const h = new Date().getHours();
+    const greet = h < 12 ? "Good morning ☀️" : h < 17 ? "Good afternoon 🌤️" : "Good evening 👋";
+    if ($("#greetingText")) $("#greetingText").textContent = greet;
+
+    // 2. Categories
+    if ($("#quickCategories")) {
+      $("#quickCategories").innerHTML = state.categories.map(c => `
+        <div class="qcat-card" onclick="openCat('${c.id}')">
+          <div class="qcat-icon" style="background:${c.bg}"><span>${c.icon}</span></div>
+          <span>${c.label}</span>
+        </div>`).join("");
     }
-  } catch (e) { console.error(e); }
-}
 
-async function fetchOrders() {
-  if(!state.user) return;
-  const { data } = await supabase.from('orders').select('*').eq('user_email', state.user.email).order('created_at', { ascending: false });
-  if(data) { state.orders = data; renderOrderTracking(); }
-}
-
-function subscribeOrders() {
-  if(!state.user) return;
-  supabase.channel('order-updates').on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `user_email=eq.${state.user.email}` }, () => fetchOrders()).subscribe();
-}
-
-async function handleAuth() {
-  haptic();
-  const email = dom.authEmail.value, password = dom.authPass.value;
-  if(!email || !password) { toast("Fill all fields"); return; }
-  dom.authPrimaryBtn.disabled = true; dom.authPrimaryBtn.textContent = "Loading...";
-  try {
-    if(state.authMode === "login") {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if(error) throw error;
-      state.user = data.user; dom.profileEmail.textContent = state.user.email;
-      fetchOrders(); subscribeOrders(); toast(`Welcome back!`);
-    } else {
-      const { error } = await supabase.auth.signUp({ email, password });
-      if(error) throw error;
-      toast("Check your email!");
+    // 3. Products
+    const list = state.query ? state.products.filter(p => p.name.toLowerCase().includes(state.query.toLowerCase())) : state.products;
+    if ($("#featuredGrid")) {
+      $("#featuredGrid").innerHTML = list.map(p => `
+        <div class="product-card">
+          <div class="product-image" style="background:${p.bg}"><img src="${p.image_url}"></div>
+          <h3>${p.name}</h3><p>${p.note}</p>
+          <div class="product-footer"><span>${fmt(p.price)}</span><button onclick="addToCart('${p.id}')">+</button></div>
+        </div>`).join("");
     }
-    dom.authScreen.classList.remove("show");
-  } catch(err) { toast(err.message); } finally {
-    dom.authPrimaryBtn.disabled = false; dom.authPrimaryBtn.textContent = state.authMode === "login" ? "Sign In" : "Sign Up";
+  } catch (e) { console.error("Render Error:", e); }
+}
+
+function openCat(id) {
+  state.grocerySub = id;
+  const home = $("#home"), grocery = $("#grocery");
+  home.classList.remove("active"); grocery.classList.add("active");
+  // Also update tabs...
+  document.querySelectorAll(".tab-item").forEach(t => t.classList.toggle("active", t.dataset.view === 'grocery'));
+}
+
+function addToCart(id) {
+  const q = state.cart.get(id) || 0;
+  state.cart.set(id, q + 1);
+  const badge = $("#cartBadge");
+  if (badge) {
+    const total = [...state.cart.values()].reduce((a, b) => a + b, 0);
+    badge.textContent = total;
+    badge.classList.add("show");
   }
 }
 
-function switchView(id) {
-  haptic(); state.currentView=id;
-  dom.views.forEach(v=>{v.classList.remove("active");if(v.id===id)v.classList.add("active")});
-  dom.tabs.forEach(t=>t.classList.toggle("active",t.dataset.view===id));
-  window.scrollTo({top:0,behavior:"instant"});
-}
-
-function renderOrderTracking() {
-  const active = state.orders.filter(o => o.status !== 'delivered' && o.status !== 'cancelled');
-  const past = state.orders.filter(o => o.status === 'delivered' || o.status === 'cancelled');
-  dom.activeOrders.innerHTML = active.length ? active.map(o => `<div class="order-card"><div class="order-header"><span class="order-id">#${o.id.toString().slice(-6)}</span><span class="order-status ${o.status}">${o.status}</span></div><div class="order-body">${o.items.map(it => `<div class="order-item-row"><span>${it.qty}x ${it.name}</span><span>${fmt(it.price * it.qty)}</span></div>`).join("")}</div><div class="order-timeline"><div class="t-dot active"></div><div class="t-dot ${['confirmed','delivered'].includes(o.status)?'active':''}"></div><div class="t-dot ${o.status==='delivered'?'active':''}"></div></div><div class="order-footer"><span class="order-time">${new Date(o.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span><span class="order-total">${fmt(o.total)}</span></div></div>`).join("") : `<div class="cart-empty" style="padding:20px">No active orders</div>`;
-  dom.orderHistory.innerHTML = past.map(o => `<div class="order-card" style="opacity:0.7"><div class="order-header"><span class="order-id">#${o.id.toString().slice(-6)}</span><span class="order-status delivered">${o.status}</span></div><div class="order-footer"><span class="order-time">${new Date(o.created_at).toLocaleDateString()}</span><span class="order-total">${fmt(o.total)}</span></div></div>`).join("");
-}
-
-function cardHTML(p, delay=0) {
-  const qty = state.cart.get(p.id)||0;
-  const stepper = qty === 0 ? `<div class="card-stepper single" data-pid="${p.id}"><button data-cadd="${p.id}">+</button></div>` : `<div class="card-stepper expanded" data-pid="${p.id}"><button data-cminus="${p.id}">−</button><span class="qty-num">${qty}</span><button data-cadd="${p.id}">+</button></div>`;
-  return `<div class="product-card" style="animation-delay:${delay}ms" data-product-id="${p.id}"><div class="product-image" style="--card-bg:${p.bg};--card-accent:${p.color}">${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" loading="lazy">` : ''}<span class="unit-tag">${p.unit}</span></div><h3>${p.name}</h3><p class="product-note">${p.note}</p><div class="product-footer"><span class="product-price">${fmt(p.price)}</span>${stepper}</div></div>`;
-}
-
-function renderPromo() {
-  if (!dom.promoCarousel || !state.promos.length) return;
-  dom.promoCarousel.innerHTML = state.promos.map(p => `<div class="promo-card" style="background:${p.bg_color};color:${p.text_color}">${p.badge_text ? `<div class="promo-badge">${p.badge_text}</div>` : ''}<h2>${p.title}</h2><p>${p.subtitle || ''}</p>${p.image_url ? `<img src="${p.image_url}" class="promo-side-img" alt="promo">` : ''}</div>`).join("");
-  const n=state.promos.length; dom.promoDots.innerHTML=Array.from({length:n},(_,i)=>`<span class="${i===0?'active':''}"></span>`).join("");
-  dom.promoCarousel.onscroll = () => { const idx=Math.round(dom.promoCarousel.scrollLeft/dom.promoCarousel.offsetWidth); dom.promoDots.querySelectorAll("span").forEach((d,i)=>d.classList.toggle("active",i===idx)); };
-}
-
-function renderQuickCats() {
-  dom.quickCats.innerHTML = state.categories.map(c=>`<div class="qcat-card" data-catview="${c.id}" data-cat="${c.id}"><div class="qcat-icon" style="background:${c.bg || ''}; border-color:${c.color ? c.color+'22' : ''}"><span>${c.icon}</span></div><span>${c.label}</span></div>`).join("");
-}
-
-function renderFeatured() {
-  const q = state.query.trim().toLowerCase(); let list = q ? state.products.filter(p => p.name.toLowerCase().includes(q) || (p.note && p.note.toLowerCase().includes(q)) || p.category.toLowerCase().includes(q)) : state.products.slice(0, 10);
-  if (!list.length) { dom.featuredGrid.innerHTML = `<div class="grid-empty"><h3>No products found</h3></div>`; return; }
-  dom.featuredGrid.innerHTML = list.map((p, i) => cardHTML(p, i * 40)).join("");
-}
-
-function renderGrocerySubcats() {
-  dom.grocerySubcats.innerHTML = grocerySubcats.map(s=>`<button class="subcat-pill ${state.grocerySub===s.id?'active':''}" data-subcat="${s.id}"><span class="se">${s.emoji}</span>${s.label}</button>`).join("");
-}
-
-function renderGroceryGrid() {
-  let list = state.products; if(state.grocerySub!=="all") list=list.filter(p=>p.category===state.grocerySub);
-  if(!list.length){dom.groceryGrid.innerHTML=`<div class="grid-empty"><h3>Coming soon</h3></div>`;return}
-  dom.groceryGrid.innerHTML=list.map((p,i)=>cardHTML(p,i*40)).join("");
-}
-
-function renderCart() {
-  const items=[]; state.cart.forEach((q,id)=>{const p=state.products.find(x=>x.id===id);if(p)items.push({...p,qty:q})});
-  const tq=cartCount(), tp=cartTotal(), df = tp >= (state.settings.freeDelivery || 499) ? 0 : (state.settings.deliveryFee || 49), gt = tp + df;
-  dom.cartBadge.textContent=tq; dom.cartBadge.classList.toggle("show",tq>0); dom.cartSub.textContent=`${tq} item${tq!==1?'s':''}`;
-  if(!items.length){ dom.cartItems.innerHTML=`<div class="cart-empty"><h3>Your basket is empty</h3></div>`; dom.cartSummary.style.display="none"; return; }
-  dom.cartSummary.style.display="";
-  dom.cartItems.innerHTML=items.map(i=>`<div class="cart-item"><div class="cart-item-img" style="--item-bg:${i.bg};--item-color:${i.color}">${i.image_url?`<img src="${i.image_url}"/>`:''}</div><div class="cart-item-info"><div class="cart-item-title">${i.name}</div><div class="cart-item-meta">${i.unit}</div></div><div class="cart-item-right"><div class="cart-item-price">${fmt(i.price*i.qty)}</div><div class="qty-control"><button class="qty-btn" data-minus="${i.id}">${i.qty===1?'✕':'−'}</button><span class="qty-val">${i.qty}</span><button class="qty-btn" data-plus="${i.id}">+</button></div></div></div>`).join("");
-  dom.subtotal.textContent=fmt(tp); dom.deliveryFee.textContent=df===0?"FREE":fmt(df); dom.cartTotal.textContent=fmt(gt); dom.checkoutBtn.disabled=tq===0;
-}
-
-function renderAll() { renderPromo(); renderQuickCats(); renderFeatured(); renderGrocerySubcats(); renderGroceryGrid(); renderCart(); }
-
-function addToCart(pid) { haptic(); const q=state.cart.get(pid)||0; state.cart.set(pid,q+1); renderCart(); }
-function minusFromCart(pid) { haptic(); const q=state.cart.get(pid)||0; if(q<=1) state.cart.delete(pid); else state.cart.set(pid,q-1); renderCart(); }
-
-dom.tabs.forEach(t=>t.addEventListener("click",()=>{if(t.dataset.view)switchView(t.dataset.view)}));
-dom.authPrimaryBtn.onclick = handleAuth;
-dom.skipAuth.onclick = () => { haptic(); sessionStorage.setItem("auth_skipped", "1"); dom.authScreen.classList.remove("show"); };
-dom.logoutBtn.onclick = async () => { haptic(); await supabase.auth.signOut(); location.reload(); };
-
-document.addEventListener("click",e=>{
-  const qcat=e.target.closest("[data-catview]"); if(qcat){switchView("grocery");state.grocerySub=qcat.dataset.catview;renderGrocerySubcats();renderGroceryGrid();return}
-  const add=e.target.closest("[data-cadd]"); if(add){addToCart(add.dataset.cadd);return}
-  const minus=e.target.closest("[data-cminus]"); if(minus){minusFromCart(minus.dataset.cminus);return}
-  const sub=e.target.closest("[data-subcat]"); if(sub){state.grocerySub=sub.dataset.subcat;renderGrocerySubcats();renderGroceryGrid();return}
-  const mBtn=e.target.closest("[data-minus]"); if(mBtn){minusFromCart(mBtn.dataset.minus);return}
-  const pBtn=e.target.closest("[data-plus]"); if(pBtn){addToCart(pBtn.dataset.plus);return}
+// Simple Tab Switch
+document.querySelectorAll(".tab-item").forEach(tab => {
+  tab.onclick = () => {
+    const view = tab.dataset.view;
+    document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+    $(`#${view}`).classList.add("active");
+    document.querySelectorAll(".tab-item").forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+  };
 });
 
-dom.modalClose.onclick = () => { dom.orderModal.classList.remove("show"); switchView("home"); };
-dom.searchInput.oninput = e => { state.query=e.target.value; renderFeatured(); };
-dom.locBtn.onclick = () => dom.locModal.classList.add("show");
-dom.saveAddrBtn.onclick = () => { haptic(); const a = dom.manualAddr.value.trim(); if(a){state.address=a; dom.locAddress.textContent=a; dom.locModal.classList.remove("show"); toast("Address saved");} };
-
-try { dom.greetText.textContent = greeting(); renderAll(); fetchData(); } catch (e) { console.error(e); }
+window.onload = () => {
+  console.log("App Ready");
+  renderAll();
+  
+  // Try to connect Supabase
+  if (window.supabase) {
+    const supabase = window.supabase.createClient(SB_URL, SB_KEY);
+    supabase.from('products').select('*').then(({data}) => {
+      if (data && data.length > 0) {
+        state.products = data;
+        renderAll();
+      }
+    });
+  }
+};
 </script>
 </body>
 </html>
