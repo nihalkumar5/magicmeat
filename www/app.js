@@ -102,10 +102,11 @@ async function fetchData() {
       });
     }
     
+    console.log("Data loaded:", { cats: state.categories.length, prods: state.products.length });
     renderAll();
   } catch (err) {
     console.error("Supabase error:", err);
-    toast("Error loading data from server");
+    toast("Error loading data. Check console.");
   }
 }
 
@@ -341,7 +342,12 @@ function renderCart() {
 }
 
 function renderAll() {
-  renderQuickCats(); renderFeatured(); renderGrocerySubcats(); renderGroceryGrid(); renderCart();
+  renderPromo();
+  renderQuickCats();
+  renderFeatured();
+  renderGrocerySubcats();
+  renderGroceryGrid();
+  renderCart();
 }
 
 // ─── CART ACTIONS ───
