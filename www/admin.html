@@ -294,7 +294,7 @@
 
         <!-- INVENTORY TAB -->
         <section class="tab-view" id="inventory">
-          <div style="display:grid; grid-template-columns: 1fr 400px; gap:32px; align-items:start;">
+          <div style="display:flex; flex-direction:column; gap:32px;">
             <div class="panel">
               <div class="panel-header">
                 <h2>Product Stock</h2>
@@ -363,9 +363,9 @@
                   <label>Description</label>
                   <textarea id="pDescription" rows="3"></textarea>
                 </div>
-                <div class="field wide">
-                  <button class="btn btn-primary" type="submit" id="saveProductBtn" style="justify-content:center;">Save Product</button>
-                  <button class="btn btn-ghost" type="button" id="resetProductBtn" style="justify-content:center; margin-top:8px;">Reset</button>
+                <div class="field wide" style="display:flex; gap:16px;">
+                  <button class="btn btn-primary" type="submit" id="saveProductBtn" style="flex:1; justify-content:center;">Save Product</button>
+                  <button class="btn btn-ghost" type="button" id="resetProductBtn" style="flex:1; justify-content:center;">Reset / New Product</button>
                 </div>
               </form>
             </div>
