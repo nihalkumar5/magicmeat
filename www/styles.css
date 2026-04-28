@@ -343,8 +343,8 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .product-card.trending::before {
   content: "🔥 TRENDING";
   position: absolute;
-  top: -8px;
-  left: 10px;
+  top: 12px;
+  left: 12px;
   background: var(--ink);
   color: #fff;
   font-size: 9px;
