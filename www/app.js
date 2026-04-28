@@ -257,10 +257,24 @@ async function loadStore() {
     const store = await api("/api/store");
     state.categories = store.categories || [];
     state.featuredOffers = store.featuredOffers || [];
+    
     const apiProducts = (store.products || []).map(normalizeProduct);
-    // Combine API products with fallback ones to ensure grids are never empty
-    state.products = [...apiProducts, ...fallbackProducts.map(normalizeProduct)];
+    
+    if (apiProducts.length > 0) {
+      // If admin has products, use them as primary source
+      state.products = apiProducts;
+      // Optionally add fallbacks for categories that are empty in the admin
+      const categoriesInAdmin = new Set(apiProducts.map(p => p.category));
+      const missingFallbacks = fallbackProducts
+        .map(normalizeProduct)
+        .filter(f => !categoriesInAdmin.has(f.category));
+      
+      state.products = [...state.products, ...missingFallbacks];
+    } else {
+      state.products = fallbackProducts.map(normalizeProduct);
+    }
   } catch (error) {
+    console.error("Store sync error:", error);
     state.categories = [
       { id: "chicken", name: "Chicken" },
       { id: "mutton", name: "Mutton" },
@@ -269,8 +283,16 @@ async function loadStore() {
       { id: "grocery", name: "Grocery" }
     ];
     state.products = fallbackProducts.map(normalizeProduct);
-    toast("Using offline menu");
+    toast("Sync failed, using offline menu");
   }
+  
+  // Deduplicate by ID just in case
+  const seen = new Set();
+  state.products = state.products.filter(p => {
+    if (seen.has(p.id)) return false;
+    seen.add(p.id);
+    return true;
+  });
 
   renderAll();
   if (state.customer.phone) {
