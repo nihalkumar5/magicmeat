@@ -246,22 +246,19 @@ function renderBundles() {
 
 function renderQuickCats() {
   if (!dom.quickCats) return;
-  // Show only top 4 for the 2x2 grid
-  const cats = state.categories.filter((category) => category.id !== "all").slice(0, 4);
+  // Show all categories in the horizontal rail
+  const cats = state.categories.filter((category) => category.id !== "all");
   dom.quickCats.innerHTML = cats.map((category) => {
     const meta = categoryFor(category.id);
     return `
       <div class="qcat-card" data-catview="${escapeHtml(category.id)}" data-cat="${escapeHtml(category.id)}">
         <div class="qcat-icon">
           ${meta.icon.startsWith('http') || meta.icon.startsWith('api/') 
-            ? `<img src="${escapeHtml(meta.icon)}" style="width:24px; height:24px; object-fit:contain;">` 
+            ? `<img src="${escapeHtml(meta.icon)}" style="width:32px; height:32px; object-fit:contain;">` 
             : `<span>${meta.icon || "🥩"}</span>`
           }
         </div>
-        <div class="qcat-text-wrap">
-          <span class="cat-title">${escapeHtml(meta.label)}</span>
-          <span class="cat-count">${Math.floor(Math.random() * 50 + 10)} Products</span>
-        </div>
+        <span class="cat-title">${escapeHtml(meta.label)}</span>
       </div>
     `;
   }).join("");
