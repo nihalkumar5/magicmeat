@@ -1,0 +1,7 @@
+node_modules/
+.env
+www/uploads/
+data/
+*.png
+test-db.js
+migrate.js

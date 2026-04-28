@@ -8,10 +8,8 @@
   <meta name="theme-color" content="#0A0A0A"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="./styles.css"/>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 <body>
 <div id="app-root">
@@ -31,32 +29,69 @@
 
   <!-- HOME VIEW -->
   <section id="home" class="view active">
-    <div class="home-greeting"><h1 id="greetingText">Good evening 👋</h1><p class="home-sub">What's cooking tonight?</p></div>
+    <div class="home-greeting">
+      <h1 id="greetingText">Good evening 👋</h1>
+      <div class="profile-avatar" onclick="switchView('profile')">👤</div>
+    </div>
     <div class="search-wrap">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input type="search" id="searchInput" placeholder="Search salmon, curry cut, paratha…"/>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="search" id="searchInput" placeholder="Search fresh vegetables, meat..."/>
+    </div>
+
+    <!-- OFFERS RAIL -->
+    <div class="offers-rail" id="offersRail">
+      <div class="offer-card orange">
+        <div class="offer-content">
+          <span class="offer-tag">Flash Sale</span>
+          <h3>Flat ₹100 OFF</h3>
+          <p>On orders above ₹599</p>
+          <span class="promo-code">CODE: FRESH100</span>
+        </div>
+        <div class="offer-emoji">🥩</div>
+      </div>
+      <div class="offer-card blue">
+        <div class="offer-content">
+          <span class="offer-tag">Daily Deal</span>
+          <h3>Free Delivery</h3>
+          <p>No minimum order today!</p>
+          <span class="promo-code">AUTO-APPLIED</span>
+        </div>
+        <div class="offer-emoji">🚚</div>
+      </div>
+      <div class="offer-card green">
+        <div class="offer-content">
+          <span class="offer-tag">Bundle Pack</span>
+          <h3>Extra 20% OFF</h3>
+          <p>On curated meat bundles</p>
+          <span class="promo-code">CODE: BUNDLE20</span>
+        </div>
+        <div class="offer-emoji">📦</div>
+      </div>
     </div>
     
-    <!-- PROMO CAROUSEL -->
-    <div class="promo-carousel" id="promoCarousel">
-      <div class="promo-card promo-cold">
-        <div class="promo-badge">LIVE</div>
-        <h2>Cold-Chain<br/>Tracked</h2>
-        <p>Every order shows its freshness score.</p>
-      </div>
-      <div class="promo-card promo-free">
-        <div class="promo-badge">TODAY</div>
-        <h2>Free Delivery<br/>Above ₹499</h2>
-        <p>No hidden fees on all orders.</p>
-      </div>
+    <div class="filter-tags" id="filterTags">
+      <button class="f-tag active">Premium Meats</button>
+      <button class="f-tag">Fresh Produce</button>
+      <button class="f-tag">Daily Groceries</button>
+      <button class="f-tag">Bestsellers</button>
     </div>
-    <div class="promo-dots" id="promoDots"></div>
 
-    <div class="section-label">Shop by Category</div>
+    <!-- HERO BANNER -->
+    <div class="hero-banner" id="heroBanner">
+      <h2>100% Fresh & Hygienic</h2>
+      <p>Premium quality meats, fresh produce, and daily essentials delivered.</p>
+      <button class="hero-btn">Shop Now <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg></button>
+      <div class="hero-illustration">🥩</div>
+    </div>
+
+    <div class="section-label">Categories <span class="see-all">All</span></div>
     <div class="quick-categories" id="quickCategories"></div>
 
-    <div class="section-label">Trending Today</div>
+    <div class="section-label">Farm Fresh Picks</div>
     <div class="product-grid" id="featuredGrid"></div>
+    
+    <div class="section-label" style="margin-top:16px;">Curated Bundles</div>
+    <div class="product-grid" id="bundlesGrid"></div>
   </section>
 
   <!-- OTHER VIEWS -->
@@ -78,329 +113,81 @@
   </section>
 
   <section id="profile" class="view">
-    <header class="cat-view-header"><h1>My Profile</h1><p class="cat-view-sub" id="profileEmail">Guest</p></header>
+    <header class="cat-view-header"><h1>My Orders</h1><p class="cat-view-sub" id="profileEmail">Track by phone</p></header>
     <div class="profile-content">
+      <div class="track-panel">
+        <input type="tel" id="profilePhone" placeholder="Enter phone number"/>
+        <button id="trackOrdersBtn" class="primary-btn">Track Orders</button>
+      </div>
+      <div class="section-label inline">Active Orders</div>
       <div id="activeOrders" class="orders-list"></div>
-      <button id="logoutBtn" class="primary-btn" style="background:none;border:1px solid #ddd;color:#333;margin-top:20px;">Logout</button>
+      <div class="section-label inline">Order History</div>
+      <div id="orderHistory" class="orders-list"></div>
+      <button id="logoutBtn" class="primary-btn ghost-btn">Clear Tracking</button>
     </div>
   </section>
 
   <!-- TAB BAR -->
   <nav class="tab-bar">
-    <div class="tab-item active" data-view="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></div>
-    <div class="tab-item" data-view="grocery"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span>Grocery</span></div>
-    <div class="tab-item" data-view="profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Profile</span></div>
-    <div class="tab-item" data-view="cart"><div class="tab-cart-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><span id="cartBadge" class="cart-badge">0</span></div><span>Cart</span></div>
+    <div class="tab-item active" data-view="home"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span>Home</span></div>
+    <div class="tab-item" data-view="grocery"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg><span>Menu</span></div>
+    <div class="tab-item" data-view="profile"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg><span>Profile</span></div>
+    <div class="tab-item" data-view="cart">
+      <div class="tab-cart-wrap">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+        <span id="cartBadge" class="cart-badge">0</span>
+      </div>
+      <span>Cart</span>
+    </div>
   </nav>
 
   <!-- MODALS -->
-  <div class="auth-overlay" id="authScreen">
-    <div class="auth-card">
-      <div class="auth-header"><div class="auth-logo">🥩</div><h2>MagicMeat</h2><p id="authSubtitle">Login to track orders</p></div>
-      <div class="auth-form">
-        <div class="input-group"><input type="email" id="authEmail" placeholder="Email address"></div>
-        <div class="input-group"><input type="password" id="authPass" placeholder="Password"></div>
-        <button id="authBtn" class="primary-btn">Sign In / Sign Up</button>
+  <div class="modal-overlay" id="checkoutModal">
+    <div class="modal-card location-modal-card">
+      <div class="modal-heading-row">
+        <h2>Checkout</h2>
+        <button class="icon-close" id="checkoutClose" aria-label="Close checkout">x</button>
       </div>
-      <button class="text-btn" id="closeAuthBtn" style="margin-top:12px">Cancel</button>
+      <p>Confirm your delivery details. You can pay on delivery.</p>
+      <form id="checkoutForm" class="checkout-form">
+        <input type="text" id="customerName" class="address-input" placeholder="Full name" required/>
+        <input type="tel" id="customerPhone" class="address-input" placeholder="Phone number" required/>
+        <textarea id="customerAddress" class="address-input" rows="3" placeholder="Flat, building, street, landmark" required></textarea>
+        <select id="customerPayment" class="address-input">
+          <option value="COD">Cash on delivery</option>
+          <option value="UPI on delivery">UPI on delivery</option>
+        </select>
+        <button class="checkout-btn" type="submit">Place Order</button>
+      </form>
     </div>
   </div>
 
   <div class="modal-overlay" id="orderModal">
-    <div class="modal-card"><h2>Success!</h2><p>Your order has been placed successfully.</p><button class="checkout-btn" id="modalClose">Done</button></div>
+    <div class="modal-card">
+      <h2>Success!</h2>
+      <p>Your order has been placed successfully.</p>
+      <div class="modal-eta"><span id="modalEta">31 min</span> estimated delivery</div>
+      <p class="modal-order-id" id="modalOrderId"></p>
+      <button class="checkout-btn" id="modalClose">Track Order</button>
+    </div>
   </div>
+
+  <div class="modal-overlay" id="locationModal">
+    <div class="modal-card location-modal-card">
+      <h2>Delivery Location</h2>
+      <p>Set your address to see accurate delivery times.</p>
+      <button class="detect-btn" id="detectLocationBtn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Use Current Location</button>
+      <div class="location-divider">OR</div>
+      <input type="text" id="manualAddress" class="address-input" placeholder="Enter flat, building, street..." />
+      <button class="primary-btn" id="saveAddressBtn">Confirm Address</button>
+      <button class="text-btn" onclick="document.getElementById('locationModal').classList.remove('show')" style="width:100%; margin-top:12px;">Cancel</button>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
 </div>
 
-<script>
-/* MagicMeat Premium Engine */
-const SB_URL = "https://cchrlbgffpqauwgzszia.supabase.co";
-const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNjaHJsYmdmZnBxYXV3Z3pzemlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NjIwNzgsImV4cCI6MjA5MjUzODA3OH0.UQAQohGU9VQ6R6z9rRMZFLuZxt2KFVAusOaU5GydlXA";
-
-const state = {
-  currentView: "home",
-  grocerySub: "all",
-  query: "",
-  cart: new Map(),
-  user: null,
-  orders: [],
-  products: [
-    { id: 'demo1', name: 'Premium Chicken Cut', price: 249, unit: '500g', category: 'meat', note: 'Fresh, antibiotic-free chicken cuts.', color: '#C62828', bg: '#FFE5E5', image_url: 'https://images.unsplash.com/photo-1587593810167-a84920ea0781?w=400' },
-    { id: 'demo2', name: 'Mutton Biryani Cut', price: 549, unit: '500g', category: 'meat', note: 'Premium goat meat for perfect biryani.', color: '#C62828', bg: '#FFE5E5', image_url: '' },
-    { id: 'demo3', name: 'Atlantic Salmon', price: 899, unit: '250g', category: 'fish', note: 'Rich in Omega-3, imported fresh.', color: '#1976D2', bg: '#E3F2FD', image_url: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400' },
-    { id: 'demo4', name: 'Fresh Rohu Fish', price: 349, unit: '1kg', category: 'fish', note: 'Local fresh water Rohu.', color: '#1976D2', bg: '#E3F2FD', image_url: 'https://images.unsplash.com/photo-1534400263227-228779dc153e?w=400' }
-  ],
-  categories: [
-    { id: 'meat', label: 'Meat', icon: '🥩', color: '#C62828', bg: '#FFE5E5' },
-    { id: 'fish', label: 'Fish', icon: '🐟', color: '#1976D2', bg: '#E3F2FD' },
-    { id: 'veggies', label: 'Veggies', icon: '🥬', color: '#2E7D32', bg: '#E8F5E9' }
-  ],
-  promos: [
-    { id:1, title: "Cold-Chain Tracked", subtitle: "Every order shows its freshness score.", badge: "LIVE", bg: "linear-gradient(135deg,#0f172a,#1e293b)", color: "#fff" },
-    { id:2, title: "Free Delivery Above ₹499", subtitle: "No hidden fees on all orders.", badge: "TODAY", bg: "linear-gradient(135deg,#fef9c3,#fde68a)", color: "#000" }
-  ]
-};
-
-const $ = s => document.querySelector(s);
-const fmt = v => `₹${v.toLocaleString("en-IN")}`;
-
-function renderAll() {
-  try {
-    // Greet
-    const h = new Date().getHours();
-    $("#greetingText").textContent = h < 12 ? "Good morning ☀️" : h < 17 ? "Good afternoon 🌤️" : "Good evening 👋";
-
-    // Promos
-    $("#promoCarousel").innerHTML = state.promos.map(p => `
-      <div class="promo-card" style="background:${p.bg}; color:${p.color}">
-        <div class="promo-badge" style="background:${p.color==='#fff'?'var(--accent)':'rgba(0,0,0,0.1)'}; color:${p.color==='#fff'?'#fff':'#000'}">${p.badge}</div>
-        <h2>${p.title}</h2><p>${p.subtitle}</p>
-      </div>`).join("");
-
-    // Categories
-    $("#quickCategories").innerHTML = state.categories.map(c => `
-      <div class="qcat-card" onclick="openCat('${c.id}')" data-cat="${c.id}">
-        <div class="qcat-icon" style="background:${c.bg}"><span>${c.icon}</span></div>
-        <span>${c.label}</span>
-      </div>`).join("");
-
-    // Products
-    const q = state.query.toLowerCase();
-    const list = q ? state.products.filter(p => p.name.toLowerCase().includes(q)) : state.products;
-    $("#featuredGrid").innerHTML = list.map(p => `
-      <div class="product-card">
-        <div class="product-image" style="--card-bg:${p.bg}">
-          ${p.image_url ? `<img src="${p.image_url}">` : `<div style="height:100%;display:grid;place-items:center;font-size:40px;opacity:0.2">${state.categories.find(c=>c.id===p.category)?.icon || '📦'}</div>`}
-          <span class="unit-tag">${p.unit}</span>
-        </div>
-        <h3>${p.name}</h3><p class="product-note">${p.note}</p>
-        <div class="product-footer">
-          <span class="product-price">${fmt(p.price)}</span>
-          <div class="card-stepper ${state.cart.has(p.id)?'expanded':'single'}" onclick="handleStepper(event, '${p.id}')">
-            ${state.cart.has(p.id) ? `<button data-m>-</button><span class="qty-num">${state.cart.get(p.id)}</span><button data-a>+</button>` : `<button data-a>+</button>`}
-          </div>
-        </div>
-      </div>`).join("");
-      
-    // Cart
-    renderCart();
-  } catch(e) { console.error(e); }
-}
-
-function toast(msg) {
-  const el = $("#toast");
-  if(!el) return;
-  el.textContent = msg;
-  el.classList.add("visible");
-  setTimeout(() => el.classList.remove("visible"), 2000);
-}
-
-function handleStepper(e, id) {
-  e.stopPropagation();
-  const q = state.cart.get(id) || 0;
-  if (e.target.hasAttribute('data-a')) {
-    state.cart.set(id, q + 1);
-    const p = state.products.find(x => x.id === id);
-    const name = p ? p.name : "Item";
-    // Micro-animations
-    const badge = $("#cartBadge");
-    if(badge) {
-      badge.classList.remove("pop");
-      void badge.offsetWidth;
-      badge.classList.add("pop");
-    }
-    const card = e.target.closest(".product-card");
-    if(card) {
-      card.classList.add("bounce");
-      setTimeout(() => card.classList.remove("bounce"), 400);
-    }
-    toast(`${name} added! 🛒`);
-  }
-  if (e.target.hasAttribute('data-m')) { 
-    if (q <= 1) state.cart.delete(id); 
-    else state.cart.set(id, q - 1); 
-  }
-  renderAll();
-}
-
-function renderCart() {
-  const badge = $("#cartBadge");
-  const totalQty = [...state.cart.values()].reduce((a, b) => a + b, 0);
-  badge.textContent = totalQty;
-  badge.classList.toggle("show", totalQty > 0);
-  
-  const items = [];
-  let totalPrice = 0;
-  state.cart.forEach((qty, id) => {
-    const p = state.products.find(x => x.id === id);
-    if (p) { items.push({...p, qty}); totalPrice += p.price * qty; }
-  });
-  
-  $("#cartSubtitle").textContent = `${totalQty} items`;
-  if (items.length === 0) {
-    $("#cartItems").innerHTML = `<div class="cart-empty"><h3>Your basket is empty</h3></div>`;
-    $("#cartSummaryBlock").style.display = "none";
-  } else {
-    $("#cartItems").innerHTML = items.map(i => `
-      <div class="cart-item">
-        <div class="cart-item-img" style="--item-bg:${i.bg}">${i.image_url ? `<img src="${i.image_url}">` : ''}</div>
-        <div class="cart-item-info"><b>${i.name}</b><br/><small>${i.unit}</small></div>
-        <div class="cart-item-right"><b>${fmt(i.price*i.qty)}</b></div>
-      </div>`).join("");
-    $("#subtotal").textContent = fmt(totalPrice);
-    $("#cartTotal").textContent = fmt(totalPrice + (totalPrice >= 499 ? 0 : 49));
-    $("#deliveryFee").textContent = totalPrice >= 499 ? "FREE" : "₹49";
-    $("#cartSummaryBlock").style.display = "block";
-  }
-}
-
-function openCat(id) {
-  state.grocerySub = id;
-  switchView('grocery');
-  // Simple category filtering
-  const list = state.products.filter(p => p.category === id);
-  $("#groceryGrid").innerHTML = list.map(p => `<div class="product-card">${p.name}</div>`).join(""); // Simplified for now
-}
-
-function switchView(id) {
-  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
-  $(`#${id}`).classList.add("active");
-  document.querySelectorAll(".tab-item").forEach(t => t.classList.toggle("active", t.dataset.view === id));
-  window.scrollTo(0,0);
-}
-
-document.querySelectorAll(".tab-item").forEach(t => t.onclick = () => switchView(t.dataset.view));
-
-async function detectLocation() {
-  const locText = $("#locationAddress");
-  if (!locText) return;
-  locText.textContent = "Detecting...";
-  
-  if (!navigator.geolocation) {
-    locText.textContent = "Mumbai, India";
-    return;
-  }
-  
-  navigator.geolocation.getCurrentPosition(async pos => {
-    try {
-      const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${pos.coords.latitude}&longitude=${pos.coords.longitude}&localityLanguage=en`);
-      const data = await res.json();
-      const area = data.locality || data.city || "Your Location";
-      locText.textContent = area;
-    } catch(e) {
-      locText.textContent = "Mumbai, India";
-    }
-  }, err => {
-    locText.textContent = "Bandra West, Mumbai";
-  });
-}
-
-async function checkout() {
-  if (state.cart.size === 0) return;
-  const btn = $("#checkoutButton");
-  btn.disabled = true;
-  btn.textContent = "Processing...";
-  
-  const items = [];
-  let total = 0;
-  state.cart.forEach((qty, id) => {
-    const p = state.products.find(x => x.id === id);
-    if(p) { items.push({...p, qty}); total += p.price * qty; }
-  });
-  
-  if (total < 499) total += 49; // Delivery fee
-
-  const payload = {
-    items: items,
-    total: total,
-    status: 'pending',
-    address: $("#locationAddress").textContent || 'Guest Location',
-    user_email: state.user ? state.user.email : 'guest'
-  };
-
-  try {
-    const { error } = await window.supabaseClient.from('orders').insert(payload);
-    if (error) throw error;
-    state.cart.clear();
-    renderCart();
-    $("#orderModal").classList.add("show");
-    if(state.user) fetchOrders();
-  } catch (err) {
-    toast("Order failed: " + err.message);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = "Place Order";
-  }
-}
-
-$("#checkoutButton").onclick = checkout;
-$("#modalClose").onclick = () => { $("#orderModal").classList.remove("show"); switchView('home'); };
-
-// AUTH & PROFILE
-async function checkAuth() {
-  const { data: { session } } = await window.supabaseClient.auth.getSession();
-  state.user = session ? session.user : null;
-  updateProfileView();
-  if(state.user) fetchOrders();
-}
-
-function updateProfileView() {
-  if (state.user) {
-    $("#profileEmail").textContent = state.user.email;
-    $("#logoutBtn").textContent = "Logout";
-    $("#logoutBtn").onclick = async () => { await window.supabaseClient.auth.signOut(); location.reload(); };
-  } else {
-    $("#profileEmail").textContent = "Guest User";
-    $("#logoutBtn").textContent = "Login / Sign Up";
-    $("#logoutBtn").onclick = () => $("#authScreen").classList.add("show");
-  }
-}
-
-async function fetchOrders() {
-  if(!state.user) return;
-  const { data } = await window.supabaseClient.from('orders').select('*').eq('user_email', state.user.email).order('created_at', { ascending: false });
-  if(data) {
-    $("#activeOrders").innerHTML = data.length ? data.map(o => `
-      <div class="order-card" style="margin-bottom:12px">
-        <div class="order-header"><b>#${o.id.toString().slice(-6)}</b> <span class="status-badge ${o.status}">${o.status}</span></div>
-        <div class="order-body" style="font-size:13px;color:var(--muted)">${o.items.map(i=>`${i.qty}x ${i.name}`).join(", ")}</div>
-        <div class="order-footer" style="margin-top:8px"><b>₹${o.total}</b> <small>${new Date(o.created_at).toLocaleDateString()}</small></div>
-      </div>
-    `).join("") : "<p style='color:var(--muted)'>No previous orders</p>";
-  }
-}
-
-$("#authBtn").onclick = async () => {
-  const email = $("#authEmail").value, pass = $("#authPass").value;
-  if(!email || !pass) return toast("Fill all fields");
-  $("#authBtn").textContent = "Loading...";
-  let { data, error } = await window.supabaseClient.auth.signInWithPassword({ email, password: pass });
-  if (error && error.message.includes("Invalid login")) {
-    const res = await window.supabaseClient.auth.signUp({ email, password: pass });
-    error = res.error; data = res.data;
-  }
-  if (error) { toast(error.message); $("#authBtn").textContent = "Sign In / Sign Up"; }
-  else { toast("Welcome!"); $("#authScreen").classList.remove("show"); checkAuth(); }
-};
-
-$("#closeAuthBtn").onclick = () => $("#authScreen").classList.remove("show");
-
-window.onload = () => {
-  renderAll();
-  detectLocation();
-  const locBtn = $("#locationBtn");
-  if (locBtn) locBtn.onclick = detectLocation;
-  
-  if (window.supabase) {
-    window.supabaseClient = window.supabase.createClient(SB_URL, SB_KEY);
-    checkAuth();
-    // Fetch products
-    window.supabaseClient.from('products').select('*').then(({data}) => { if (data && data.length) { state.products = data; renderAll(); }});
-    // Fetch categories
-    window.supabaseClient.from('categories').select('*').then(({data}) => { if (data && data.length) { state.categories = data; renderAll(); }});
-  }
-};
-</script>
+<script src="./app.js"></script>
 </body>
 </html>
