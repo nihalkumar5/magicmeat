@@ -547,17 +547,23 @@ async function placeOrder(event) {
 }
 
 function saveAddress() {
+  console.log("Saving address...");
+  if (!dom.manualAddr) return;
   const address = dom.manualAddr.value.trim();
   if (!address) {
-    toast("Enter your delivery address");
+    toast("Please enter your full address");
     return;
   }
+  
+  state.customer = state.customer || {};
   state.customer.address = address;
-  state.address = address;
   localStorage.setItem("magicmeat_customer", JSON.stringify(state.customer));
-  dom.locAddress.textContent = address;
-  dom.locModal.classList.remove("show");
-  toast("Address saved");
+  
+  if (dom.locAddress) dom.locAddress.textContent = address;
+  if (dom.locModal) dom.locModal.classList.remove("show");
+  
+  toast("✅ Address updated successfully");
+  console.log("Address saved:", address);
 }
 
 dom.tabs.forEach((tab) => tab.addEventListener("click", () => switchView(tab.dataset.view)));
