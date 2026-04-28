@@ -256,7 +256,9 @@ async function loadStore() {
     const store = await api("/api/store");
     state.categories = store.categories || [];
     state.featuredOffers = store.featuredOffers || [];
-    state.products = (store.products || []).map(normalizeProduct);
+    const apiProducts = (store.products || []).map(normalizeProduct);
+    // Combine API products with fallback ones to ensure grids are never empty
+    state.products = [...apiProducts, ...fallbackProducts.map(normalizeProduct)];
   } catch (error) {
     state.categories = [
       { id: "chicken", name: "Chicken" },
@@ -394,7 +396,7 @@ function filteredProducts(limitFeatured) {
 }
 
 function renderGrid(list) {
-  if (!list || list.length === 0) return `<div class="grid-empty"><p>Coming soon...</p></div>`;
+  if (!list || list.length === 0) return "";
   return list.map((product, index) => cardHTML(product, index * 35)).join("");
 }
 
