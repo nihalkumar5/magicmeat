@@ -402,7 +402,19 @@ function renderGrid(list) {
 }
 
 function renderFeatured() {
-  if (dom.trendingRail) dom.trendingRail.innerHTML = renderGrid(state.products.slice(0, 6));
+  const query = state.query.trim().toLowerCase();
+  let trendingList = state.products;
+  if (query) {
+    trendingList = trendingList.filter(p => 
+      p.category.toLowerCase().includes(query) || 
+      p.name.toLowerCase().includes(query)
+    );
+  } else {
+    // If no specific query (Bestsellers), show top rated
+    trendingList = trendingList.filter(p => p.rating >= 4.8);
+  }
+
+  if (dom.trendingRail) dom.trendingRail.innerHTML = renderGrid(trendingList.slice(0, 8));
   if (dom.featuredGrid) dom.featuredGrid.innerHTML = renderGrid(filteredProducts(true).slice(0, 4));
   if (dom.seafoodGrid) dom.seafoodGrid.innerHTML = renderGrid(state.products.filter(p => p.category === "fish").slice(0, 4));
   if (dom.dairyGrid) dom.dairyGrid.innerHTML = renderGrid(state.products.filter(p => p.category === "dairy" || p.category === "eggs").slice(0, 4));
@@ -671,11 +683,13 @@ if (dom.filterTags) dom.filterTags.forEach(tag => {
   tag.addEventListener("click", () => {
     dom.filterTags.forEach(t => t.classList.remove("active"));
     tag.classList.add("active");
-    // Simple mock filter
-    if (tag.textContent === "Bestsellers") state.query = "a"; 
-    else if (tag.textContent === "Premium Meats") state.query = "meat";
-    else if (tag.textContent === "Fresh Produce") state.query = "fresh";
-    else state.query = "";
+    
+    const filter = tag.textContent.trim();
+    if (filter === "Bestsellers") state.query = "";
+    else if (filter === "Premium Meats") state.query = "chicken"; // or meat
+    else if (filter === "Fresh Produce") state.query = "veggies";
+    else if (filter === "Daily Groceries") state.query = "dairy";
+    
     renderFeatured();
   });
 });
