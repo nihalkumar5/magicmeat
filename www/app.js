@@ -31,6 +31,9 @@ const dom = {
   dairyGrid: $("#dairyGrid"),
   veggiesGrid: $("#veggiesGrid"),
   bundlesGrid: $("#bundlesGrid"),
+  frozenGrid: $("#frozenGrid"),
+  drinksGrid: $("#drinksGrid"),
+  pantryGrid: $("#pantryGrid"),
   grocerySubcats: $("#grocerySubcats"),
   groceryGrid: $("#groceryGrid"),
   cartItems: $("#cartItems"),
@@ -130,6 +133,32 @@ const fallbackProducts = [
     freshness: 95,
     eta: 31,
     description: "Organic hydroponic spinach.",
+    stock: 20
+  },
+  {
+    id: "fallback-frozen",
+    name: "Chicken Nuggets",
+    category: "frozen",
+    price: 199,
+    unit: "500g",
+    emoji: "🍗",
+    rating: 4.8,
+    freshness: 98,
+    eta: 30,
+    description: "Crispy golden chicken nuggets.",
+    stock: 15
+  },
+  {
+    id: "fallback-drinks",
+    name: "Fresh Orange Juice",
+    category: "drinks",
+    price: 99,
+    unit: "1L",
+    emoji: "🍹",
+    rating: 4.9,
+    freshness: 99,
+    eta: 25,
+    description: "100% natural cold-pressed orange juice.",
     stock: 20
   }
 ];
@@ -374,7 +403,10 @@ function renderFeatured() {
   if (dom.seafoodGrid) dom.seafoodGrid.innerHTML = renderGrid(state.products.filter(p => p.category === "fish").slice(0, 4));
   if (dom.dairyGrid) dom.dairyGrid.innerHTML = renderGrid(state.products.filter(p => p.category === "dairy" || p.category === "eggs").slice(0, 4));
   if (dom.veggiesGrid) dom.veggiesGrid.innerHTML = renderGrid(state.products.filter(p => p.category === "veggies" || p.category === "fruits").slice(0, 4));
-  if (dom.bundlesGrid) dom.bundlesGrid.innerHTML = renderGrid(state.products.filter(p => p.category === "masala" || p.category === "frozen").slice(0, 4));
+  if (dom.bundlesGrid) dom.bundlesGrid.innerHTML = renderGrid(state.products.filter(p => p.category === "masala").slice(0, 4));
+  if (dom.frozenGrid) dom.frozenGrid.innerHTML = renderGrid(state.products.filter(p => p.category === "frozen").slice(0, 4));
+  if (dom.drinksGrid) dom.drinksGrid.innerHTML = renderGrid(state.products.filter(p => p.category === "drinks").slice(0, 4));
+  if (dom.pantryGrid) dom.pantryGrid.innerHTML = renderGrid(state.products.filter(p => p.category === "masala" || p.category === "pantry").slice(0, 4));
 }
 
 function renderGrocerySubcats() {
