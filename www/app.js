@@ -626,6 +626,15 @@ document.addEventListener("click", (event) => {
     return;
   }
 
+  const seeAll = event.target.closest("#seeAllCats");
+  if (seeAll) {
+    state.grocerySub = "all";
+    switchView("grocery");
+    renderGrocerySubcats();
+    renderGroceryGrid();
+    return;
+  }
+
   const add = event.target.closest("[data-cadd]");
   if (add) {
     addToCart(add.dataset.cadd);
