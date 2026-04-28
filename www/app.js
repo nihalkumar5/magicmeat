@@ -396,9 +396,9 @@ function filteredProducts(limitFeatured) {
   return limitFeatured && !query ? list.slice(0, 10) : list;
 }
 
-function renderGrid(list) {
+function renderGrid(list, extraClass = "") {
   if (!list || list.length === 0) return "";
-  return list.map((product, index) => cardHTML(product, index * 35)).join("");
+  return list.map((product, index) => cardHTML(product, index * 35, extraClass)).join("");
 }
 
 function renderFeatured() {
@@ -414,7 +414,7 @@ function renderFeatured() {
     trendingList = trendingList.filter(p => p.rating >= 4.8);
   }
 
-  if (dom.trendingRail) dom.trendingRail.innerHTML = renderGrid(trendingList.slice(0, 8));
+  if (dom.trendingRail) dom.trendingRail.innerHTML = renderGrid(trendingList.slice(0, 8), "trending");
   if (dom.featuredGrid) dom.featuredGrid.innerHTML = renderGrid(filteredProducts(true).slice(0, 4));
   if (dom.seafoodGrid) dom.seafoodGrid.innerHTML = renderGrid(state.products.filter(p => p.category === "fish").slice(0, 4));
   if (dom.dairyGrid) dom.dairyGrid.innerHTML = renderGrid(state.products.filter(p => p.category === "dairy" || p.category === "eggs").slice(0, 4));
