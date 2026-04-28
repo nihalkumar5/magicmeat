@@ -344,7 +344,7 @@ function renderQuickCats() {
   }).join("");
 }
 
-function cardHTML(product, delay = 0) {
+function cardHTML(product, delay = 0, extraClass = "") {
   const quantity = state.cart.get(product.id) || 0;
   const disabled = product.stock <= 0;
   const stepper = disabled
@@ -358,7 +358,7 @@ function cardHTML(product, delay = 0) {
          </div>`;
 
   return `
-    <div class="product-card" style="animation-delay:${delay}ms" data-product-id="${escapeHtml(product.id)}">
+    <div class="product-card ${extraClass}" style="animation-delay:${delay}ms" data-product-id="${escapeHtml(product.id)}">
       <div class="product-image" style="--card-bg:${product.bg};--card-accent:${product.color}">
         ${product.image 
           ? `<img src="${escapeHtml(product.image)}" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;">` 
