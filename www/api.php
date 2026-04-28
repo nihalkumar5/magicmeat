@@ -115,8 +115,8 @@ elseif (strpos($path, 'admin/') === 0) {
     elseif ($method === 'POST' && $path === 'admin/categories') {
         $data = getBody();
         $id = strtolower(str_replace(' ', '-', $data['name']));
-        $stmt = $conn->prepare("INSERT INTO categories (id, name) VALUES (?, ?)");
-        $stmt->bind_param("ss", $id, $data['name']);
+        $stmt = $conn->prepare("INSERT INTO categories (id, name, icon) VALUES (?, ?, ?)");
+        $stmt->bind_param("sss", $id, $data['name'], $data['icon']);
         $stmt->execute();
         echo json_encode(["id" => $id]);
     }

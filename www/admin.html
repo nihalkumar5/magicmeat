@@ -376,10 +376,21 @@
         <section class="tab-view" id="categories">
           <div class="card p-24" style="margin-bottom:24px;">
             <h3>Add New Category</h3>
-            <div style="display:flex; gap:12px; margin-top:16px;">
-              <input type="text" id="catName" placeholder="e.g. Fresh Fruits" style="flex:1; background:var(--bg); padding:14px; border-radius:12px; border:none;">
-              <button class="btn btn-primary" id="addCatBtn">Add Category</button>
+            <div style="display:grid; grid-template-columns: 1fr auto; gap:16px; margin-top:16px;">
+              <div class="field">
+                <label>Category Name</label>
+                <input type="text" id="catName" placeholder="e.g. Fresh Fruits" style="background:var(--bg); padding:14px; border-radius:12px; border:none;">
+              </div>
+              <div class="field">
+                <label>Icon (SVG/PNG)</label>
+                <div class="upload-wrapper">
+                  <input type="text" id="catIcon" placeholder="api/uploads/..." readonly>
+                  <button type="button" class="upload-btn-inline" id="catUploadBtn">UPLOAD</button>
+                </div>
+                <input type="file" id="catFileInput" style="display:none" accept="image/svg+xml,image/png">
+              </div>
             </div>
+            <button class="btn btn-primary" id="addCatBtn" style="margin-top:20px; width:100%; justify-content:center;">Create Category</button>
           </div>
           <div class="card p-24">
             <h3>Active Categories</h3>
@@ -633,9 +644,14 @@
     function renderCategories() {
       $("#categoriesList").innerHTML = state.categories.map(c => `
         <div style="display:flex; justify-content:space-between; align-items:center; padding:16px; background:var(--bg); border-radius:12px;">
-          <div>
-            <strong>${esc(c.name)}</strong><br>
-            <small style="color:var(--muted);">ID: ${esc(c.id)}</small>
+          <div style="display:flex; align-items:center; gap:16px;">
+            <div style="width:40px; height:40px; border-radius:8px; background:white; display:grid; place-items:center; padding:8px;">
+              ${c.icon ? `<img src="${esc(c.icon)}" style="width:100%; height:100%; object-fit:contain;">` : '🛒'}
+            </div>
+            <div>
+              <strong>${esc(c.name)}</strong><br>
+              <small style="color:var(--muted);">ID: ${esc(c.id)}</small>
+            </div>
           </div>
           <button class="btn-icon btn-danger" onclick="deleteCategory('${esc(c.id)}')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
@@ -646,13 +662,15 @@
 
     async function addCategory() {
       const name = $("#catName").value.trim();
+      const icon = $("#catIcon").value.trim();
       if (!name) return showToast("Enter category name");
       try {
         await api("/api/admin/categories", {
           method: "POST",
-          body: JSON.stringify({ name })
+          body: JSON.stringify({ name, icon })
         });
         $("#catName").value = "";
+        $("#catIcon").value = "";
         showToast("✅ Category added");
         loadDashboard();
       } catch (e) {
@@ -784,15 +802,12 @@
     $("#addCatBtn").addEventListener("click", addCategory);
     
     $("#uploadBtn").addEventListener("click", () => $("#fileInput").click());
+    $("#catUploadBtn").addEventListener("click", () => $("#catFileInput").click());
     
-    $("#fileInput").addEventListener("change", async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      
+    async function uploadHandler(file, inputId) {
       const formData = new FormData();
       formData.append("image", file);
-      
-      showToast("Uploading image...");
+      showToast("Uploading...");
       try {
         const response = await fetch("api.php?path=admin/upload", {
           method: "POST",
@@ -801,15 +816,23 @@
         });
         const result = await response.json();
         if (result.url) {
-          $("#pImage").value = result.url;
-          updateImagePreview();
-          showToast("✅ Image uploaded!");
+          $(inputId).value = result.url;
+          if (inputId === "#pImage") updateImagePreview();
+          showToast("✅ Uploaded!");
         } else {
           throw new Error(result.error || "Upload failed");
         }
       } catch (err) {
         showToast("❌ " + err.message);
       }
+    }
+
+    $("#fileInput").addEventListener("change", (e) => {
+      if (e.target.files[0]) uploadHandler(e.target.files[0], "#pImage");
+    });
+
+    $("#catFileInput").addEventListener("change", (e) => {
+      if (e.target.files[0]) uploadHandler(e.target.files[0], "#catIcon");
     });
 
     document.querySelectorAll(".nav-item[data-tab]").forEach(item => {

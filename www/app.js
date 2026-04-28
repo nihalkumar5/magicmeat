@@ -125,7 +125,8 @@ function categoryFor(id) {
   return {
     ...meta,
     id,
-    label: apiCategory?.name || meta.label || id
+    label: apiCategory?.name || meta.label || id,
+    icon: apiCategory?.icon || meta.icon || "🛒"
   };
 }
 
@@ -252,7 +253,10 @@ function renderQuickCats() {
     return `
       <div class="qcat-card" data-catview="${escapeHtml(category.id)}" data-cat="${escapeHtml(category.id)}">
         <div class="qcat-icon">
-          <span>${meta.icon || "🥩"}</span>
+          ${meta.icon.startsWith('http') || meta.icon.startsWith('api/') 
+            ? `<img src="${escapeHtml(meta.icon)}" style="width:24px; height:24px; object-fit:contain;">` 
+            : `<span>${meta.icon || "🥩"}</span>`
+          }
         </div>
         <div class="qcat-text-wrap">
           <span class="cat-title">${escapeHtml(meta.label)}</span>
@@ -325,12 +329,16 @@ function renderFeatured() {
 
 function renderGrocerySubcats() {
   if (!dom.grocerySubcats) return;
-  const cats = [{ id: "all", name: "All" }, ...state.categories.filter((category) => category.id !== "all")];
+  const cats = [{ id: "all", name: "All" }, ...state.categories];
   dom.grocerySubcats.innerHTML = cats.map((category) => {
     const meta = categoryFor(category.id);
+    const iconHtml = meta.icon.startsWith('http') || meta.icon.startsWith('api/')
+      ? `<img src="${escapeHtml(meta.icon)}" style="width:16px; height:16px; object-fit:contain; margin-right:8px;">`
+      : `<span class="se">${meta.icon || "🛒"}</span>`;
+      
     return `
       <button class="subcat-pill ${state.grocerySub === category.id ? "active" : ""}" data-subcat="${escapeHtml(category.id)}">
-        <span class="se">${meta.icon || "🛒"}</span>${escapeHtml(meta.label)}
+        ${iconHtml}${escapeHtml(meta.label)}
       </button>
     `;
   }).join("");
