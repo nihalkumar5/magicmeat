@@ -113,10 +113,10 @@ function toast(message) {
 
 function greeting() {
   const hour = new Date().getHours();
-  if (hour < 12) return "Good morning";
-  if (hour < 17) return "Good afternoon";
-  if (hour < 21) return "Good evening";
-  return "Late night cravings?";
+  if (hour >= 5 && hour < 12) return "Good morning ☀️";
+  if (hour >= 12 && hour < 17) return "Good afternoon 🌤️";
+  if (hour >= 17 && hour < 22) return "Good evening 🌙";
+  return "Late night cravings? 🍗";
 }
 
 function categoryFor(id) {
@@ -667,4 +667,26 @@ document.addEventListener("click", (event) => {
 if (dom.greetText) dom.greetText.textContent = greeting();
 if (dom.locAddress) dom.locAddress.textContent = state.customer.address || "Set delivery address";
 if (dom.profilePhone) dom.profilePhone.value = state.customer.phone || "";
+
+// Auto detect location if not set
+if (!state.customer.address) {
+  setTimeout(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((pos) => {
+        // Since we don't have a reverse geocoding API, we use a placeholder or prompt
+        const mockAddress = "Detecting nearby...";
+        state.customer.address = mockAddress;
+        if (dom.locAddress) dom.locAddress.textContent = mockAddress;
+        dom.locModal.classList.add("show");
+        toast("📍 Please confirm your location");
+      }, () => {
+        // If denied, just show the modal
+        dom.locModal.classList.add("show");
+      });
+    } else {
+      dom.locModal.classList.add("show");
+    }
+  }, 1500);
+}
+
 loadStore();
