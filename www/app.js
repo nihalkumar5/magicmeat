@@ -27,6 +27,9 @@ const dom = {
   heroBanner: $("#heroBanner"),
   quickCats: $("#quickCategories"),
   featuredGrid: $("#featuredGrid"),
+  seafoodGrid: $("#seafoodGrid"),
+  dairyGrid: $("#dairyGrid"),
+  veggiesGrid: $("#veggiesGrid"),
   bundlesGrid: $("#bundlesGrid"),
   grocerySubcats: $("#grocerySubcats"),
   groceryGrid: $("#groceryGrid"),
@@ -323,11 +326,11 @@ function filteredProducts(limitFeatured) {
 }
 
 function renderFeatured() {
-  if (!dom.featuredGrid) return;
-  const list = filteredProducts(true);
-  dom.featuredGrid.innerHTML = list.length
-    ? list.map((product, index) => cardHTML(product, index * 35)).join("")
-    : `<div class="grid-empty"><h3>No products found</h3><p>Try another search.</p></div>`;
+  if (dom.featuredGrid) dom.featuredGrid.innerHTML = renderGrid(filteredProducts(true).slice(0, 4));
+  if (dom.seafoodGrid) dom.seafoodGrid.innerHTML = renderGrid(state.products.filter(p => p.category === "fish").slice(0, 4));
+  if (dom.dairyGrid) dom.dairyGrid.innerHTML = renderGrid(state.products.filter(p => p.category === "dairy" || p.category === "eggs").slice(0, 4));
+  if (dom.veggiesGrid) dom.veggiesGrid.innerHTML = renderGrid(state.products.filter(p => p.category === "veggies" || p.category === "fruits").slice(0, 4));
+  if (dom.bundlesGrid) dom.bundlesGrid.innerHTML = renderGrid(state.products.filter(p => p.category === "masala" || p.category === "frozen").slice(0, 4));
 }
 
 function renderGrocerySubcats() {
