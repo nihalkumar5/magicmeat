@@ -92,6 +92,45 @@ const fallbackProducts = [
     eta: 31,
     description: "Fresh cleaned curry cut chicken packed cold.",
     stock: 12
+  },
+  {
+    id: "fallback-fish",
+    name: "Fresh Rohu Fish",
+    category: "fish",
+    price: 349,
+    unit: "1kg",
+    emoji: "🐟",
+    rating: 4.9,
+    freshness: 99,
+    eta: 35,
+    description: "River fresh Rohu, cleaned and sliced.",
+    stock: 8
+  },
+  {
+    id: "fallback-dairy",
+    name: "Premium Buffalo Milk",
+    category: "dairy",
+    price: 78,
+    unit: "1L",
+    emoji: "🥛",
+    rating: 4.8,
+    freshness: 100,
+    eta: 25,
+    description: "Fresh farm milk delivered within 4 hours.",
+    stock: 50
+  },
+  {
+    id: "fallback-veggies",
+    name: "Fresh Spinach (Palak)",
+    category: "veggies",
+    price: 29,
+    unit: "250g",
+    emoji: "🥬",
+    rating: 4.7,
+    freshness: 95,
+    eta: 31,
+    description: "Organic hydroponic spinach.",
+    stock: 20
   }
 ];
 
@@ -323,6 +362,11 @@ function filteredProducts(limitFeatured) {
     );
   }
   return limitFeatured && !query ? list.slice(0, 10) : list;
+}
+
+function renderGrid(list) {
+  if (!list || list.length === 0) return `<div class="grid-empty"><p>Coming soon...</p></div>`;
+  return list.map((product, index) => cardHTML(product, index * 35)).join("");
 }
 
 function renderFeatured() {
