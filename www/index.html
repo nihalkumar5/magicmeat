@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="./styles.css?v=1.1"/>
+  <link rel="stylesheet" href="./styles.css?v=1.2"/>
 </head>
 <body>
 <div id="app-root">
@@ -179,7 +179,7 @@
       <button class="detect-btn" id="detectLocationBtn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Use Current Location</button>
       <div class="location-divider">OR</div>
       <input type="text" id="manualAddress" class="address-input" placeholder="Enter flat, building, street..." />
-      <button class="primary-btn" id="saveAddressBtn">Confirm Address</button>
+      <button class="primary-btn" id="saveAddressBtn" onclick="saveAddress()">Confirm Address</button>
       <button class="text-btn" onclick="document.getElementById('locationModal').classList.remove('show')" style="width:100%; margin-top:12px;">Cancel</button>
     </div>
   </div>
@@ -188,6 +188,6 @@
 
 </div>
 
-<script src="./app.js"></script>
+<script src="./app.js?v=1.2"></script>
 </body>
 </html>
