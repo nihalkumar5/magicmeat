@@ -159,7 +159,11 @@ function deliveryFeeFor(subtotal) {
 }
 
 async function api(path, options = {}) {
-  const response = await fetch(path, {
+  // Route through PHP api
+  const cleanPath = path.replace(/^\/api\//, '');
+  const url = `api.php?path=${cleanPath}`;
+  
+  const response = await fetch(url, {
     headers: { "Content-Type": "application/json", ...(options.headers || {}) },
     ...options
   });

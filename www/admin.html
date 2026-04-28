@@ -422,7 +422,11 @@
     });
 
     async function api(path, options = {}) {
-      const response = await fetch(path, {
+      // Route through PHP api
+      const cleanPath = path.replace(/^\/api\//, '');
+      const url = `api.php?path=${cleanPath}`;
+
+      const response = await fetch(url, {
         headers: {
           "Content-Type": "application/json",
           ...(state.token ? { Authorization: `Bearer ${state.token}` } : {}),
@@ -693,7 +697,7 @@
       
       showToast("Uploading image...");
       try {
-        const response = await fetch("/api/admin/upload", {
+        const response = await fetch("api.php?path=admin/upload", {
           method: "POST",
           headers: { "Authorization": `Bearer ${state.token}` },
           body: formData
