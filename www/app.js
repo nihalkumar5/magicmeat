@@ -675,6 +675,21 @@ if (dom.locAddress) dom.locAddress.textContent = state.customer.address || "Set 
 if (dom.etaText) dom.etaText.textContent = `${state.eta} min • By ${getDeliveryTime(state.eta)}`;
 if (dom.profilePhone) dom.profilePhone.value = state.customer.phone || "";
 
+// Auto-slide for Offers Rail
+function initAutoSlider() {
+  const rail = $("#offersRail");
+  if (!rail) return;
+  let scrollIdx = 0;
+  setInterval(() => {
+    const cards = rail.querySelectorAll(".offer-card");
+    if (cards.length === 0) return;
+    scrollIdx = (scrollIdx + 1) % cards.length;
+    const cardWidth = cards[0].offsetWidth + 16; // width + gap
+    rail.scrollTo({ left: scrollIdx * cardWidth, behavior: "smooth" });
+  }, 4000);
+}
+initAutoSlider();
+
 // Auto detect location if not set
 if (!state.customer.address) {
   setTimeout(() => {
