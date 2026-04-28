@@ -296,6 +296,23 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .product-image { width: 100%; aspect-ratio: 1; border-radius: 16px; margin-bottom: 12px; position: relative; background: var(--surface); display: grid; place-items: center; }
 .product-emoji { font-size: 64px; filter: drop-shadow(0 12px 20px rgba(0,0,0,0.1)); transform: scale(1.1); transition: transform 0.3s; }
 .product-card:hover .product-emoji { transform: scale(1.2); }
+
+/* ── HORIZONTAL PRODUCT RAIL ── */
+.product-rail-h {
+  display: flex; gap: 14px; padding: 0 20px 24px;
+  overflow-x: auto; scrollbar-width: none;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+}
+.product-rail-h::-webkit-scrollbar { display: none; }
+.product-rail-h .product-card {
+  flex: 0 0 165px;
+  scroll-snap-align: center;
+  animation: none; /* Disable entrance animation for rail items */
+}
+.product-rail-h .product-card .product-emoji { font-size: 52px; }
+.product-rail-h .product-card h3 { font-size: 14px; height: 34px; overflow: hidden; }
+
 .unit-tag { position: absolute; bottom: 8px; left: 8px; padding: 4px 8px; background: rgba(255,255,255,0.9); border-radius: 8px; font-size: 11px; font-weight: 700; color: var(--ink-soft); z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
 
 .product-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; line-height: 1.2; color: var(--ink); }

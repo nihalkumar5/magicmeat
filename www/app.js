@@ -24,6 +24,7 @@ const dom = {
   greetText: $("#greetingText"),
   searchInput: $("#searchInput"),
   filterTags: $$(".f-tag"),
+  trendingRail: $("#trendingRail"),
   heroBanner: $("#heroBanner"),
   quickCats: $("#quickCategories"),
   featuredGrid: $("#featuredGrid"),
@@ -401,6 +402,7 @@ function renderGrid(list) {
 }
 
 function renderFeatured() {
+  if (dom.trendingRail) dom.trendingRail.innerHTML = renderGrid(state.products.slice(0, 6));
   if (dom.featuredGrid) dom.featuredGrid.innerHTML = renderGrid(filteredProducts(true).slice(0, 4));
   if (dom.seafoodGrid) dom.seafoodGrid.innerHTML = renderGrid(state.products.filter(p => p.category === "fish").slice(0, 4));
   if (dom.dairyGrid) dom.dairyGrid.innerHTML = renderGrid(state.products.filter(p => p.category === "dairy" || p.category === "eggs").slice(0, 4));
