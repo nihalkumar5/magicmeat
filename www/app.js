@@ -102,6 +102,12 @@ const escapeHtml = (value) =>
     "'": "&#039;"
   })[char]);
 
+function getDeliveryTime(extraMins = 31) {
+  const now = new Date();
+  now.setMinutes(now.getMinutes() + extraMins);
+  return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
 let toastTimer;
 function toast(message) {
   if (!dom.toast) return;
@@ -537,7 +543,7 @@ async function placeOrder(event) {
     state.cart.clear();
     dom.checkoutModal.classList.remove("show");
     dom.modalOrderId.textContent = `Order #${order.id.slice(-8)}`;
-    dom.modalEta.textContent = `${state.eta} min`;
+    dom.modalEta.textContent = `${state.eta} min (By ${getDeliveryTime(state.eta)})`;
     dom.orderModal.classList.add("show");
     await loadStore();
     await loadOrders(customer.phone);
@@ -666,21 +672,32 @@ document.addEventListener("click", (event) => {
 
 if (dom.greetText) dom.greetText.textContent = greeting();
 if (dom.locAddress) dom.locAddress.textContent = state.customer.address || "Set delivery address";
+if (dom.etaText) dom.etaText.textContent = `${state.eta} min • By ${getDeliveryTime(state.eta)}`;
 if (dom.profilePhone) dom.profilePhone.value = state.customer.phone || "";
 
 // Auto detect location if not set
 if (!state.customer.address) {
   setTimeout(() => {
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((pos) => {
-        // Since we don't have a reverse geocoding API, we use a placeholder or prompt
-        const mockAddress = "Detecting nearby...";
-        state.customer.address = mockAddress;
-        if (dom.locAddress) dom.locAddress.textContent = mockAddress;
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`);
+          const data = await res.json();
+          const realAddress = data.address.suburb || data.address.town || data.address.city || "Hazaribagh";
+          const stateName = data.address.state || "";
+          const fullAddr = `${realAddress}${stateName ? ', ' + stateName : ''}`;
+          
+          state.customer.address = fullAddr;
+          if (dom.locAddress) dom.locAddress.textContent = fullAddr;
+          if (dom.manualAddr) dom.manualAddr.value = fullAddr;
+          toast(`📍 Located: ${realAddress}`);
+        } catch (e) {
+          const fallback = "Hazaribagh, Jharkhand";
+          state.customer.address = fallback;
+          if (dom.locAddress) dom.locAddress.textContent = fallback;
+        }
         dom.locModal.classList.add("show");
-        toast("📍 Please confirm your location");
       }, () => {
-        // If denied, just show the modal
         dom.locModal.classList.add("show");
       });
     } else {
