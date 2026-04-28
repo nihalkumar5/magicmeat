@@ -363,6 +363,34 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .footer-links span { margin: 0 4px; cursor: pointer; }
 .footer-copy { font-size: 11px; opacity: 0.4; font-weight: 600; }
 
+/* ── FLOATING CALL BUTTON ── */
+.floating-call-btn {
+  position: fixed;
+  bottom: 100px; /* Above the tab bar */
+  right: 20px;
+  background: #25D366; /* WhatsApp Green for comfort */
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 14px;
+  box-shadow: 0 8px 20px rgba(37, 211, 102, 0.3);
+  z-index: 200;
+  animation: pulse-green 2s infinite;
+  transition: transform 0.2s;
+}
+.floating-call-btn:active { transform: scale(0.92); }
+
+@keyframes pulse-green {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7); }
+  70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(37, 211, 102, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
+}
+
 .unit-tag { position: absolute; bottom: 8px; left: 8px; padding: 4px 8px; background: rgba(255,255,255,0.9); border-radius: 8px; font-size: 11px; font-weight: 700; color: var(--ink-soft); z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
 
 .product-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; line-height: 1.2; color: var(--ink); }
