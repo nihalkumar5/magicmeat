@@ -141,13 +141,32 @@
     .btn-icon { width: 36px; height: 36px; border-radius: 10px; background: var(--bg); display: grid; place-items: center; }
     .btn-icon:hover { background: var(--line); }
     
-    /* Form */
+    /* Form Improvements */
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 28px; }
     .field { display: flex; flex-direction: column; gap: 8px; }
     .field.wide { grid-column: 1 / -1; }
-    label { font-size: 12px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
-    input, select, textarea { background: var(--bg); padding: 14px 18px; border-radius: 14px; font-weight: 500; font-size: 15px; border: 2px solid transparent; }
+    label { font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+    input, select, textarea { background: var(--bg); padding: 14px 18px; border-radius: 14px; font-weight: 500; font-size: 14px; border: 2px solid transparent; transition: 0.2s; }
     input:focus, select:focus, textarea:focus { border-color: var(--ink); background: #fff; }
+
+    /* New Upload UI */
+    .upload-wrapper { position: relative; display: flex; align-items: center; }
+    .upload-wrapper input { padding-right: 90px; width: 100%; }
+    .upload-btn-inline { 
+      position: absolute; right: 6px; top: 6px; bottom: 6px;
+      background: var(--ink); color: white; border: none; border-radius: 10px;
+      padding: 0 14px; font-size: 11px; font-weight: 800; cursor: pointer;
+      transition: 0.2s;
+    }
+    .upload-btn-inline:hover { transform: scale(0.95); opacity: 0.9; }
+    
+    .image-preview { 
+      width: 100%; height: 140px; border-radius: 16px; border: 2px dashed var(--line); 
+      margin-top: 8px; display: flex; align-items: center; justify-content: center;
+      overflow: hidden; background: var(--bg); transition: 0.3s;
+    }
+    .image-preview:hover { border-color: var(--muted); }
+    .image-preview img { width: 100%; height: 100%; object-fit: cover; }
     
     .toast { position: fixed; bottom: 32px; right: 32px; background: var(--ink); color: #fff; padding: 16px 24px; border-radius: 16px; box-shadow: var(--shadow-lg); transform: translateY(100px); opacity: 0; transition: all 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); z-index: 2000; font-weight: 700; }
     .toast.show { transform: translateY(0); opacity: 1; }
@@ -198,6 +217,10 @@
         <a href="#" class="nav-item" data-tab="analytics">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
           <span>Analytics</span>
+        </a>
+        <a href="#" class="nav-item" data-tab="categories">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><path d="M3 14h7v7H3z"/><path d="M14 14h7v7h-7z"/></svg>
+          <span>Categories</span>
         </a>
       </nav>
       <div class="sidebar-footer">
@@ -323,11 +346,14 @@
                 </div>
                 <div class="field">
                   <label>Image URL (Optional)</label>
-                  <div style="display:flex; gap:8px;">
-                    <input type="text" id="pImage" placeholder="https://..." style="flex:1;">
-                    <button type="button" class="btn btn-ghost" id="uploadBtn" style="padding:0 12px; height:42px; font-size:14px;">Upload</button>
+                  <div class="upload-wrapper">
+                    <input type="text" id="pImage" placeholder="https://...">
+                    <button type="button" class="upload-btn-inline" id="uploadBtn">UPLOAD</button>
                   </div>
                   <input type="file" id="fileInput" style="display:none" accept="image/*">
+                  <div class="image-preview" id="imagePreview">
+                    <span style="color:#999; font-size:12px;">No Preview</span>
+                  </div>
                 </div>
                 <div class="field">
                   <label>Rating</label>
@@ -346,7 +372,20 @@
           </div>
         </section>
 
-        <!-- ANALYTICS TAB -->
+        <!-- CATEGORIES TAB -->
+        <section class="tab-view" id="categories">
+          <div class="card p-24" style="margin-bottom:24px;">
+            <h3>Add New Category</h3>
+            <div style="display:flex; gap:12px; margin-top:16px;">
+              <input type="text" id="catName" placeholder="e.g. Fresh Fruits" style="flex:1; background:var(--bg); padding:14px; border-radius:12px; border:none;">
+              <button class="btn btn-primary" id="addCatBtn">Add Category</button>
+            </div>
+          </div>
+          <div class="card p-24">
+            <h3>Active Categories</h3>
+            <div id="categoriesList" style="margin-top:16px; display:grid; gap:12px;"></div>
+          </div>
+        </section>
         <section class="tab-view" id="analytics">
           <div class="empty" style="padding:100px; text-align:center;">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:48px; height:48px; margin-bottom:16px; opacity:0.3;"><path d="M21 12V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h7"/><path d="M9 5v14"/><path d="M17 19v-2"/><path d="M21 19v-6"/></svg>
@@ -487,10 +526,13 @@
         lastOrderCount = newOrders.length;
         state.orders = newOrders;
 
+        state.orders = newOrders;
+ 
         renderStats(payload.stats || {});
         renderCategoryOptions();
         renderOrders();
         renderProducts();
+        renderCategories();
         renderRecentOrders();
       } catch (error) {
         if (error.message === "Unauthorized") logout();
@@ -588,6 +630,47 @@
       }).join("");
     }
 
+    function renderCategories() {
+      $("#categoriesList").innerHTML = state.categories.map(c => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:16px; background:var(--bg); border-radius:12px;">
+          <div>
+            <strong>${esc(c.name)}</strong><br>
+            <small style="color:var(--muted);">ID: ${esc(c.id)}</small>
+          </div>
+          <button class="btn-icon btn-danger" onclick="deleteCategory('${esc(c.id)}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          </button>
+        </div>
+      `).join("");
+    }
+
+    async function addCategory() {
+      const name = $("#catName").value.trim();
+      if (!name) return showToast("Enter category name");
+      try {
+        await api("/api/admin/categories", {
+          method: "POST",
+          body: JSON.stringify({ name })
+        });
+        $("#catName").value = "";
+        showToast("✅ Category added");
+        loadDashboard();
+      } catch (e) {
+        showToast("❌ " + e.message);
+      }
+    }
+
+    async function deleteCategory(id) {
+      if (!confirm("Delete this category?")) return;
+      try {
+        await api(`/api/admin/categories/${id}`, { method: "DELETE" });
+        showToast("✅ Category deleted");
+        loadDashboard();
+      } catch (e) {
+        showToast("❌ " + e.message);
+      }
+    }
+
     async function adjustStock(id, delta) {
       const p = state.products.find(x => x.id === id);
       if (!p) return;
@@ -618,6 +701,18 @@
       $("#saveProductBtn").textContent = "Update Product";
       switchTab("inventory");
     }
+
+    function updateImagePreview() {
+      const url = $("#pImage").value;
+      const preview = $("#imagePreview");
+      if (url) {
+        preview.innerHTML = `<img src="${url}" onerror="this.parentElement.innerHTML='<span style=\'color:#999; font-size:12px;\'>Invalid URL</span>'">`;
+      } else {
+        preview.innerHTML = `<span style="color:#999; font-size:12px;">No Preview</span>`;
+      }
+    }
+
+    $("#pImage").addEventListener("input", updateImagePreview);
 
     async function saveProduct(e) {
       e.preventDefault();
@@ -685,6 +780,8 @@
     $("#resetProductBtn").addEventListener("click", resetProductForm);
     $("#orderSearch").addEventListener("input", renderOrders);
     $("#productSearch").addEventListener("input", renderProducts);
+    $("#addCatBtn").addEventListener("click", addCategory);
+    $("#addCatBtn").addEventListener("click", addCategory);
     
     $("#uploadBtn").addEventListener("click", () => $("#fileInput").click());
     
@@ -705,6 +802,7 @@
         const result = await response.json();
         if (result.url) {
           $("#pImage").value = result.url;
+          updateImagePreview();
           showToast("✅ Image uploaded!");
         } else {
           throw new Error(result.error || "Upload failed");

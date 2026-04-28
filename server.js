@@ -281,6 +281,17 @@ async function routeApi(req, res, url) {
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host || "localhost"}`);
 
+  // Support for PHP-style routing api.php?path=...
+  if (url.pathname === "/api.php") {
+    const phpPath = url.searchParams.get("path");
+    if (phpPath) {
+      // Mock the pathname for routeApi
+      const mockUrl = new URL(url.href);
+      mockUrl.pathname = "/api/" + phpPath;
+      if (await routeApi(req, res, mockUrl)) return;
+    }
+  }
+
   if (await routeApi(req, res, url)) return;
 
   const requestedPath = url.pathname === "/" ? "/index.html" : (url.pathname === "/admin" ? "/admin.html" : url.pathname);

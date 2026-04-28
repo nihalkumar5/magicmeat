@@ -121,10 +121,11 @@ function greeting() {
 
 function categoryFor(id) {
   const apiCategory = state.categories.find((category) => category.id === id);
+  const meta = categoryMeta[id] || categoryMeta["grocery"];
   return {
-    ...categoryMeta[id],
+    ...meta,
     id,
-    label: apiCategory?.label || apiCategory?.name || categoryMeta[id]?.label || id
+    label: apiCategory?.name || meta.label || id
   };
 }
 
@@ -301,7 +302,9 @@ function cardHTML(product, delay = 0) {
 function filteredProducts(limitFeatured) {
   const query = state.query.trim().toLowerCase();
   let list = state.products;
-  if (state.grocerySub !== "all") list = list.filter((product) => product.category === state.grocerySub);
+  if (state.grocerySub && state.grocerySub !== "all") {
+    list = list.filter((product) => product.category === state.grocerySub);
+  }
   if (query) {
     list = list.filter((product) =>
       product.name.toLowerCase().includes(query) ||

@@ -43,13 +43,19 @@ function isAdmin() {
 if ($method === 'GET' && $path === 'store') {
     $res = $conn->query("SELECT * FROM products");
     $products = $res->fetch_all(MYSQLI_ASSOC);
-    $categories = [
-        ["id" => "chicken", "name" => "Chicken"],
-        ["id" => "mutton", "name" => "Mutton"],
-        ["id" => "fish", "name" => "Fish"],
-        ["id" => "eggs", "name" => "Eggs"],
-        ["id" => "grocery", "name" => "Grocery"]
-    ];
+    
+    $catRes = $conn->query("SELECT * FROM categories");
+    $categories = $catRes->fetch_all(MYSQLI_ASSOC);
+    
+    // If empty, return defaults
+    if (empty($categories)) {
+        $categories = [
+            ["id" => "chicken", "name" => "Chicken"],
+            ["id" => "mutton", "name" => "Mutton"],
+            ["id" => "fish", "name" => "Fish"]
+        ];
+    }
+    
     echo json_encode(["categories" => $categories, "products" => $products, "featuredOffers" => []]);
 }
 
@@ -96,13 +102,31 @@ elseif (strpos($path, 'admin/') === 0) {
     if ($method === 'GET' && $path === 'admin/dashboard') {
         $orders = $conn->query("SELECT * FROM orders ORDER BY createdAt DESC")->fetch_all(MYSQLI_ASSOC);
         $products = $conn->query("SELECT * FROM products")->fetch_all(MYSQLI_ASSOC);
+        $categories = $conn->query("SELECT * FROM categories")->fetch_all(MYSQLI_ASSOC);
         $rev = $conn->query("SELECT SUM(total) as r FROM orders WHERE status='delivered'")->fetch_assoc()['r'] ?? 0;
         echo json_encode([
             "stats" => ["orders" => count($orders), "products" => count($products), "revenue" => (float)$rev],
-            "categories" => [["id"=>"chicken","name"=>"Chicken"],["id"=>"mutton","name"=>"Mutton"]],
+            "categories" => $categories,
             "products" => $products,
             "orders" => $orders
         ]);
+    }
+
+    elseif ($method === 'POST' && $path === 'admin/categories') {
+        $data = getBody();
+        $id = strtolower(str_replace(' ', '-', $data['name']));
+        $stmt = $conn->prepare("INSERT INTO categories (id, name) VALUES (?, ?)");
+        $stmt->bind_param("ss", $id, $data['name']);
+        $stmt->execute();
+        echo json_encode(["id" => $id]);
+    }
+
+    elseif ($method === 'DELETE' && strpos($path, 'admin/categories/') === 0) {
+        $id = str_replace('admin/categories/', '', $path);
+        $stmt = $conn->prepare("DELETE FROM categories WHERE id=?");
+        $stmt->bind_param("s", $id);
+        $stmt->execute();
+        echo json_encode(["ok" => true]);
     }
 
     elseif ($method === 'POST' && $path === 'admin/upload') {
