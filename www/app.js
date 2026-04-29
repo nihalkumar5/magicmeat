@@ -325,7 +325,22 @@ function switchView(id) {
 }
 
 function renderPromo() {
-  // Hero banner is static in HTML, but we could update it dynamically here if needed
+  const rail = $("#offersRail");
+  if (!rail || !state.featuredOffers) return;
+  
+  if (state.featuredOffers.length > 0) {
+    rail.innerHTML = state.featuredOffers.map(off => `
+      <div class="offer-card ${off.color || 'orange'}">
+        <div class="offer-content">
+          <span class="offer-tag">${off.tag}</span>
+          <h3>${off.title}</h3>
+          <p>${off.subtext}</p>
+          <span class="promo-code">CODE: ${off.code}</span>
+        </div>
+        <div class="offer-emoji">${off.emoji || '🥩'}</div>
+      </div>
+    `).join("");
+  }
 }
 
 function renderBundles() {

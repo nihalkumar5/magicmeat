@@ -222,6 +222,10 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><path d="M3 14h7v7H3z"/><path d="M14 14h7v7h-7z"/></svg>
           <span>Categories</span>
         </a>
+        <a href="#" class="nav-item" data-tab="offers">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12l-8 8-8-8M12 4v16"/></svg>
+          <span>Manage Offers</span>
+        </a>
       </nav>
       <div class="sidebar-footer">
         <a href="#" class="nav-item" id="logoutBtn" style="color:var(--danger-soft);">
@@ -404,6 +408,55 @@
             <p>Advanced revenue reports and customer trends are being cooked.</p>
           </div>
         </section>
+
+        <!-- OFFERS TAB -->
+        <section class="tab-view" id="offers">
+          <div class="panel">
+            <div class="panel-header"><h2>Create New Offer Banner</h2></div>
+            <form id="offerForm" class="form-grid">
+              <div class="field">
+                <label>Tag (e.g. FLASH SALE)</label>
+                <input type="text" id="offTag" placeholder="FLASH SALE" required>
+              </div>
+              <div class="field">
+                <label>Title</label>
+                <input type="text" id="offTitle" placeholder="Flat ₹100 OFF" required>
+              </div>
+              <div class="field wide">
+                <label>Subtext</label>
+                <input type="text" id="offSubtext" placeholder="On orders above ₹599" required>
+              </div>
+              <div class="field">
+                <label>Promo Code</label>
+                <input type="text" id="offCode" placeholder="FRESH100" required>
+              </div>
+              <div class="field">
+                <label>Emoji Icon</label>
+                <input type="text" id="offEmoji" placeholder="🥩">
+              </div>
+              <div class="field">
+                <label>Card Color (Class: orange/blue/green)</label>
+                <select id="offColor">
+                  <option value="orange">Premium Orange-Red</option>
+                  <option value="blue">Electric Blue</option>
+                  <option value="green">Nature Green</option>
+                </select>
+              </div>
+              <div class="field wide">
+                <button class="btn btn-primary" type="submit" style="width:100%; justify-content:center;">Add Offer Banner</button>
+              </div>
+            </form>
+          </div>
+          <div class="panel">
+            <div class="panel-header"><h2>Active Offers</h2></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Title</th><th>Code</th><th>Tag</th><th>Action</th></tr></thead>
+                <tbody id="offersListBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
       </div>
     </main>
   </div>
@@ -412,7 +465,7 @@
 
   <script>
     const tokenKey = "magicmeat_admin_token";
-    const state = { token: localStorage.getItem(tokenKey), categories: [], products: [], orders: [] };
+    const state = { token: localStorage.getItem(tokenKey), categories: [], products: [], orders: [], offers: [] };
     const $ = (selector) => document.querySelector(selector);
     const fmt = (value) => `₹${Number(value || 0).toLocaleString("en-IN")}`;
     const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({
@@ -454,7 +507,8 @@
         overview: ["Overview", "Welcome back to the command center."],
         orders: ["Live Orders", "Manage and track customer deliveries."],
         inventory: ["Inventory", "Control your stock levels and product catalog."],
-        analytics: ["Analytics", "Business insights and performance data."]
+        analytics: ["Analytics", "Business insights and performance data."],
+        offers: ["Manage Offers", "Control promotional banners on the home page."]
       };
       
       const [title, sub] = titles[tabId] || ["Dashboard", ""];
@@ -528,6 +582,7 @@
         const payload = await api("/api/admin/dashboard");
         state.categories = payload.categories || [];
         state.products = payload.products || [];
+        state.offers = payload.offers || [];
         
         const newOrders = payload.orders || [];
         if (lastOrderCount !== -1 && newOrders.length > lastOrderCount) {
@@ -537,13 +592,12 @@
         lastOrderCount = newOrders.length;
         state.orders = newOrders;
 
-        state.orders = newOrders;
- 
         renderStats(payload.stats || {});
         renderCategoryOptions();
         renderOrders();
         renderProducts();
         renderCategories();
+        renderOffers();
         renderRecentOrders();
       } catch (error) {
         if (error.message === "Unauthorized") logout();
@@ -790,6 +844,44 @@
       showLogin();
     }
 
+    async function saveOffer(e) {
+      e.preventDefault();
+      const payload = {
+        tag: $("#offTag").value.trim(),
+        title: $("#offTitle").value.trim(),
+        subtext: $("#offSubtext").value.trim(),
+        code: $("#offCode").value.trim(),
+        emoji: $("#offEmoji").value.trim(),
+        color: $("#offColor").value
+      };
+      try {
+        await api("/api/admin/offers", { method: "POST", body: JSON.stringify(payload) });
+        $("#offerForm").reset();
+        showToast("✅ Offer added!");
+        loadDashboard();
+      } catch (err) { showToast("❌ " + err.message); }
+    }
+
+    async function deleteOffer(id) {
+      if (!confirm("Delete this offer?")) return;
+      try {
+        await api(`/api/admin/offers/${id}`, { method: "DELETE" });
+        showToast("✅ Offer deleted");
+        loadDashboard();
+      } catch (err) { showToast("❌ " + err.message); }
+    }
+
+    function renderOffers() {
+      $("#offersListBody").innerHTML = state.offers.map(o => `
+        <tr>
+          <td><strong>${esc(o.title)}</strong><br><small>${esc(o.subtext)}</small></td>
+          <td><span class="promo-code" style="background:var(--bg); padding:4px 8px; border-radius:8px; border:1px solid var(--line); font-size:12px; font-weight:800;">${esc(o.code)}</span></td>
+          <td><span class="pill" style="background:var(--bg);">${esc(o.tag)}</span></td>
+          <td><button class="btn-icon btn-danger" onclick="deleteOffer(${o.id})">🗑</button></td>
+        </tr>
+      `).join("");
+    }
+
     // Events
     $("#loginForm").addEventListener("submit", login);
     $("#logoutBtn").addEventListener("click", (e) => { e.preventDefault(); logout(); });
@@ -799,6 +891,7 @@
     $("#orderSearch").addEventListener("input", renderOrders);
     $("#productSearch").addEventListener("input", renderProducts);
     $("#addCatBtn").addEventListener("click", addCategory);
+    $("#offerForm").addEventListener("submit", saveOffer);
     $("#addCatBtn").addEventListener("click", addCategory);
     
     $("#uploadBtn").addEventListener("click", () => $("#fileInput").click());

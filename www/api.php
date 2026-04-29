@@ -39,6 +39,17 @@ function isAdmin() {
     return $auth === "Bearer $admin_token";
 }
 
+// Auto-create offers table if not exists
+$conn->query("CREATE TABLE IF NOT EXISTS offers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tag VARCHAR(50),
+    title VARCHAR(100),
+    subtext VARCHAR(255),
+    code VARCHAR(50),
+    color VARCHAR(20),
+    emoji VARCHAR(10)
+)");
+
 // ROUTING
 if ($method === 'GET' && $path === 'store') {
     $res = $conn->query("SELECT * FROM products");
@@ -46,6 +57,9 @@ if ($method === 'GET' && $path === 'store') {
     
     $catRes = $conn->query("SELECT * FROM categories");
     $categories = $catRes->fetch_all(MYSQLI_ASSOC);
+    
+    $offerRes = $conn->query("SELECT * FROM offers");
+    $offers = $offerRes->fetch_all(MYSQLI_ASSOC);
     
     // If empty, return defaults
     if (empty($categories)) {
@@ -56,7 +70,11 @@ if ($method === 'GET' && $path === 'store') {
         ];
     }
     
-    echo json_encode(["categories" => $categories, "products" => $products, "featuredOffers" => []]);
+    echo json_encode([
+        "categories" => $categories, 
+        "products" => $products, 
+        "featuredOffers" => $offers
+    ]);
 }
 
 elseif ($method === 'GET' && $path === 'orders') {
@@ -103,12 +121,14 @@ elseif (strpos($path, 'admin/') === 0) {
         $orders = $conn->query("SELECT * FROM orders ORDER BY createdAt DESC")->fetch_all(MYSQLI_ASSOC);
         $products = $conn->query("SELECT * FROM products")->fetch_all(MYSQLI_ASSOC);
         $categories = $conn->query("SELECT * FROM categories")->fetch_all(MYSQLI_ASSOC);
+        $offers = $conn->query("SELECT * FROM offers")->fetch_all(MYSQLI_ASSOC);
         $rev = $conn->query("SELECT SUM(total) as r FROM orders WHERE status='delivered'")->fetch_assoc()['r'] ?? 0;
         echo json_encode([
             "stats" => ["orders" => count($orders), "products" => count($products), "revenue" => (float)$rev],
             "categories" => $categories,
             "products" => $products,
-            "orders" => $orders
+            "orders" => $orders,
+            "offers" => $offers
         ]);
     }
 
@@ -119,6 +139,22 @@ elseif (strpos($path, 'admin/') === 0) {
         $stmt->bind_param("sss", $id, $data['name'], $data['icon']);
         $stmt->execute();
         echo json_encode(["id" => $id]);
+    }
+
+    elseif ($method === 'POST' && $path === 'admin/offers') {
+        $data = getBody();
+        $stmt = $conn->prepare("INSERT INTO offers (tag, title, subtext, code, color, emoji) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("ssssss", $data['tag'], $data['title'], $data['subtext'], $data['code'], $data['color'], $data['emoji']);
+        $stmt->execute();
+        echo json_encode(["ok" => true]);
+    }
+
+    elseif ($method === 'DELETE' && strpos($path, 'admin/offers/') === 0) {
+        $id = str_replace('admin/offers/', '', $path);
+        $stmt = $conn->prepare("DELETE FROM offers WHERE id=?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        echo json_encode(["ok" => true]);
     }
 
     elseif ($method === 'DELETE' && strpos($path, 'admin/categories/') === 0) {
