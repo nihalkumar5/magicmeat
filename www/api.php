@@ -10,9 +10,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 // Database Configuration
 $host = "srv2210.hstgr.io";
-$user = "u583553206_admin";
+$user = "u583553206_nihal";
 $pass = "NihalKumar@555";
-$db   = "u583553206_magicmeat";
+$db   = "u583553206_magicmeatnew";
 $admin_user = "admin";
 $admin_pass = "NihalKumar@555";
 $admin_token = "magicmeat-admin-token";
