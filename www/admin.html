@@ -226,6 +226,10 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12l-8 8-8-8M12 4v16"/></svg>
           <span>Manage Offers</span>
         </a>
+        <a href="#" class="nav-item" data-tab="testimonials">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span>Testimonials</span>
+        </a>
       </nav>
       <div class="sidebar-footer">
         <a href="#" class="nav-item" id="logoutBtn" style="color:var(--danger-soft);">
@@ -435,12 +439,24 @@
                 <input type="text" id="offEmoji" placeholder="🥩">
               </div>
               <div class="field">
-                <label>Card Color (Class: orange/blue/green)</label>
+                <label>Card Color (Premium Shades)</label>
                 <select id="offColor">
-                  <option value="orange">Premium Orange-Red</option>
+                  <option value="orange">Classic Orange-Red</option>
                   <option value="blue">Electric Blue</option>
                   <option value="green">Nature Green</option>
+                  <option value="purple">Royal Purple</option>
+                  <option value="gold">Luxury Gold</option>
+                  <option value="midnight">Deep Midnight</option>
+                  <option value="rose">Soft Rose</option>
                 </select>
+              </div>
+              <div class="field">
+                <label>Banner Image URL (Optional)</label>
+                <div class="upload-wrapper">
+                  <input type="text" id="offImage" placeholder="https://...">
+                  <button type="button" class="upload-btn-inline" id="offUploadBtn">UPLOAD</button>
+                </div>
+                <input type="file" id="offFileInput" style="display:none" accept="image/*">
               </div>
               <div class="field wide">
                 <button class="btn btn-primary" type="submit" style="width:100%; justify-content:center;">Add Offer Banner</button>
@@ -457,6 +473,34 @@
             </div>
           </div>
         </section>
+
+        <!-- TESTIMONIALS TAB -->
+        <section class="tab-view" id="testimonials">
+          <div class="panel">
+            <div class="panel-header"><h2>Add Customer Testimonial</h2></div>
+            <form id="testiForm" class="form-grid">
+              <div class="field">
+                <label>Customer Name</label>
+                <input type="text" id="testiName" placeholder="Nihal Kumar" required>
+              </div>
+              <div class="field">
+                <label>Rating (1-5)</label>
+                <input type="number" id="testiRating" min="1" max="5" value="5" required>
+              </div>
+              <div class="field wide">
+                <label>Feedback Message</label>
+                <textarea id="testiText" rows="3" placeholder="Excellent quality meat!" required></textarea>
+              </div>
+              <div class="field wide">
+                <button class="btn btn-primary" type="submit" style="width:100%; justify-content:center;">Add Testimonial</button>
+              </div>
+            </form>
+          </div>
+          <div class="panel">
+            <div class="panel-header"><h2>Manage Testimonials</h2></div>
+            <div id="testiList" style="padding:28px; display:grid; gap:16px;"></div>
+          </div>
+        </section>
       </div>
     </main>
   </div>
@@ -465,7 +509,7 @@
 
   <script>
     const tokenKey = "magicmeat_admin_token";
-    const state = { token: localStorage.getItem(tokenKey), categories: [], products: [], orders: [], offers: [] };
+    const state = { token: localStorage.getItem(tokenKey), categories: [], products: [], orders: [], offers: [], testimonials: [] };
     const $ = (selector) => document.querySelector(selector);
     const fmt = (value) => `₹${Number(value || 0).toLocaleString("en-IN")}`;
     const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({
@@ -508,7 +552,8 @@
         orders: ["Live Orders", "Manage and track customer deliveries."],
         inventory: ["Inventory", "Control your stock levels and product catalog."],
         analytics: ["Analytics", "Business insights and performance data."],
-        offers: ["Manage Offers", "Control promotional banners on the home page."]
+        offers: ["Manage Offers", "Control promotional banners on the home page."],
+        testimonials: ["Testimonials", "Manage customer reviews and feedback."]
       };
       
       const [title, sub] = titles[tabId] || ["Dashboard", ""];
@@ -583,6 +628,7 @@
         state.categories = payload.categories || [];
         state.products = payload.products || [];
         state.offers = payload.offers || [];
+        state.testimonials = payload.testimonials || [];
         
         const newOrders = payload.orders || [];
         if (lastOrderCount !== -1 && newOrders.length > lastOrderCount) {
@@ -598,6 +644,7 @@
         renderProducts();
         renderCategories();
         renderOffers();
+        renderTestimonials();
         renderRecentOrders();
       } catch (error) {
         if (error.message === "Unauthorized") logout();
@@ -852,7 +899,8 @@
         subtext: $("#offSubtext").value.trim(),
         code: $("#offCode").value.trim(),
         emoji: $("#offEmoji").value.trim(),
-        color: $("#offColor").value
+        color: $("#offColor").value,
+        image: $("#offImage").value.trim()
       };
       try {
         await api("/api/admin/offers", { method: "POST", body: JSON.stringify(payload) });
@@ -860,6 +908,42 @@
         showToast("✅ Offer added!");
         loadDashboard();
       } catch (err) { showToast("❌ " + err.message); }
+    }
+
+    async function saveTestimonial(e) {
+      e.preventDefault();
+      const payload = {
+        name: $("#testiName").value.trim(),
+        rating: Number($("#testiRating").value),
+        text: $("#testiText").value.trim()
+      };
+      try {
+        await api("/api/admin/testimonials", { method: "POST", body: JSON.stringify(payload) });
+        $("#testiForm").reset();
+        showToast("✅ Testimonial added!");
+        loadDashboard();
+      } catch (err) { showToast("❌ " + err.message); }
+    }
+
+    async function deleteTestimonial(id) {
+      if (!confirm("Delete this review?")) return;
+      try {
+        await api(`/api/admin/testimonials/${id}`, { method: "DELETE" });
+        showToast("✅ Deleted");
+        loadDashboard();
+      } catch (err) { showToast("❌ " + err.message); }
+    }
+
+    function renderTestimonials() {
+      $("#testiList").innerHTML = state.testimonials.map(o => `
+        <div style="padding:20px; background:var(--bg); border-radius:16px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <strong>${esc(o.name)}</strong> <small>(${o.rating}⭐)</small><br>
+            <p style="font-size:14px; margin-top:4px; opacity:0.8;">${esc(o.text)}</p>
+          </div>
+          <button class="btn-icon btn-danger" onclick="deleteTestimonial(${o.id})">🗑</button>
+        </div>
+      `).join("");
     }
 
     async function deleteOffer(id) {
@@ -892,10 +976,11 @@
     $("#productSearch").addEventListener("input", renderProducts);
     $("#addCatBtn").addEventListener("click", addCategory);
     $("#offerForm").addEventListener("submit", saveOffer);
-    $("#addCatBtn").addEventListener("click", addCategory);
+    $("#testiForm").addEventListener("submit", saveTestimonial);
     
     $("#uploadBtn").addEventListener("click", () => $("#fileInput").click());
     $("#catUploadBtn").addEventListener("click", () => $("#catFileInput").click());
+    $("#offUploadBtn").addEventListener("click", () => $("#offFileInput").click());
     
     async function uploadHandler(file, inputId) {
       const formData = new FormData();
@@ -926,6 +1011,10 @@
 
     $("#catFileInput").addEventListener("change", (e) => {
       if (e.target.files[0]) uploadHandler(e.target.files[0], "#catIcon");
+    });
+
+    $("#offFileInput").addEventListener("change", (e) => {
+      if (e.target.files[0]) uploadHandler(e.target.files[0], "#offImage");
     });
 
     document.querySelectorAll(".nav-item[data-tab]").forEach(item => {

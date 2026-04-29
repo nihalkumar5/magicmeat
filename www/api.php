@@ -47,7 +47,16 @@ $conn->query("CREATE TABLE IF NOT EXISTS offers (
     subtext VARCHAR(255),
     code VARCHAR(50),
     color VARCHAR(20),
-    emoji VARCHAR(10)
+    emoji VARCHAR(10),
+    image VARCHAR(255)
+)");
+
+// Auto-create testimonials table
+$conn->query("CREATE TABLE IF NOT EXISTS testimonials (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
+    text TEXT,
+    rating INT DEFAULT 5
 )");
 
 // ROUTING
@@ -60,6 +69,9 @@ if ($method === 'GET' && $path === 'store') {
     
     $offerRes = $conn->query("SELECT * FROM offers");
     $offers = $offerRes->fetch_all(MYSQLI_ASSOC);
+
+    $testiRes = $conn->query("SELECT * FROM testimonials");
+    $testimonials = $testiRes->fetch_all(MYSQLI_ASSOC);
     
     // If empty, return defaults
     if (empty($categories)) {
@@ -73,7 +85,8 @@ if ($method === 'GET' && $path === 'store') {
     echo json_encode([
         "categories" => $categories, 
         "products" => $products, 
-        "featuredOffers" => $offers
+        "featuredOffers" => $offers,
+        "testimonials" => $testimonials
     ]);
 }
 
@@ -122,13 +135,15 @@ elseif (strpos($path, 'admin/') === 0) {
         $products = $conn->query("SELECT * FROM products")->fetch_all(MYSQLI_ASSOC);
         $categories = $conn->query("SELECT * FROM categories")->fetch_all(MYSQLI_ASSOC);
         $offers = $conn->query("SELECT * FROM offers")->fetch_all(MYSQLI_ASSOC);
+        $testimonials = $conn->query("SELECT * FROM testimonials")->fetch_all(MYSQLI_ASSOC);
         $rev = $conn->query("SELECT SUM(total) as r FROM orders WHERE status='delivered'")->fetch_assoc()['r'] ?? 0;
         echo json_encode([
             "stats" => ["orders" => count($orders), "products" => count($products), "revenue" => (float)$rev],
             "categories" => $categories,
             "products" => $products,
             "orders" => $orders,
-            "offers" => $offers
+            "offers" => $offers,
+            "testimonials" => $testimonials
         ]);
     }
 
@@ -143,8 +158,24 @@ elseif (strpos($path, 'admin/') === 0) {
 
     elseif ($method === 'POST' && $path === 'admin/offers') {
         $data = getBody();
-        $stmt = $conn->prepare("INSERT INTO offers (tag, title, subtext, code, color, emoji) VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssssss", $data['tag'], $data['title'], $data['subtext'], $data['code'], $data['color'], $data['emoji']);
+        $stmt = $conn->prepare("INSERT INTO offers (tag, title, subtext, code, color, emoji, image) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("sssssss", $data['tag'], $data['title'], $data['subtext'], $data['code'], $data['color'], $data['emoji'], $data['image']);
+        $stmt->execute();
+        echo json_encode(["ok" => true]);
+    }
+
+    elseif ($method === 'POST' && $path === 'admin/testimonials') {
+        $data = getBody();
+        $stmt = $conn->prepare("INSERT INTO testimonials (name, text, rating) VALUES (?, ?, ?)");
+        $stmt->bind_param("ssi", $data['name'], $data['text'], $data['rating']);
+        $stmt->execute();
+        echo json_encode(["ok" => true]);
+    }
+
+    elseif ($method === 'DELETE' && strpos($path, 'admin/testimonials/') === 0) {
+        $id = str_replace('admin/testimonials/', '', $path);
+        $stmt = $conn->prepare("DELETE FROM testimonials WHERE id=?");
+        $stmt->bind_param("i", $id);
         $stmt->execute();
         echo json_encode(["ok" => true]);
     }

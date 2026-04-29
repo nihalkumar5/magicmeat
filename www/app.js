@@ -329,18 +329,36 @@ function renderPromo() {
   if (!rail || !state.featuredOffers) return;
   
   if (state.featuredOffers.length > 0) {
-    rail.innerHTML = state.featuredOffers.map(off => `
-      <div class="offer-card ${off.color || 'orange'}">
-        <div class="offer-content">
-          <span class="offer-tag">${off.tag}</span>
-          <h3>${off.title}</h3>
-          <p>${off.subtext}</p>
-          <span class="promo-code">CODE: ${off.code}</span>
+    rail.innerHTML = state.featuredOffers.map(off => {
+      const visual = off.image 
+        ? `<img src="${off.image}" style="width:100%; height:100%; object-fit:cover; position:absolute; right:0; top:0; z-index:1; opacity:0.8;">` 
+        : `<div class="offer-emoji">${off.emoji || '🥩'}</div>`;
+        
+      return `
+        <div class="offer-card ${off.color || 'orange'}">
+          <div class="offer-content">
+            <span class="offer-tag">${off.tag}</span>
+            <h3>${off.title}</h3>
+            <p>${off.subtext}</p>
+            <span class="promo-code">CODE: ${off.code}</span>
+          </div>
+          ${visual}
         </div>
-        <div class="offer-emoji">${off.emoji || '🥩'}</div>
-      </div>
-    `).join("");
+      `;
+    }).join("");
   }
+}
+
+function renderTestimonials() {
+  const rail = $("#testimonialsRail");
+  if (!rail || !state.testimonials || state.testimonials.length === 0) return;
+  
+  rail.innerHTML = state.testimonials.map(t => `
+    <div class="testi-card">
+      <p>"${t.text}"</p>
+      <div class="testi-user">- ${t.name}</div>
+    </div>
+  `).join("");
 }
 
 function renderBundles() {
@@ -608,6 +626,7 @@ function renderAll() {
   renderBundles();
   renderGrocerySubcats();
   renderGroceryGrid();
+  renderTestimonials();
   renderCart();
   renderOrderTracking();
 }
