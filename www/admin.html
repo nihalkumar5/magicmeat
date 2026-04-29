@@ -314,7 +314,8 @@
                     <tr>
                       <th>Product</th>
                       <th>Category</th>
-                      <th>Price</th>
+                      <th>Offer Price</th>
+                      <th>MRP</th>
                       <th>Stock Level</th>
                       <th>Actions</th>
                     </tr>
@@ -341,8 +342,12 @@
                   <input type="text" id="pUnit" placeholder="500g" required>
                 </div>
                 <div class="field">
-                  <label>Price (₹)</label>
+                  <label>Offer Price (₹)</label>
                   <input type="number" id="pPrice" required>
+                </div>
+                <div class="field">
+                  <label>MRP (₹)</label>
+                  <input type="number" id="pMrp" placeholder="Optional">
                 </div>
                 <div class="field">
                   <label>Initial Stock</label>
@@ -723,6 +728,7 @@
             </td>
             <td>${esc(p.category)}</td>
             <td><strong>${fmt(p.price)}</strong></td>
+            <td><span style="text-decoration:line-through; opacity:0.5;">${p.mrp ? fmt(p.mrp) : '-'}</span></td>
             <td>
               <div style="display:flex; align-items:center;">
                 <button class="qty-btn" onclick="adjustStock('${esc(p.id)}', -1)">-</button>
@@ -811,6 +817,7 @@
       $("#pCategory").value = p.category;
       $("#pUnit").value = p.unit;
       $("#pPrice").value = p.price;
+      $("#pMrp").value = p.mrp || "";
       $("#pStock").value = p.stock;
       $("#pEmoji").value = p.emoji || "🥩";
       $("#pImage").value = p.image || "";
@@ -841,6 +848,7 @@
         category: $("#pCategory").value,
         unit: $("#pUnit").value.trim(),
         price: Number($("#pPrice").value),
+        mrp: $("#pMrp").value ? Number($("#pMrp").value) : null,
         stock: Number($("#pStock").value),
         emoji: $("#pEmoji").value.trim() || "🥩",
         image: $("#pImage").value.trim() || "",
@@ -862,8 +870,10 @@
     function resetProductForm() {
       $("#productForm").reset();
       $("#productId").value = "";
+      $("#pMrp").value = "";
       $("#formTitle").textContent = "Add Product";
       $("#saveProductBtn").textContent = "Save Product";
+      $("#imagePreview").innerHTML = '<span style="color:#999; font-size:12px;">No Preview</span>';
     }
 
     async function deleteProduct(id) {

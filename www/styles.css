@@ -431,6 +431,9 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .product-card .product-note { font-size: 13px; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 12px; }
 .product-footer { margin-top: auto; display: flex; justify-content: space-between; align-items: center; }
 .product-price { font-weight: 800; font-size: 17px; letter-spacing: -0.01em; color: var(--ink); }
+.price-stack { display: flex; align-items: baseline; gap: 6px; }
+.product-mrp { font-size: 13px; text-decoration: line-through; color: var(--muted); font-weight: 500; opacity: 0.8; }
+.discount-badge { position: absolute; top: 12px; right: 12px; background: var(--accent); color: #fff; font-size: 10px; font-weight: 800; padding: 4px 8px; border-radius: 8px; z-index: 10; box-shadow: 0 4px 10px rgba(227, 125, 86, 0.2); }
 
 /* Stepper */
 .card-stepper { display: flex; align-items: center; border-radius: 14px; overflow: hidden; background: var(--ink); height: 36px; transition: width .25s var(--ease); }

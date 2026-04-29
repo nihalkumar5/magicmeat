@@ -412,6 +412,9 @@ function cardHTML(product, delay = 0, extraClass = "") {
            <button data-cadd="${escapeHtml(product.id)}">+</button>
          </div>`;
 
+  const hasDiscount = product.mrp && product.mrp > product.price;
+  const savings = hasDiscount ? Math.round(((product.mrp - product.price) / product.mrp) * 100) : 0;
+
   return `
     <div class="product-card ${extraClass}" style="animation-delay:${delay}ms" data-product-id="${escapeHtml(product.id)}">
       <div class="product-image" style="--card-bg:${product.bg};--card-accent:${product.color}">
@@ -420,6 +423,7 @@ function cardHTML(product, delay = 0, extraClass = "") {
           : `<span class="product-emoji">${escapeHtml(product.emoji)}</span>`
         }
         <span class="unit-tag">${escapeHtml(product.unit)}</span>
+        ${hasDiscount ? `<span class="discount-badge">OFF ${savings}%</span>` : ''}
       </div>
       <h3>${escapeHtml(product.name)}</h3>
       <p class="product-note">${escapeHtml(product.note)}</p>
@@ -428,7 +432,10 @@ function cardHTML(product, delay = 0, extraClass = "") {
         <span>${Number(product.freshness || 96)}% fresh</span>
       </div>
       <div class="product-footer">
-        <span class="product-price">${fmt(product.price)}</span>
+        <div class="price-stack">
+          <span class="product-price">${fmt(product.price)}</span>
+          ${hasDiscount ? `<span class="product-mrp">${fmt(product.mrp)}</span>` : ''}
+        </div>
         ${stepper}
       </div>
     </div>
