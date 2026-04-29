@@ -203,7 +203,7 @@ elseif (strpos($path, 'admin/') === 0) {
         $fileName = time() . '_' . basename($_FILES['image']['name']);
         $targetPath = $uploadDir . $fileName;
         if (move_uploaded_file($_FILES['image']['tmp_name'], $targetPath)) {
-            echo json_encode(["url" => "api/" . $targetPath]);
+            echo json_encode(["url" => $targetPath]);
         } else {
             echo json_encode(["error" => "Upload failed"]);
         }
