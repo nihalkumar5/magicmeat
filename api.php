@@ -274,8 +274,9 @@ elseif (strpos($path, 'admin/') === 0) {
     elseif ($method === 'POST' && $path === 'admin/products') {
         $p = getBody();
         $id = "p-" . uniqid();
-        $stmt = $conn->prepare("INSERT INTO products (id, name, category, price, unit, emoji, image, stock, description, rating) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("sssssssdss", $id, $p['name'], $p['category'], $p['price'], $p['unit'], $p['emoji'], $p['image'], $p['stock'], $p['description'], $p['rating']);
+        $mrp = $p['mrp'] ?? $p['price'];
+        $stmt = $conn->prepare("INSERT INTO products (id, name, category, price, mrp, unit, emoji, image, stock, description, rating) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("sssssdsssss", $id, $p['name'], $p['category'], $p['price'], $mrp, $p['unit'], $p['emoji'], $p['image'], $p['stock'], $p['description'], $p['rating']);
         $stmt->execute();
         echo json_encode(["id" => $id]);
     }
@@ -283,8 +284,9 @@ elseif (strpos($path, 'admin/') === 0) {
     elseif ($method === 'PUT' && strpos($path, 'admin/products/') === 0) {
         $id = str_replace('admin/products/', '', $path);
         $p = getBody();
-        $stmt = $conn->prepare("UPDATE products SET name=?, category=?, price=?, unit=?, emoji=?, image=?, stock=?, description=?, rating=? WHERE id=?");
-        $stmt->bind_param("ssssssisss", $p['name'], $p['category'], $p['price'], $p['unit'], $p['emoji'], $p['image'], $p['stock'], $p['description'], $p['rating'], $id);
+        $mrp = $p['mrp'] ?? $p['price'];
+        $stmt = $conn->prepare("UPDATE products SET name=?, category=?, price=?, mrp=?, unit=?, emoji=?, image=?, stock=?, description=?, rating=? WHERE id=?");
+        $stmt->bind_param("ssssssissss", $p['name'], $p['category'], $p['price'], $mrp, $p['unit'], $p['emoji'], $p['image'], $p['stock'], $p['description'], $p['rating'], $id);
         $stmt->execute();
         echo json_encode(["ok" => true]);
     }

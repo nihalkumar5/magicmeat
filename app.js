@@ -350,6 +350,11 @@ async function loadStore() {
     } else {
       state.products = fallbackProducts.map(normalizeProduct);
     }
+    
+    // Final check - never allow empty products on home
+    if (!state.products || state.products.length === 0) {
+      state.products = fallbackProducts.map(normalizeProduct);
+    }
 
     renderAll();
     renderMarquee();
@@ -662,26 +667,26 @@ function renderFeatured() {
     if (dom.searchResults) dom.searchResults.style.display = "none";
     
     // Filter logic for home page categories
-    let featuredList = state.products || [];
+    let featuredList = (state.products && state.products.length > 0) ? state.products : fallbackProducts.map(normalizeProduct);
     const filter = state.homeFilter || "Bestsellers";
     
     if (filter === "Premium Meats") {
-      featuredList = state.products.filter(p => ["chicken", "mutton", "fish"].includes(p.category.toLowerCase()));
+      featuredList = featuredList.filter(p => ["chicken", "mutton", "fish"].includes(p.category.toLowerCase()));
     } else if (filter === "Fresh Produce") {
-      featuredList = state.products.filter(p => ["veggies", "grocery"].includes(p.category.toLowerCase()));
+      featuredList = featuredList.filter(p => ["veggies", "grocery"].includes(p.category.toLowerCase()));
     } else if (filter === "Daily Groceries") {
-      featuredList = state.products.filter(p => ["dairy", "eggs"].includes(p.category.toLowerCase()));
+      featuredList = featuredList.filter(p => ["dairy", "eggs"].includes(p.category.toLowerCase()));
     } else {
-      // Bestsellers - Relaxed filter to ensure products show
-      featuredList = state.products.filter(p => p.rating >= 4.5);
-      if (featuredList.length < 4 && state.products.length > 0) featuredList = state.products.slice(0, 8);
+      // Bestsellers
+      featuredList = featuredList.filter(p => p.rating >= 4.0);
     }
     
-    // Trending - Relaxed filter
-    let trendingList = state.products.filter(p => p.rating >= 4.7).slice(0, 8);
-    if (trendingList.length < 4 && state.products.length > 0) trendingList = state.products.slice(0, 8);
+    // Fallback if filter returns empty
+    if (featuredList.length === 0) featuredList = (state.products.length > 0 ? state.products : fallbackProducts.map(normalizeProduct)).slice(0, 8);
     
+    const trendingList = (state.products.length > 0 ? state.products : fallbackProducts.map(normalizeProduct)).slice(0, 8);
     if (dom.trendingRail) dom.trendingRail.innerHTML = renderGrid(trendingList, "trending");
+    
     if (dom.featuredGrid) dom.featuredGrid.innerHTML = renderGrid(featuredList.slice(0, 8));
     
     if (dom.seafoodGrid) dom.seafoodGrid.innerHTML = renderGrid(state.products.filter(p => p.category === "fish").slice(0, 4));
