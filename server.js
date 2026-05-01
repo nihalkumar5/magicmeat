@@ -6,7 +6,7 @@ const mysql = require("mysql2/promise");
 const formidable = require("formidable");
 require("dotenv").config();
 
-const root = path.join(__dirname, "www");
+const root = __dirname;
 const port = process.env.PORT || 3000;
 const adminToken = process.env.ADMIN_TOKEN || "magicmeat-admin-token";
 
