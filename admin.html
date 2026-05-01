@@ -685,32 +685,29 @@
         state.products = payload.products || [];
         state.offers = payload.offers || [];
         state.testimonials = payload.testimonials || [];
+        state.orders = payload.orders || [];
         
-        const newOrders = payload.orders || [];
-        if (lastOrderCount !== -1 && newOrders.length > lastOrderCount) {
-          if (soundEnabled) alertAudio.play().catch(()=>{});
-          showToast("🔔 New Order Arrived!");
-        }
-        lastOrderCount = newOrders.length;
-        state.orders = newOrders;
+        lastOrderCount = state.orders.length;
 
         renderStats(payload.stats || {});
         renderCategoryOptions();
         renderPromo();
         renderMarquee();
-        renderProducts();
-        renderCategories();
-        renderOffers();
-        renderTestimonials();
-        renderRecentOrders();
         
-        // Load settings
-        const settings = await api("/api/admin/settings");
+        // Wrap renders in try/catch to prevent cascading failures
+        try { renderProducts(); } catch(e) { console.error("Product render failed", e); }
+        try { renderCategories(); } catch(e) { console.error("Category render failed", e); }
+        try { renderOffers(); } catch(e) { console.error("Offer render failed", e); }
+        try { renderTestimonials(); } catch(e) { console.error("Testi render failed", e); }
+        try { renderRecentOrders(); } catch(e) { console.error("Order render failed", e); }
+        
+        const settings = await api("/api/admin/settings").catch(() => null);
         if (settings) {
-          $("#set-phone").value = settings.phone_number || "";
-          $("#set-marquee").value = settings.marquee_text || "";
+          if ($("#set-phone")) $("#set-phone").value = settings.phone_number || "";
+          if ($("#set-marquee")) $("#set-marquee").value = settings.marquee_text || "";
         }
       } catch (error) {
+        console.error("Dashboard load failed", error);
         if (error.message === "Unauthorized") logout();
       }
     }
