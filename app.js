@@ -400,7 +400,6 @@ async function loadOrders(phone) {
   } catch (error) {
     console.error("Orders load failed", error);
   }
-  }
 }
 
 function switchView(id) {
