@@ -81,7 +81,7 @@ $conn->query("INSERT IGNORE INTO categories (id, name, icon) VALUES ('eggs', 'Eg
 foreach ($demo_products as $p) {
     $id = strtolower(str_replace(' ', '-', $p['name'])) . '-' . rand(100, 999);
     $stmt = $conn->prepare("INSERT INTO products (id, name, category, unit, price, mrp, stock, emoji, image, rating, description, note) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("sssssddissss", $id, $p['name'], $p['category'], $p['unit'], $p['price'], $p['mrp'], $p['stock'], $p['emoji'], $p['image'], $p['rating'], $p['description'], $p['note']);
+    $stmt->bind_param("ssssddissssd", $id, $p['name'], $p['category'], $p['unit'], $p['price'], $p['mrp'], $p['stock'], $p['emoji'], $p['image'], $p['rating'], $p['description'], $p['note']);
     if ($stmt->execute()) {
         echo "Added: " . $p['name'] . " (ID: $id)\n";
     } else {

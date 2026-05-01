@@ -1,4 +1,5 @@
 const API_BASE = "api.php";
+console.log("🚀 MagicMeat v2.0.1 Loaded");
 
 const state = {
   currentView: "home",

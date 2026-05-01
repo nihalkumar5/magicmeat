@@ -23,8 +23,11 @@ if ($conn->connect_error) {
     exit;
 }
 
-$method = $_SERVER['REQUEST_METHOD'];
 $path = $_GET['path'] ?? '';
+if (!$path && basename($_SERVER['PHP_SELF']) !== 'api.php') {
+    return;
+}
+$method = $_SERVER['REQUEST_METHOD'];
 
 // Helper to get request body
 function getBody() {
