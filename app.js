@@ -583,9 +583,10 @@ function cardHTML(product, delay = 0, extraClass = "") {
     <div class="product-card ${extraClass}" style="animation-delay:${delay}ms" data-product-id="${escapeHtml(product.id)}">
       <div class="product-image">
         ${product.image 
-          ? `<img src="${escapeHtml(product.image)}" loading="lazy">` 
-          : `<span class="product-emoji">${escapeHtml(product.emoji || "🥩")}</span>`
+          ? `<img src="${escapeHtml(product.image)}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` 
+          : ''
         }
+        <span class="product-emoji" style="${product.image ? 'display:none;' : 'display:flex;'}">${escapeHtml(product.emoji || "🥩")}</span>
         <span class="unit-tag">${escapeHtml(product.unit)}</span>
       </div>
       <div class="product-content">
