@@ -8,181 +8,248 @@
   <meta name="theme-color" content="#0A0A0A"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <link rel="stylesheet" href="./styles.css?v=1.2"/>
 </head>
 <body>
 <div id="app-root">
-
-  <!-- TOP GLASS HEADER -->
+  <!-- PREMIUM TOP SECTION -->
   <header class="glass-header">
-    <div class="location-row" id="locationBtn">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-      <div class="location-text">
-        <span class="location-label">Deliver to</span>
-        <span class="location-address" id="locationAddress">Hazaribagh…</span>
+    <div class="header-left" onclick="switchView('home')" style="cursor: pointer;">
+      <div class="brand-text">
+        <span class="brand-name">MagicMeat</span>
+        <span class="brand-tagline">Farm Fresh Delivery</span>
       </div>
-      <svg class="loc-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
     </div>
-    <div class="profile-avatar" onclick="switchView('profile')">👤</div>
+    <div class="header-right">
+      <div class="header-eta-chip">
+        <span class="eta-pulse"></span>
+        <span id="etaText">31 min</span>
+      </div>
+      <div class="profile-avatar" onclick="switchView('profile')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+      </div>
+    </div>
   </header>
+
+  <!-- NEW PREMIUM MARQUEE -->
+  <div class="marquee-bar">
+    <div class="marquee-content">
+      <span>✨ Flash Sale: Get 60% OFF on your first order! Use code: <b>FRESH60</b></span>
+      <span>🚚 FREE Delivery on orders above ₹499!</span>
+      <span>🥩 Premium Fresh Meat delivered in 31 mins!</span>
+      <span>✨ Flash Sale: Get 60% OFF on your first order! Use code: <b>FRESH60</b></span>
+    </div>
+  </div>
 
   <!-- HOME VIEW -->
   <section id="home" class="view active">
-    <div class="home-greeting">
-      <h1 id="greetingText">Good evening 👋</h1>
-      <div class="delivery-eta"><span class="eta-dot"></span><span id="etaText">31 min delivery</span></div>
-    </div>
-    <div class="search-wrap">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input type="search" id="searchInput" placeholder="Search fresh vegetables, meat..."/>
-    </div>
-
-    <!-- OFFERS RAIL -->
-    <div class="offers-rail" id="offersRail">
-      <div class="offer-card orange">
-        <div class="offer-content">
-          <span class="offer-tag">Flash Sale</span>
-          <h3>Flat ₹100 OFF</h3>
-          <p>On orders above ₹599</p>
-          <span class="promo-code">CODE: FRESH100</span>
+    <div class="premium-hero-zone">
+      <div class="hero-gradient-bg"></div>
+      <div class="hero-zone-content">
+        <div class="location-row" id="locationBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span class="location-address" id="locationAddress">Hazaribagh…</span>
+          <svg class="loc-chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
-        <div class="offer-emoji">🥩</div>
-      </div>
-      <div class="offer-card blue">
-        <div class="offer-content">
-          <span class="offer-tag">Daily Deal</span>
-          <h3>Free Delivery</h3>
-          <p>No minimum order today!</p>
-          <span class="promo-code">AUTO-APPLIED</span>
+        <h1 id="greetingText" class="hero-greeting">Good morning ☀️</h1>
+        <p class="hero-subtitle">What would you like to order today?</p>
+        <div class="search-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="search" id="searchInput" placeholder="Search chicken, fish, veggies..."/>
         </div>
 
-    <!-- TRUST BADGES (Beautification) -->
-    <div class="trust-badges-rail">
-      <div class="trust-badge">
-        <div class="badge-icon">🌿</div>
-        <span>100% Farm Fresh</span>
+        <!-- HERO SLIDER (Dynamic) -->
+        <div class="hero-slider" id="heroSlider" style="margin-top: 32px; padding: 0;"></div>
+        <div class="hero-dots" id="heroDots"></div>
       </div>
-      <div class="trust-badge">
-        <div class="badge-icon">⚡</div>
-        <span>31m Express</span>
-      </div>
-      <div class="trust-badge">
-        <div class="badge-icon">🧼</div>
-        <span>Hygienic Pack</span>
-      </div>
-    </div>
-        <div class="offer-emoji">🚚</div>
-      </div>
-      <div class="offer-card green">
-        <div class="offer-content">
-          <span class="offer-tag">Bundle Pack</span>
-          <h3>Extra 20% OFF</h3>
-          <p>On curated meat bundles</p>
-          <span class="promo-code">CODE: BUNDLE20</span>
-        </div>
-        <div class="offer-emoji">📦</div>
-      </div>
-    </div>
-    
-    <div class="filter-tags">
-      <button class="f-tag active">Bestsellers</button>
-      <button class="f-tag">Premium Meats</button>
-      <button class="f-tag">Fresh Produce</button>
-      <button class="f-tag">Daily Groceries</button>
+      <div class="hero-mist"></div>
     </div>
 
-    <!-- HORIZONTAL PRODUCT RAIL (Trending) -->
-    <div class="section-label">Trending Now 🔥</div>
-    <div class="product-rail-h" id="trendingRail"></div>
+    <!-- SEARCH RESULTS VIEW -->
+    <div id="searchResults" class="product-grid" style="display:none; margin-top:20px; padding: 0 20px;"></div>
 
-    <!-- HERO BANNER -->
-    <div class="hero-banner" id="heroBanner">
-      <h2>100% Fresh & Hygienic</h2>
-      <p>Premium quality meats, fresh produce, and daily essentials delivered.</p>
-      <button class="hero-btn">Shop Now <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg></button>
-      <div class="hero-illustration">🥩</div>
+    <div id="homeContent">
+      <!-- NEW PROMO HUB (Moved Up) -->
+      <section class="promo-hub">
+        <div class="top-offers">
+          <h3>Top Offers for you</h3>
+          <div class="offers-rail-v2" id="offersRail"></div>
+        </div>
+      </section>
+
+      <div class="filter-tags" style="padding-top: 10px; margin-bottom: 0;">
+        <button class="f-tag active">Bestsellers</button>
+        <button class="f-tag">Premium Meats</button>
+        <button class="f-tag">Fresh Produce</button>
+        <button class="f-tag">Daily Groceries</button>
+      </div>
+
+      <!-- HORIZONTAL PRODUCT RAIL (Trending) -->
+      <div class="section-label" style="margin-top: 0;">Trending Now <button class="p-popular-badge" id="shuffleTrending">POPULAR</button></div>
+      <div class="product-rail-h" id="trendingRail"></div>
+
+      <!-- RESTORED CIRCULAR CATEGORIES -->
+      <section class="category-zone">
+        <div class="section-label">Explore by Category <span class="see-all" id="seeAllCats">See All</span></div>
+        <div class="quick-categories" id="quickCategories"></div>
+      </section>
+
+      <div class="section-label">Farm Fresh Picks</div>
+      <div class="product-grid" id="featuredGrid"></div>
+
+      <div class="section-label">Ocean's Finest (Seafood)</div>
+      <div class="product-grid" id="seafoodGrid"></div>
+
+      <div class="section-label">Daily Dairy & Essentials</div>
+      <div class="product-grid" id="dairyGrid"></div>
+
+      <div class="section-label">The Green Grocer</div>
+      <div class="product-grid" id="veggiesGrid"></div>
+
+      <div class="section-label" style="margin-top:16px;">Curated Bundles</div>
+      <div class="product-grid" id="bundlesGrid"></div>
+
+      <div class="section-label">Frozen Favorites</div>
+      <div class="product-grid" id="frozenGrid"></div>
+
+      <div class="section-label">Beverages & Drinks</div>
+      <div class="product-grid" id="drinksGrid"></div>
+
+      <!-- MAGIC PASS SECTION -->
+      <section class="magic-pass-zone">
+        <div class="magic-pass-card">
+          <div class="mp-content">
+            <span class="mp-badge">MEMBERSHIP</span>
+            <h2>Join MagicPass</h2>
+            <p>Get Free Delivery & Extra 10% OFF on all orders.</p>
+            <a href="#" class="mp-btn">Join Now for ₹99</a>
+          </div>
+          <div class="mp-illus">
+            <img src="./magic-pass-person.png" alt="MagicPass">
+          </div>
+        </div>
+      </section>
+
+
+      <!-- WHY MAGIC MEAT (Horizontal Scroll) -->
+      <section class="promise-zone">
+        <div class="promise-header">
+          <div class="promise-badge">Our Promise</div>
+          <h2>Why MagicMeat?</h2>
+          <p>The freshest, highest quality meat straight from the farm.</p>
+        </div>
+        <div class="promise-rail">
+          <div class="promise-card">
+            <div class="p-icon-wrap">🛡️</div>
+            <h3>100%</h3>
+            <h4>Prime Quality</h4>
+            <p>Handpicked antibiotic-free cuts.</p>
+          </div>
+          <div class="promise-card">
+            <div class="p-icon-wrap">🚀</div>
+            <h3>31 min</h3>
+            <h4>Fast Delivery</h4>
+            <p>Lightning-fast freshness to your door.</p>
+          </div>
+          <div class="promise-card">
+            <div class="p-icon-wrap">❄️</div>
+            <h3>Cold</h3>
+            <h4>Peak Fresh</h4>
+            <p>Maintained at 0-4°C always.</p>
+          </div>
+          <div class="promise-card">
+            <div class="p-icon-wrap">💊</div>
+            <h3>Pure</h3>
+            <h4>No Antibiotics</h4>
+            <p>100% residue-free meat.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- TESTIMONIALS (Premium) -->
+      <section class="testimonials-premium">
+        <div class="section-label">Loved by 500+ customer ❤️</div>
+        <div class="testi-rail-premium">
+          <div class="testi-card-premium">
+            <div class="testi-stars">★★★★★</div>
+            <p>"The best chicken I've ever ordered online. Super fresh and perfectly cut!"</p>
+            <div class="testi-author">
+              <div class="testi-avatar">NK</div>
+              <div class="testi-info">
+                <strong>Nihal Kumar</strong>
+                <span>Verified Buyer ✓</span>
+              </div>
+            </div>
+          </div>
+          <div class="testi-card-premium">
+            <div class="testi-stars">★★★★★</div>
+            <p>"Delivery in 25 minutes! The fish was incredibly fresh. Highly recommend."</p>
+            <div class="testi-author">
+              <div class="testi-avatar">PS</div>
+              <div class="testi-info">
+                <strong>Priya Sharma</strong>
+                <span>Verified Buyer ✓</span>
+              </div>
+            </div>
+          </div>
+          <div class="testi-card-premium">
+            <div class="testi-stars">★★★★★</div>
+            <p>"MagicMeat has changed the way I shop. Best quality meat in Hazaribagh!"</p>
+            <div class="testi-author">
+              <div class="testi-avatar">RK</div>
+              <div class="testi-info">
+                <strong>Rahul Kashyap</strong>
+                <span>Verified Buyer ✓</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+                <!-- YELLOW MARQUEE (Relocated Above Footer) -->
+    <div class="marquee-container">
+      <div class="marquee-content" id="marqueeText">
+        <span class="marquee-item">⚡ FLASH SALE: FLAT ₹100 OFF ON ORDERS ABOVE ₹599! ⚡</span>
+        <span class="marquee-item">🚀 25 MINUTE FRESH DELIVERY GUARANTEED! 🚀</span>
+        <span class="marquee-item">🍗 PREMIUM HYGIENIC MEATS DELIVERED TO YOUR DOORSTEP! 🍗</span>
+      </div>
     </div>
 
-    <div class="section-label">Categories <span class="see-all" id="seeAllCats" style="cursor:pointer; color:var(--ink); font-weight:700;">All</span></div>
-    <div class="quick-categories" id="quickCategories"></div>
-
-    <div class="section-label">Farm Fresh Picks</div>
-    <div class="product-grid" id="featuredGrid"></div>
-
-    <div class="section-label">Ocean's Finest (Seafood)</div>
-    <div class="product-grid" id="seafoodGrid"></div>
-
-    <div class="section-label">Daily Dairy & Essentials</div>
-    <div class="product-grid" id="dairyGrid"></div>
-
-    <div class="section-label">The Green Grocer</div>
-    <div class="product-grid" id="veggiesGrid"></div>
-
-    <!-- ADVERTISING BANNER -->
-    <div class="ad-banner magic-pass">
-      <div class="ad-content">
-        <div class="ad-tag">MEMBERSHIP</div>
-        <h2>Join MagicPass</h2>
-        <p>Get Free Delivery & Extra 10% OFF on all orders.</p>
-        <button class="ad-btn">Join Now for ₹99</button>
-      </div>
-      <div class="ad-visual">✨</div>
-    </div>
-    
-    <div class="section-label" style="margin-top:16px;">Curated Bundles</div>
-    <div class="product-grid" id="bundlesGrid"></div>
-
-    <div class="section-label">Frozen Favorites</div>
-    <div class="product-grid" id="frozenGrid"></div>
-
-    <div class="section-label">Beverages & Drinks</div>
-    <div class="product-grid" id="drinksGrid"></div>
-
-    <div class="section-label">Kitchen Pantry</div>
-    <div class="product-grid" id="pantryGrid"></div>
-
-    <!-- WHY MAGICMEAT? -->
-    <section class="why-us">
-      <div class="section-label">Why MagicMeat? ✨</div>
-      <div class="why-grid">
-        <div class="why-item">
-          <div class="why-icon">🥩</div>
-          <h3>Prime Quality</h3>
-          <p>Handpicked antibiotic-free premium cuts.</p>
+    <footer class="premium-footer">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <div>
+            <div class="footer-brand-name">MagicMeat</div>
+            <div class="footer-brand-sub">Farm Fresh Delivery</div>
+          </div>
         </div>
-        <div class="why-item">
-          <div class="why-icon">⚡</div>
-          <h3>Fast Delivery</h3>
-          <p>Freshness delivered within 31 minutes.</p>
+        <p class="footer-desc">Delivering the freshest farm-to-table meat & groceries across Hazaribagh.</p>
+        
+        <!-- 3D WHATSAPP BUTTON (Inside Footer) -->
+        <div style="margin: 20px 0;">
+          <a href="https://wa.me/919876543210" class="btn-3d-wa" id="whatsappBtn" style="text-decoration:none;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.72.937 3.659 1.432 5.631 1.433h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            WhatsApp Support
+          </a>
         </div>
-        <div class="why-item">
-          <div class="why-icon">🧼</div>
-          <h3>Hygienic</h3>
-          <p>Cleaned and vacuum-sealed for safety.</p>
+
+        <div class="footer-links">
+          <a>About Us</a>
+          <a>Privacy Policy</a>
+          <a>Terms</a>
+          <a>Contact</a>
+        </div>
+        <div class="footer-divider"></div>
+        <div class="footer-bottom">
+          <span>© 2026 MagicMeat</span>
+          <span>Made with ❤️ in India</span>
         </div>
       </div>
-    </section>
-
-    <!-- TESTIMONIALS -->
-    <section class="testimonials">
-      <div class="section-label">Customer Stories ⭐</div>
-      <div class="testi-rail" id="testimonialsRail">
-        <div class="testi-card">
-          <p>"The best chicken I've ever ordered online. Super fresh!"</p>
-          <div class="testi-user">- Nihal Kumar</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- FOOTER SECTION -->
-    <footer class="main-footer">
-      <div class="footer-logo">MagicMeat</div>
-      <p>Delivering the freshest farm-to-table meat & groceries to your doorstep.</p>
-      <div class="footer-links">
-        <span>About Us</span> • <span>Privacy</span> • <span>Contact</span>
-      </div>
-      <div class="footer-copy">© 2026 MagicMeat. All rights reserved.</div>
     </footer>
   </section>
 
@@ -219,23 +286,93 @@
     </div>
   </section>
 
-  <!-- FLOATING CALL BUTTON -->
-  <a href="tel:+919876543210" class="floating-call-btn" id="callToOrder">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-    <span>Call to Order</span>
-  </a>
+  <section id="offers" class="view">
+    <header class="cat-view-header"><h1>Exclusive Offers</h1><p class="cat-view-sub">Handpicked deals just for you</p></header>
+    <div style="padding: 0 20px;">
+       <div id="offersViewRail" class="offers-rail-v2"></div>
+       
+       <div class="section-label">Seasonal Specials</div>
+       <div id="specialOffersGrid" class="product-grid"></div>
+    </div>
+      <!-- FOOTER -->
+      <footer class="main-footer">
+        <div class="footer-logo">
+          <span class="brand-name">MagicMeat</span>
+          <p>Freshness delivered to your doorstep.</p>
+        </div>
+        <div class="footer-links">
+          <a href="#" onclick="switchView('aboutView')">About Us</a>
+          <a href="#" onclick="switchView('privacyView')">Privacy Policy</a>
+          <a href="#" onclick="switchView('termsView')">Terms & Conditions</a>
+          <a href="#" onclick="switchView('contactView')">Contact Us</a>
+        </div>
+        <div class="footer-social">
+          <span>Follow us:</span>
+          <div class="social-icons">
+            <span>FB</span> <span>IG</span> <span>TW</span>
+          </div>
+        </div>
+        <div class="footer-copy">© 2026 MagicMeat. All rights reserved.</div>
+      </footer>
+    </div>
+
+    <!-- PRODUCT DETAIL VIEW -->
+  <section id="productDetail" class="view">
+    <div class="pd-back-row">
+      <button class="pd-back-btn" id="pdBackBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <span class="pd-back-label">Product Details</span>
+      <div style="width:36px"></div>
+    </div>
+    <div id="productDetailContent"></div>
+  </section>
+
+  <!-- (Floating Call Removed) -->
+
+  <!-- SIDE CART DRAWER (Premium) -->
+  <div class="drawer-overlay" id="cartDrawerOverlay"></div>
+  <div class="cart-drawer" id="cartDrawer">
+    <div class="drawer-header">
+      <div class="drawer-title">
+        <h2>Your Basket</h2>
+        <span id="drawerCartCount">0 items</span>
+      </div>
+      <button class="drawer-close" id="cartDrawerClose">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    
+    <div class="drawer-body" id="drawerCartItems">
+      <!-- Items go here -->
+    </div>
+    
+    <div class="drawer-footer" id="drawerCartSummary">
+      <div class="summary-row"><span>Subtotal</span><span id="drawerSubtotal">₹0</span></div>
+      <div class="summary-row"><span>Delivery</span><span class="free-tag" id="drawerDeliveryFee">FREE</span></div>
+      <div class="summary-row total"><span>Total</span><span id="drawerTotal">₹0</span></div>
+      <button class="checkout-btn" id="drawerCheckoutBtn">Proceed to Checkout <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg></button>
+    </div>
+  </div>
+
+  <!-- STICKY CART BAR (REPLACED BY DRAWER) -->
+  <div id="stickyCartBar" class="sticky-cart-bar" style="display:none;"></div>
 
   <!-- TAB BAR -->
   <nav class="tab-bar">
-    <div class="tab-item active" data-view="home"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span>Home</span></div>
-    <div class="tab-item" data-view="grocery"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg><span>Menu</span></div>
-    <div class="tab-item" data-view="profile"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg><span>Profile</span></div>
+    <div class="tab-item active" data-view="home"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></div>
+    <div class="tab-item" data-view="grocery"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg></div>
+    <a href="tel:+919876543210" class="tab-item" id="footerCallBtn" style="text-decoration:none;">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79a15.15 15.15 0 0 0 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+    </a>
+    <div class="tab-item" data-view="offers" id="navOffers">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58s1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41s-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>
+    </div>
     <div class="tab-item" data-view="cart">
       <div class="tab-cart-wrap">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
         <span id="cartBadge" class="cart-badge">0</span>
       </div>
-      <span>Cart</span>
     </div>
   </nav>
 
@@ -250,13 +387,85 @@
       <form id="checkoutForm" class="checkout-form">
         <input type="text" id="customerName" class="address-input" placeholder="Full name" required/>
         <input type="tel" id="customerPhone" class="address-input" placeholder="Phone number" required/>
-        <textarea id="customerAddress" class="address-input" rows="3" placeholder="Flat, building, street, landmark" required></textarea>
+        <input type="text" id="customerHouse" class="address-input" placeholder="House/Flat No." required/>
+        <input type="text" id="customerStreet" class="address-input" placeholder="Street/Area Name" required/>
+        <input type="text" id="customerLandmark" class="address-input" placeholder="Landmark (Optional)"/>
+        <input type="text" id="customerPincode" class="address-input" placeholder="Pincode" required pattern="[0-9]{6}"/>
         <select id="customerPayment" class="address-input">
+          <option value="Razorpay">Pay via Razorpay (Cards, UPI, NetBanking)</option>
           <option value="COD">Cash on delivery</option>
           <option value="UPI on delivery">UPI on delivery</option>
         </select>
         <button class="checkout-btn" type="submit">Place Order</button>
       </form>
+    </div>
+  </div>
+
+  </div>
+
+  <!-- ABOUT US VIEW -->
+  <div class="view content-view" id="aboutView">
+    <header class="content-header">
+      <button class="back-btn" onclick="switchView('home')">←</button>
+      <h2>About Us</h2>
+    </header>
+    <div class="content-body">
+      <p>MagicMeat is Hazaribagh's premier fresh meat and grocery delivery service. Founded on the principle of "Farm to Table," we ensure that every cut of meat and every piece of produce reaches you in its peak freshness.</p>
+      <p>Our state-of-the-art cold chain logistics maintain temperatures between 0-4°C, preserving flavor and hygiene without compromise.</p>
+    </div>
+  </div>
+
+  <!-- PRIVACY POLICY VIEW -->
+  <div class="view content-view" id="privacyView">
+    <header class="content-header">
+      <button class="back-btn" onclick="switchView('home')">←</button>
+      <h2>Privacy Policy</h2>
+    </header>
+    <div class="content-body">
+      <p>Your privacy is important to us. We only collect information necessary to deliver your orders and improve our service.</p>
+      <ul>
+        <li>We do not share your phone number with third parties.</li>
+        <li>Your payment data is processed securely via Razorpay.</li>
+        <li>We use cookies to maintain your shopping cart.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- TERMS VIEW -->
+  <div class="view content-view" id="termsView">
+    <header class="content-header">
+      <button class="back-btn" onclick="switchView('home')">←</button>
+      <h2>Terms & Conditions</h2>
+    </header>
+    <div class="content-body">
+      <p>By using MagicMeat, you agree to:</p>
+      <ul>
+        <li>Provide accurate delivery information.</li>
+        <li>Accept delivery within the specified time window.</li>
+        <li>Follow our returns policy for any quality concerns.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- CONTACT US VIEW -->
+  <div class="view content-view" id="contactView">
+    <header class="content-header">
+      <button class="back-btn" onclick="switchView('home')">←</button>
+      <h2>Contact Us</h2>
+    </header>
+    <div class="content-body">
+      <div class="contact-card">
+        <h3>Support Hotline</h3>
+        <p>+91 98765 43210</p>
+      </div>
+      <div class="contact-card">
+        <h3>Email Us</h3>
+        <p>support@magicmeat.in</p>
+      </div>
+      <div class="contact-card">
+        <h3>Office</h3>
+        <p>Main Road, Hazaribagh, Jharkhand</p>
+      </div>
     </div>
   </div>
 
@@ -277,7 +486,7 @@
       <button class="detect-btn" id="detectLocationBtn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Use Current Location</button>
       <div class="location-divider">OR</div>
       <input type="text" id="manualAddress" class="address-input" placeholder="Enter flat, building, street..." />
-      <button class="primary-btn" id="saveAddressBtn" onclick="saveAddress()">Confirm Address</button>
+      <button class="primary-btn" id="saveAddressBtn">Confirm Address</button>
       <button class="text-btn" onclick="document.getElementById('locationModal').classList.remove('show')" style="width:100%; margin-top:12px;">Cancel</button>
     </div>
   </div>
@@ -285,6 +494,7 @@
   <div class="toast" id="toast"></div>
 
 </div>
+</div><!-- /app-root -->
 
 <script src="./app.js?v=1.2"></script>
 </body>

@@ -59,6 +59,16 @@ $conn->query("CREATE TABLE IF NOT EXISTS testimonials (
     rating INT DEFAULT 5
 )");
 
+// Auto-create settings table
+$conn->query("CREATE TABLE IF NOT EXISTS settings (
+    k VARCHAR(50) PRIMARY KEY,
+    v TEXT
+)");
+
+// Seed default settings if not exists
+$conn->query("INSERT IGNORE INTO settings (k, v) VALUES ('phone_number', '+919876543210')");
+$conn->query("INSERT IGNORE INTO settings (k, v) VALUES ('marquee_text', '⚡ FLASH SALE: FLAT ₹100 OFF ON ORDERS ABOVE ₹599! ⚡ | 🚀 25 MINUTE FRESH DELIVERY GUARANTEED! 🚀')");
+
 // ROUTING
 if ($method === 'GET' && $path === 'store') {
     $res = $conn->query("SELECT * FROM products");
@@ -82,12 +92,40 @@ if ($method === 'GET' && $path === 'store') {
         ];
     }
     
+    $settingRes = $conn->query("SELECT * FROM settings");
+    $settings = [];
+    while($row = $settingRes->fetch_assoc()) {
+        $settings[$row['k']] = $row['v'];
+    }
+    
     echo json_encode([
         "categories" => $categories, 
         "products" => $products, 
         "featuredOffers" => $offers,
-        "testimonials" => $testimonials
+        "testimonials" => $testimonials,
+        "settings" => $settings
     ]);
+    exit;
+}
+
+if ($method === 'POST' && $path === 'admin/settings') {
+    if (!isAdmin()) {
+        echo json_encode(["error" => "Unauthorized"]);
+        exit;
+    }
+    $body = getBody();
+    $key = $body['k'] ?? '';
+    $val = $body['v'] ?? '';
+    
+    if ($key) {
+        $stmt = $conn->prepare("INSERT INTO settings (k, v) VALUES (?, ?) ON DUPLICATE KEY UPDATE v = ?");
+        $stmt->bind_param("sss", $key, $val, $val);
+        $stmt->execute();
+        echo json_encode(["success" => true]);
+    } else {
+        echo json_encode(["error" => "Key missing"]);
+    }
+    exit;
 }
 
 elseif ($method === 'GET' && $path === 'orders') {
@@ -102,13 +140,28 @@ elseif ($method === 'GET' && $path === 'orders') {
 elseif ($method === 'POST' && $path === 'orders') {
     $data = getBody();
     $orderId = "ord-" . time();
-    $items = json_encode($data['items']);
-    $stmt = $conn->prepare("INSERT INTO orders (id, customerName, phone, address, total, items, status) VALUES (?, ?, ?, ?, ?, ?, 'placed')");
-    $stmt->bind_param("ssssss", $orderId, $data['customerName'], $data['phone'], $data['address'], $data['total'], $items);
-    if ($stmt->execute()) {
-        echo json_encode(["id" => $orderId, "total" => $data['total']]);
+    $items = is_string($data['items']) ? $data['items'] : json_encode($data['items']);
+    $pm = $data['paymentMethod'] ?? 'COD';
+    $pid = $data['paymentId'] ?? '';
+    
+    // Attempt to insert with payment fields. If columns don't exist, it will fallback.
+    $stmt = $conn->prepare("INSERT INTO orders (id, customerName, phone, address, total, items, status, paymentMethod, paymentId) VALUES (?, ?, ?, ?, ?, ?, 'placed', ?, ?)");
+    if ($stmt) {
+        $stmt->bind_param("ssssssss", $orderId, $data['customerName'], $data['phone'], $data['address'], $data['total'], $items, $pm, $pid);
+        if ($stmt->execute()) {
+            echo json_encode(["id" => $orderId, "total" => $data['total']]);
+        } else {
+            echo json_encode(["error" => "Order failed: " . $conn->error]);
+        }
     } else {
-        echo json_encode(["error" => "Order failed"]);
+        // Fallback for old schema
+        $stmt = $conn->prepare("INSERT INTO orders (id, customerName, phone, address, total, items, status) VALUES (?, ?, ?, ?, ?, ?, 'placed')");
+        $stmt->bind_param("ssssss", $orderId, $data['customerName'], $data['phone'], $data['address'], $data['total'], $items);
+        if ($stmt->execute()) {
+            echo json_encode(["id" => $orderId, "total" => $data['total']]);
+        } else {
+            echo json_encode(["error" => "Order failed"]);
+        }
     }
 }
 
@@ -160,6 +213,15 @@ elseif (strpos($path, 'admin/') === 0) {
         $data = getBody();
         $stmt = $conn->prepare("INSERT INTO offers (tag, title, subtext, code, color, emoji, image) VALUES (?, ?, ?, ?, ?, ?, ?)");
         $stmt->bind_param("sssssss", $data['tag'], $data['title'], $data['subtext'], $data['code'], $data['color'], $data['emoji'], $data['image']);
+        $stmt->execute();
+        echo json_encode(["ok" => true]);
+    }
+
+    elseif ($method === 'PUT' && strpos($path, 'admin/offers/') === 0) {
+        $id = str_replace('admin/offers/', '', $path);
+        $data = getBody();
+        $stmt = $conn->prepare("UPDATE offers SET tag=?, title=?, subtext=?, code=?, color=?, emoji=?, image=? WHERE id=?");
+        $stmt->bind_param("sssssssi", $data['tag'], $data['title'], $data['subtext'], $data['code'], $data['color'], $data['emoji'], $data['image'], $id);
         $stmt->execute();
         echo json_encode(["ok" => true]);
     }
@@ -253,6 +315,23 @@ elseif (strpos($path, 'admin/') === 0) {
         $stmt = $conn->prepare("UPDATE orders SET status=? WHERE id=?");
         $stmt->bind_param("ss", $p['status'], $id);
         $stmt->execute();
+        echo json_encode(["ok" => true]);
+    }
+
+    elseif ($method === 'GET' && $path === 'admin/settings') {
+        $res = $conn->query("SELECT * FROM settings");
+        $settings = [];
+        while($row = $res->fetch_assoc()) { $settings[$row['k']] = $row['v']; }
+        echo json_encode($settings);
+    }
+
+    elseif ($method === 'POST' && $path === 'admin/settings') {
+        $data = getBody();
+        foreach($data as $k => $v) {
+            $stmt = $conn->prepare("UPDATE settings SET v=? WHERE k=?");
+            $stmt->bind_param("ss", $v, $k);
+            $stmt->execute();
+        }
         echo json_encode(["ok" => true]);
     }
 }

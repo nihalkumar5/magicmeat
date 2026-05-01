@@ -66,3 +66,13 @@ INSERT IGNORE INTO categories (id, name, icon) VALUES
 ('veggies', 'Vegetables', '🥬'),
 ('dairy', 'Dairy', '🧈'),
 ('frozen', 'Frozen', '❄️');
+
+-- 6. Settings Table
+CREATE TABLE IF NOT EXISTS settings (
+    k VARCHAR(50) PRIMARY KEY,
+    v TEXT
+);
+
+INSERT IGNORE INTO settings (k, v) VALUES 
+('phone_number', '+919876543210'),
+('marquee_text', '⚡ FLASH SALE: FLAT ₹100 OFF ON ORDERS ABOVE ₹599! ⚡\n🚀 25 MINUTE FRESH DELIVERY GUARANTEED! 🚀\n🍗 PREMIUM HYGIENIC MEATS DELIVERED TO YOUR DOORSTEP! 🍗');

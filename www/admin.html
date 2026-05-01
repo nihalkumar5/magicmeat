@@ -230,6 +230,10 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           <span>Testimonials</span>
         </a>
+        <a href="#" class="nav-item" data-tab="settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span>Settings</span>
+        </a>
       </nav>
       <div class="sidebar-footer">
         <a href="#" class="nav-item" id="logoutBtn" style="color:var(--danger-soft);">
@@ -420,66 +424,96 @@
 
         <!-- OFFERS TAB -->
         <section class="tab-view" id="offers">
-          <div class="panel">
-            <div class="panel-header"><h2>Create New Offer Banner</h2></div>
-            <form id="offerForm" class="form-grid">
-              <div class="field">
-                <label>Tag (e.g. FLASH SALE)</label>
-                <input type="text" id="offTag" placeholder="FLASH SALE" required>
-              </div>
-              <div class="field">
-                <label>Title</label>
-                <input type="text" id="offTitle" placeholder="Flat ₹100 OFF" required>
-              </div>
-              <div class="field wide">
-                <label>Subtext</label>
-                <input type="text" id="offSubtext" placeholder="On orders above ₹599" required>
-              </div>
-              <div class="field">
-                <label>Promo Code</label>
-                <input type="text" id="offCode" placeholder="FRESH100" required>
-              </div>
-              <div class="field">
-                <label>Emoji Icon</label>
-                <input type="text" id="offEmoji" placeholder="🥩">
-              </div>
-              <div class="field">
-                <label>Card Color (Premium Shades)</label>
-                <select id="offColor">
-                  <option value="orange">Classic Orange-Red</option>
-                  <option value="blue">Electric Blue</option>
-                  <option value="green">Nature Green</option>
-                  <option value="purple">Royal Purple</option>
-                  <option value="gold">Luxury Gold</option>
-                  <option value="midnight">Deep Midnight</option>
-                  <option value="rose">Soft Rose</option>
-                </select>
-              </div>
-              <div class="field">
-                <label>Banner Image URL (Optional)</label>
-                <div class="upload-wrapper">
-                  <input type="text" id="offImage" placeholder="https://...">
-                  <button type="button" class="upload-btn-inline" id="offUploadBtn">UPLOAD</button>
+          <div style="display:grid; grid-template-columns: 1fr 320px; gap:32px; align-items: start;">
+            <div class="panel">
+              <div class="panel-header"><h2>Create & Edit Offer Banner</h2></div>
+              <form id="offerForm" class="form-grid">
+                <input type="hidden" id="offId">
+                <div class="field">
+                  <label>Tag (e.g. FLASH SALE)</label>
+                  <input type="text" id="offTag" placeholder="FLASH SALE" required>
                 </div>
-                <input type="file" id="offFileInput" style="display:none" accept="image/*">
-              </div>
-              <div class="field wide">
-                <button class="btn btn-primary" type="submit" style="width:100%; justify-content:center;">Add Offer Banner</button>
-              </div>
-            </form>
-          </div>
-          <div class="panel">
-            <div class="panel-header"><h2>Active Offers</h2></div>
-            <div class="table-wrap">
-              <table>
-                <thead><tr><th>Title</th><th>Code</th><th>Tag</th><th>Action</th></tr></thead>
-                <tbody id="offersListBody"></tbody>
-              </table>
+                <div class="field">
+                  <label>Title</label>
+                  <input type="text" id="offTitle" placeholder="Flat ₹100 OFF" required>
+                </div>
+                <div class="field wide">
+                  <label>Subtext</label>
+                  <input type="text" id="offSubtext" placeholder="On orders above ₹599" required>
+                </div>
+                <div class="field">
+                  <label>Promo Code</label>
+                  <input type="text" id="offCode" placeholder="FRESH100" required>
+                </div>
+                <div class="field">
+                  <label>Emoji Icon</label>
+                  <input type="text" id="offEmoji" placeholder="🥩">
+                </div>
+                <div class="field">
+                  <label>Background Color</label>
+                  <select id="offColor">
+                    <option value="#0F3D2E">Deep Forest Green</option>
+                    <option value="#E37D56">Burnt Orange</option>
+                    <option value="#407BA7">Electric Blue</option>
+                    <option value="#6B4E71">Royal Purple</option>
+                    <option value="#A67C00">Luxury Gold</option>
+                    <option value="#1A1A1A">Pitch Black</option>
+                    <option value="#D64545">Crimson Red</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Background Image (Optional)</label>
+                  <div class="upload-wrapper">
+                    <input type="text" id="offImage" placeholder="https://...">
+                    <button type="button" class="upload-btn-inline" id="offUploadBtn">UPLOAD</button>
+                  </div>
+                  <input type="file" id="offFileInput" style="display:none" accept="image/*">
+                </div>
+                <div class="field wide" style="display:flex; gap:16px; margin-top:12px;">
+                  <button class="btn btn-primary" type="submit" style="flex:1; justify-content:center;">Save Offer Banner</button>
+                  <button class="btn btn-ghost" type="button" onclick="$('#offerForm').reset(); $('#offId').value=''; updateOfferPreview();" style="flex:1; justify-content:center;">Reset</button>
+                </div>
+              </form>
             </div>
+
+            <div class="panel" style="position: sticky; top: 120px;">
+              <div class="panel-header"><h2>Live Preview</h2></div>
+              <div style="padding:24px; background:var(--bg);">
+                <div id="offerPreviewContainer" style="width:100%;">
+                  <!-- Preview will be injected here -->
+                  <div style="text-align:center; padding:40px; color:var(--muted); font-size:12px; font-weight:700;">Fill details to see preview</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel" style="margin-top:32px;">
+            <div class="panel-header"><h2>Active Promotional Banners</h2></div>
+            <div id="offersGrid" style="padding:28px; display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap:24px;"></div>
           </div>
         </section>
 
-        <!-- TESTIMONIALS TAB -->
+          <!-- SETTINGS SECTION -->
+          <section class="admin-section" id="section-settings" style="display:none;">
+            <div class="section-header">
+              <h2>Site Settings</h2>
+              <p>Control global announcements and platform details.</p>
+            </div>
+            
+            <div class="settings-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
+              <div class="settings-card" style="background:#fff; padding:20px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+                <label style="display:block; font-weight:700; margin-bottom:10px;">Marquee Announcement Text</label>
+                <textarea id="marqueeInput" rows="3" style="width:100%; padding:12px; border-radius:12px; border:1px solid #eee; margin-bottom:15px;" placeholder="Enter text for scrolling marquee..."></textarea>
+                <button class="btn-primary" onclick="saveSetting('marquee_text', 'marqueeInput')">Update Marquee</button>
+              </div>
+              
+              <div class="settings-card" style="background:#fff; padding:20px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+                <label style="display:block; font-weight:700; margin-bottom:10px;">Support Phone Number</label>
+                <input type="text" id="phoneInput" style="width:100%; padding:12px; border-radius:12px; border:1px solid #eee; margin-bottom:15px;" placeholder="+91...">
+                <button class="btn-primary" onclick="saveSetting('phone_number', 'phoneInput')">Update Phone</button>
+              </div>
+            </div>
+          </section>
         <section class="tab-view" id="testimonials">
           <div class="panel">
             <div class="panel-header"><h2>Add Customer Testimonial</h2></div>
@@ -506,6 +540,23 @@
             <div id="testiList" style="padding:28px; display:grid; gap:16px;"></div>
           </div>
         </section>
+      </div>
+      <!-- SETTINGS TAB -->
+      <div id="tab-settings" class="tab-content">
+        <div class="content-header">
+          <h1>Site Settings</h1>
+          <button class="btn btn-primary" onclick="saveSettings()">Save Changes</button>
+        </div>
+        <div class="card" style="max-width: 600px;">
+          <div class="form-group">
+            <label>WhatsApp / Support Number</label>
+            <input type="text" id="set-phone" placeholder="+91..." />
+          </div>
+          <div class="form-group">
+            <label>Marquee Announcement Text</label>
+            <textarea id="set-marquee" rows="4" placeholder="Enter scrolling text..."></textarea>
+          </div>
+        </div>
       </div>
     </main>
   </div>
@@ -645,15 +696,34 @@
 
         renderStats(payload.stats || {});
         renderCategoryOptions();
-        renderOrders();
+        renderPromo();
+        renderMarquee();
         renderProducts();
         renderCategories();
         renderOffers();
         renderTestimonials();
         renderRecentOrders();
+        
+        // Load settings
+        const settings = await api("/api/admin/settings");
+        if (settings) {
+          $("#set-phone").value = settings.phone_number || "";
+          $("#set-marquee").value = settings.marquee_text || "";
+        }
       } catch (error) {
         if (error.message === "Unauthorized") logout();
       }
+    }
+
+    async function saveSettings() {
+      const data = {
+        phone_number: $("#set-phone").value,
+        marquee_text: $("#set-marquee").value
+      };
+      try {
+        await api("/api/admin/settings", { method: "POST", body: data });
+        showToast("✅ Settings saved");
+      } catch (err) { showToast("❌ " + err.message); }
     }
 
     function renderStats(stats) {
@@ -692,8 +762,12 @@
 
       $("#ordersBody").innerHTML = orders.map(o => `
         <tr>
-          <td><strong>#${esc(o.id.slice(-8))}</strong><br><small>${new Date(o.createdAt).toLocaleTimeString()}</small></td>
-          <td><strong>${esc(o.customerName)}</strong><br><small>${esc(o.phone)}</small></td>
+          <td><strong>#${esc(o.id.slice(-8))}</strong><br><small>${new Date(o.createdAt).toLocaleDateString()} ${new Date(o.createdAt).toLocaleTimeString()}</small></td>
+          <td>
+            <strong>${esc(o.customerName)}</strong><br>
+            <small>${esc(o.phone)}</small><br>
+            <small style="color:var(--muted);">${esc(o.address)}</small>
+          </td>
           <td>${(o.items || []).map(i => `${i.quantity}x ${esc(i.name)}`).join(", ")}</td>
           <td>
             <select data-order-status="${esc(o.id)}" class="pill ${esc(o.status)}" style="border:none; cursor:pointer;">
@@ -903,6 +977,7 @@
 
     async function saveOffer(e) {
       e.preventDefault();
+      const id = $("#offId").value;
       const payload = {
         tag: $("#offTag").value.trim(),
         title: $("#offTitle").value.trim(),
@@ -913,11 +988,31 @@
         image: $("#offImage").value.trim()
       };
       try {
-        await api("/api/admin/offers", { method: "POST", body: JSON.stringify(payload) });
+        await api(id ? `/api/admin/offers/${id}` : "/api/admin/offers", { 
+          method: id ? "PUT" : "POST", 
+          body: JSON.stringify(payload) 
+        });
         $("#offerForm").reset();
-        showToast("✅ Offer added!");
+        $("#offId").value = "";
+        showToast(id ? "✅ Offer updated!" : "✅ Offer added!");
         loadDashboard();
       } catch (err) { showToast("❌ " + err.message); }
+    }
+
+    function editOffer(id) {
+      const o = state.offers.find(x => x.id == id);
+      if (!o) return;
+      $("#offId").value = o.id;
+      $("#offTag").value = o.tag;
+      $("#offTitle").value = o.title;
+      $("#offSubtext").value = o.subtext;
+      $("#offCode").value = o.code;
+      $("#offEmoji").value = o.emoji || "";
+      $("#offColor").value = o.color;
+      $("#offImage").value = o.image || "";
+      showToast("Editing offer...");
+      updateOfferPreview();
+      window.scrollTo({ top: $("#offerForm").offsetTop - 100, behavior: 'smooth' });
     }
 
     async function saveTestimonial(e) {
@@ -965,14 +1060,62 @@
       } catch (err) { showToast("❌ " + err.message); }
     }
 
+    function updateOfferPreview() {
+      const data = {
+        tag: $("#offTag").value || "OFFER TAG",
+        title: $("#offTitle").value || "Offer Title",
+        subtext: $("#offSubtext").value || "Description text goes here",
+        code: $("#offCode").value || "CODE100",
+        color: $("#offColor").value,
+        image: $("#offImage").value
+      };
+      
+      const container = $("#offerPreviewContainer");
+      container.innerHTML = `
+        <div style="background: ${data.color}; background-image: url('${data.image}'); background-size: cover; border-radius: 20px; padding: 20px; color: #fff; position: relative; min-height: 160px; display: flex; flex-direction: column; justify-content: center; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
+          <div style="position: relative; z-index: 2;">
+            <div style="display: inline-block; padding: 4px 10px; background: rgba(255,255,255,0.2); backdrop-filter: blur(4px); border-radius: 100px; font-size: 9px; font-weight: 800; margin-bottom: 8px; letter-spacing: 0.05em; text-transform: uppercase;">${esc(data.tag)}</div>
+            <h3 style="font-size: 20px; font-weight: 800; margin-bottom: 4px; line-height: 1.1;">${esc(data.title)}</h3>
+            <p style="font-size: 11px; opacity: 0.9; font-weight: 600; margin-bottom: 12px; max-width: 80%;">${esc(data.subtext)}</p>
+            <div style="display: inline-block; background: #fff; color: #143C31; padding: 6px 12px; border-radius: 10px; font-size: 11px; font-weight: 900; letter-spacing: 0.05em;">${esc(data.code)}</div>
+          </div>
+          <div style="position: absolute; inset: 0; background: linear-gradient(105deg, rgba(0,0,0,0.5) 0%, transparent 60%); z-index: 1;"></div>
+        </div>
+      `;
+    }
+
+    $("#offTag").addEventListener("input", updateOfferPreview);
+    $("#offTitle").addEventListener("input", updateOfferPreview);
+    $("#offSubtext").addEventListener("input", updateOfferPreview);
+    $("#offCode").addEventListener("input", updateOfferPreview);
+    $("#offColor").addEventListener("change", updateOfferPreview);
+    $("#offImage").addEventListener("input", updateOfferPreview);
+
     function renderOffers() {
-      $("#offersListBody").innerHTML = state.offers.map(o => `
-        <tr>
-          <td><strong>${esc(o.title)}</strong><br><small>${esc(o.subtext)}</small></td>
-          <td><span class="promo-code" style="background:var(--bg); padding:4px 8px; border-radius:8px; border:1px solid var(--line); font-size:12px; font-weight:800;">${esc(o.code)}</span></td>
-          <td><span class="pill" style="background:var(--bg);">${esc(o.tag)}</span></td>
-          <td><button class="btn-icon btn-danger" onclick="deleteOffer(${o.id})">🗑</button></td>
-        </tr>
+      const grid = $("#offersGrid");
+      if (!grid) return;
+      
+      grid.innerHTML = state.offers.map(o => `
+        <div class="panel" style="margin-bottom:0;">
+          <div style="padding: 16px; border-bottom: 1px solid var(--line);">
+             <div style="background: ${o.color}; background-image: url('${o.image}'); background-size: cover; border-radius: 16px; padding: 20px; color: #fff; position: relative; min-height: 140px; display: flex; flex-direction: column; justify-content: center; overflow: hidden;">
+                <div style="position: relative; z-index: 2;">
+                  <div style="display: inline-block; padding: 3px 8px; background: rgba(255,255,255,0.2); border-radius: 100px; font-size: 8px; font-weight: 800; margin-bottom: 6px; text-transform: uppercase;">${esc(o.tag)}</div>
+                  <h4 style="font-size: 16px; font-weight: 800; margin-bottom: 2px;">${esc(o.title)}</h4>
+                  <p style="font-size: 10px; opacity: 0.9; margin-bottom: 8px;">${esc(o.subtext)}</p>
+                  <span style="font-size: 10px; font-weight: 900; background: #fff; color: #143C31; padding: 4px 8px; border-radius: 8px;">${esc(o.code)}</span>
+                </div>
+                <div style="position: absolute; inset: 0; background: linear-gradient(105deg, rgba(0,0,0,0.5) 0%, transparent 60%); z-index: 1;"></div>
+             </div>
+          </div>
+          <div style="padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; background: #F9FAFB;">
+            <div style="font-size: 12px; font-weight: 700; color: var(--muted);">ID: ${o.id}</div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-ghost" style="padding: 6px 12px; font-size: 12px;" onclick="editOffer(${o.id})">Edit</button>
+              <button class="btn btn-danger" style="padding: 6px 12px; font-size: 12px;" onclick="deleteOffer(${o.id})">Delete</button>
+            </div>
+          </div>
+        </div>
       `).join("");
     }
 
