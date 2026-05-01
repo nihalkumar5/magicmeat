@@ -63,10 +63,11 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
   position: sticky;
   top: 0;
   z-index: 150;
-  padding: 16px 20px 8px; /* Added more top padding for spacing */
+  padding: env(safe-area-inset-top, 12px) 20px 8px; 
   display: flex;
   justify-content: space-between;
   align-items: center;
+  box-shadow: 0 4px 15px rgba(255, 217, 61, 0.2);
 }
 .header-left { display: flex; flex-direction: column; gap: 2px; }
 .brand-name { font-size: 16px; font-weight: 800; color: #0A0A0A; letter-spacing: -0.01em; }
@@ -1514,6 +1515,13 @@ select.address-input { appearance: none; background: #FFFFFF url('data:image/svg
 .order-timeline::before { content: ""; position: absolute; top: 7px; left: 16px; right: 16px; height: 2px; background: rgba(20,60,49,0.06); z-index: 1; }
 .t-dot { width: 16px; height: 16px; border-radius: 50%; background: #E5E1D8; z-index: 2; position: relative; border: 3px solid #FFFFFF; }
 .t-dot.active { background: var(--ink); box-shadow: 0 0 0 4px var(--green-soft); }
+
+@media(max-width: 380px) {
+  .brand-name { font-size: 24px !important; }
+  .hero-greeting { font-size: 24px; }
+  .product-grid { grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 12px 24px; }
+  .section-label { font-size: 18px; padding: 12px 16px; }
+}
 
 @media(max-width:360px){
   .track-panel { grid-template-columns: 1fr; }
