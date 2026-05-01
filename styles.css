@@ -40,18 +40,24 @@ button, input, textarea, select { font: inherit; border: none; outline: none; ba
 button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
 
 /* ── APP SHELL ── */
-#app-root { max-width: 430px; min-height: 100dvh; margin: 0 auto; background: var(--surface-warm); position: relative; overflow-x: hidden; }
-@media(min-width: 431px) {
+#app-root { 
+  width: 100%;
+  max-width: 430px; 
+  min-height: 100dvh; 
+  margin: 0 auto; 
+  background: var(--surface-warm); 
+  position: relative; 
+  overflow-x: hidden; 
+}
+
+@media(min-width: 600px) {
   body { 
     padding: 20px 0; 
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
   }
   #app-root { 
     border-radius: 40px; 
-    box-shadow: 
-      0 0 0 8px #1a1a1a,
-      0 0 0 10px #333,
-      0 25px 80px rgba(0,0,0,0.5); 
+    box-shadow: 0 0 0 8px #1a1a1a, 0 0 0 10px #333, 0 25px 80px rgba(0,0,0,0.5); 
     min-height: calc(100dvh - 40px); 
     overflow: hidden;
   }
