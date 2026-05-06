@@ -1,5 +1,6 @@
 const API_BASE = "api.php";
-console.log("🚀 MagicMeat v2.0.1 Loaded");
+const adminToken = localStorage.getItem("magicmeat_admin_token") || "magicmeat-admin-token";
+console.log("MagicMeat v2.1 loaded");
 
 const state = {
   currentView: "home",
@@ -11,6 +12,8 @@ const state = {
   featuredOffers: [],
   orders: [],
   customer: JSON.parse(localStorage.getItem("magicmeat_customer") || "{}"),
+  token: localStorage.getItem("magicmeat_token") || null,
+  user: JSON.parse(localStorage.getItem("magicmeat_user") || "null"),
   settings: { freeDelivery: 299, deliveryFee: 29 },
   eta: 31,
   previousView: "home"
@@ -90,7 +93,20 @@ const dom = {
   drawerCheckoutBtn: $("#drawerCheckoutBtn"),
   seeAllCats: $("#seeAllCats"),
   offersViewRail: $("#offersViewRail"),
-  specialOffersGrid: $("#specialOffersGrid")
+  specialOffersGrid: $("#specialOffersGrid"),
+  
+  // Auth DOM
+  authModal: $("#authModal"),
+  authClose: $("#authClose"),
+  loginForm: $("#loginForm"),
+  signupForm: $("#signupForm"),
+  authLoginPhone: $("#authLoginPhone"),
+  authLoginPassword: $("#authLoginPassword"),
+  authSignupName: $("#authSignupName"),
+  authSignupPhone: $("#authSignupPhone"),
+  authSignupPassword: $("#authSignupPassword"),
+  showSignupBtn: $("#showSignupBtn"),
+  showLoginBtn: $("#showLoginBtn")
 };
 
 
@@ -117,23 +133,23 @@ async function saveSetting(key, inputId) {
 }
 
 const categoryMeta = {
-  all: { label: "All", icon: "🛒", color: "#0A0A0A", bg: "#F2F2F7" },
-  chicken: { label: "Chicken", icon: "🍗", color: "#C62828", bg: "#FFE5E5" },
-  mutton: { label: "Mutton", icon: "🥩", color: "#8B1E1E", bg: "#FCE8E8" },
-  fish: { label: "Fish", icon: "🐟", color: "#1976D2", bg: "#E3F2FD" },
-  eggs: { label: "Eggs", icon: "🥚", color: "#B7791F", bg: "#FFF9C4" },
-  grocery: { label: "Grocery", icon: "🥦", color: "#2E7D32", bg: "#E8F5E9" },
-  fruits: { label: "Fruits", icon: "🍎", color: "#D97706", bg: "#FFF3E0" },
-  veggies: { label: "Vegetables", icon: "🥬", color: "#2E7D32", bg: "#E8F5E9" },
-  masala: { label: "Masala", icon: "🌶️", color: "#B91C1C", bg: "#FEE2E2" },
-  frozen: { label: "Frozen", icon: "❄️", color: "#2563EB", bg: "#DBEAFE" },
-  dairy: { label: "Dairy", icon: "🧈", color: "#CA8A04", bg: "#FEF3C7" }
+  all: { label: "All", icon: "ALL", color: "#1F2933", bg: "#F5F2EC" },
+  chicken: { label: "Chicken", icon: "CHK", color: "#8F3E38", bg: "#F7ECE8" },
+  mutton: { label: "Mutton", icon: "MTN", color: "#7B3833", bg: "#F4E9E6" },
+  fish: { label: "Fish", icon: "FSH", color: "#2F6473", bg: "#E8F1F2" },
+  eggs: { label: "Eggs", icon: "EGG", color: "#8A6C2C", bg: "#F8F0D8" },
+  grocery: { label: "Grocery", icon: "GRY", color: "#496D4B", bg: "#EEF3EA" },
+  fruits: { label: "Fruits", icon: "FRT", color: "#9A6040", bg: "#F7EDE4" },
+  veggies: { label: "Vegetables", icon: "VEG", color: "#496D4B", bg: "#EEF3EA" },
+  masala: { label: "Masala", icon: "MSL", color: "#8F3E38", bg: "#F7ECE8" },
+  frozen: { label: "Frozen", icon: "FRZ", color: "#486276", bg: "#E8EEF2" },
+  dairy: { label: "Dairy", icon: "DRY", color: "#8A6C2C", bg: "#F8F0D8" }
 };
 
 function renderMarquee() {
   const bar = document.querySelector('.marquee-content');
   if (!bar) return;
-  const rawText = state.settings?.marquee_text || "✨ Flash Sale: Get 60% OFF on your first order! Use code: FRESH60\n🚚 FREE Delivery on orders above ₹499!";
+  const rawText = stripPictographs(state.settings?.marquee_text) || "First order gets 60% off with FRESH60\nFree delivery above ₹499";
   
   // Replace newlines with a nice separator
   const formattedText = rawText.split('\n')
@@ -153,7 +169,7 @@ const fallbackProducts = [
     category: "chicken",
     price: 189,
     unit: "500g",
-    emoji: "🍗",
+    emoji: "CHK",
     rating: 4.8,
     freshness: 98,
     eta: 31,
@@ -166,7 +182,7 @@ const fallbackProducts = [
     category: "fish",
     price: 349,
     unit: "1kg",
-    emoji: "🐟",
+    emoji: "FSH",
     rating: 4.9,
     freshness: 99,
     eta: 35,
@@ -179,7 +195,7 @@ const fallbackProducts = [
     category: "dairy",
     price: 78,
     unit: "1L",
-    emoji: "🥛",
+    emoji: "DRY",
     rating: 4.8,
     freshness: 100,
     eta: 25,
@@ -192,7 +208,7 @@ const fallbackProducts = [
     category: "veggies",
     price: 29,
     unit: "250g",
-    emoji: "🥬",
+    emoji: "VEG",
     rating: 4.7,
     freshness: 95,
     eta: 31,
@@ -205,7 +221,7 @@ const fallbackProducts = [
     category: "frozen",
     price: 199,
     unit: "500g",
-    emoji: "🍗",
+    emoji: "CHK",
     rating: 4.8,
     freshness: 98,
     eta: 30,
@@ -218,7 +234,7 @@ const fallbackProducts = [
     category: "drinks",
     price: 99,
     unit: "1L",
-    emoji: "🍹",
+    emoji: "JCE",
     rating: 4.9,
     freshness: 99,
     eta: 25,
@@ -236,6 +252,16 @@ const escapeHtml = (value) =>
     '"': "&quot;",
     "'": "&#039;"
   })[char]);
+const stripPictographs = (value) =>
+  String(value ?? "").replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, "").replace(/\s{2,}/g, " ").trim();
+
+function renderProductMark(value, label = "MagicMeat") {
+  const safeValue = String(value || "MM");
+  if (safeValue.includes(".png") || safeValue.includes(".jpg") || safeValue.startsWith("http") || safeValue.startsWith("api/")) {
+    return `<img src="${escapeHtml(safeValue)}" alt="${escapeHtml(label)}" loading="lazy">`;
+  }
+  return `<span class="mark-text">${escapeHtml(safeValue.slice(0, 4).toUpperCase())}</span>`;
+}
 
 function getDeliveryTime(extraMins = 31) {
   const now = new Date();
@@ -271,7 +297,7 @@ function greeting() {
   if (hour >= 5 && hour < 12) return `Good morning ${sunIcon}`;
   if (hour >= 12 && hour < 17) return `Good afternoon ${cloudSunIcon}`;
   if (hour >= 17 && hour < 22) return `Good evening ${moonIcon}`;
-  return "Late night cravings? 🍗";
+  return "Late night cravings?";
 }
 
 function categoryFor(id) {
@@ -281,16 +307,20 @@ function categoryFor(id) {
     ...meta,
     id,
     label: apiCategory?.name || meta.label || id,
-    icon: apiCategory?.icon || meta.icon || "🛒"
+    icon: apiCategory?.icon || meta.icon || "ALL"
   };
 }
 
-function categoryFor(catId) {
-  return categoryMeta[catId] || categoryMeta.all;
+function cleanMark(value, fallback = "MM") {
+  const mark = String(value || "").trim();
+  if (!mark) return fallback;
+  if (mark.startsWith("http") || mark.startsWith("api/") || /\.(png|jpe?g|svg|webp)$/i.test(mark)) return mark;
+  return /[^\x00-\x7F]/.test(mark) ? fallback : mark.slice(0, 4).toUpperCase();
 }
 
 function normalizeProduct(product) {
   const meta = categoryFor(product.category);
+  const mark = cleanMark(product.emoji, meta.icon || "MM");
   return {
     ...product,
     id: String(product.id),
@@ -298,7 +328,7 @@ function normalizeProduct(product) {
     mrp: Number(product.mrp || product.price || 0),
     color: product.color || meta.color || "#0A0A0A",
     bg: product.bg || meta.bg || "#F2F2F7",
-    emoji: product.emoji || meta.icon || "🥩",
+    emoji: mark,
     stock: Number(product.stock || 50),
     rating: Number(product.rating || 5)
   };
@@ -319,6 +349,18 @@ function cartSubtotal() {
 
 function deliveryFeeFor(subtotal) {
   return subtotal >= state.settings.freeDelivery ? 0 : state.settings.deliveryFee;
+}
+
+function calculateTotal() {
+  const subtotal = cartSubtotal();
+  return subtotal + deliveryFeeFor(subtotal);
+}
+
+function updateCartUI() {
+  renderCart();
+  renderFeatured();
+  renderGroceryGrid();
+  closeCartDrawer();
 }
 
 async function api(path, options = {}) {
@@ -366,6 +408,11 @@ async function loadStore() {
       if (callBtn) callBtn.href = `tel:${state.settings.phone_number}`;
       const waBtn = document.getElementById('whatsappBtn');
       if (waBtn) waBtn.href = `https://wa.me/${state.settings.phone_number.replace(/\+/g, '')}`;
+      
+      const heroCallBtn = document.getElementById('heroCallBtn');
+      if (heroCallBtn) heroCallBtn.href = `tel:${state.settings.phone_number}`;
+      const heroWaBtn = document.getElementById('heroWaBtn');
+      if (heroWaBtn) heroWaBtn.href = `https://wa.me/${state.settings.phone_number.replace(/\+/g, '')}`;
     }
     
     if (state.customer.phone) {
@@ -386,7 +433,7 @@ async function loadOrders(phone) {
     if (dom.ordersList) {
       dom.ordersList.innerHTML = `
         <div style="text-align:center; padding:60px 20px; opacity:0.5;">
-          <div style="font-size:48px; margin-bottom:16px;">📦</div>
+          <div class="empty-mark" style="margin-bottom:16px;">ORD</div>
           <p>Login with your phone number to see your orders.</p>
           <button class="checkout-btn" style="margin-top:20px;" onclick="switchView('profile')">Login in Profile</button>
         </div>
@@ -441,7 +488,7 @@ function renderHeroSlider() {
         <button class="hero-btn">
           Shop ${cat.name} <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
-        <div class="hero-illustration">${meta.icon}</div>
+        <div class="hero-illustration">${renderProductMark(meta.icon, meta.label)}</div>
       </div>
     `;
   }).join("");
@@ -496,7 +543,7 @@ function renderOffersView() {
 
 function copyCode(code) {
   navigator.clipboard.writeText(code);
-  toast(`📋 Code ${code} copied!`);
+  toast(`Code ${code} copied`);
 }
 
 function renderPromo() {
@@ -544,7 +591,7 @@ function renderBundles() {
     price: p.price * 2.5,
     unit: 'Combo Pack',
     note: 'Perfect for family dinners',
-    emoji: '🍱'
+    emoji: 'BOX'
   }));
   
   dom.bundlesGrid.innerHTML = bundles.length
@@ -563,7 +610,7 @@ function renderQuickCats() {
         <div class="qcat-icon">
           ${meta.icon.includes('.png') || meta.icon.includes('.jpg') || meta.icon.startsWith('http') || meta.icon.startsWith('api/') 
             ? `<img src="${escapeHtml(meta.icon)}" style="width:32px; height:32px; object-fit:contain;">` 
-            : `<span>${meta.icon || "🥩"}</span>`
+            : renderProductMark(meta.icon || "MM", meta.label)
           }
         </div>
         <span class="cat-title">${escapeHtml(meta.label)}</span>
@@ -586,7 +633,7 @@ function cardHTML(product, delay = 0, extraClass = "") {
           ? `<img src="${escapeHtml(product.image)}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` 
           : ''
         }
-        <span class="product-emoji" style="${product.image ? 'display:none;' : 'display:flex;'}">${escapeHtml(product.emoji || "🥩")}</span>
+        <span class="product-emoji" style="${product.image ? 'display:none;' : 'display:flex;'}">${escapeHtml(product.emoji || "MM")}</span>
         <span class="unit-tag">${escapeHtml(product.unit)}</span>
       </div>
       <div class="product-content">
@@ -655,7 +702,7 @@ function renderFeatured() {
       dom.searchResults.innerHTML = results.length > 0
         ? results.map((p, i) => cardHTML(p, i * 50)).join("")
         : `<div style="grid-column: 1/-1; text-align:center; padding:40px; opacity:0.6;">
-            <div style="font-size:48px; margin-bottom:16px;">🔍</div>
+            <div class="empty-mark" style="margin-bottom:16px;">SRCH</div>
             <p>No products found for "${state.query}"</p>
            </div>`;
     }
@@ -707,7 +754,7 @@ function renderGrocerySubcats() {
     const meta = categoryFor(category.id);
     const iconHtml = meta.icon.startsWith('http') || meta.icon.startsWith('api/')
       ? `<img src="${escapeHtml(meta.icon)}" style="width:16px; height:16px; object-fit:contain; margin-right:8px;">`
-      : `<span class="se">${meta.icon || "🛒"}</span>`;
+      : `<span class="se">${escapeHtml(meta.icon || "ALL")}</span>`;
       
     return `
       <button class="subcat-pill ${state.grocerySub === category.id ? "active" : ""}" data-subcat="${escapeHtml(category.id)}">
@@ -750,8 +797,8 @@ function renderCart() {
   }
 
   const goalMsg = fee > 0 
-    ? `<div class="cart-goal-msg"><span class="goal-icon">🚚</span>Add ${fmt(state.settings.freeDelivery - subtotal)} more for <strong>FREE Delivery</strong></div>`
-    : `<div class="cart-goal-msg" style="background:#ECFDF5; color:#059669; border-color:rgba(5,150,105,0.2)"><span class="goal-icon">🎉</span>You've unlocked <strong>FREE Delivery!</strong></div>`;
+    ? `<div class="cart-goal-msg"><span class="goal-icon">DEL</span>Add ${fmt(state.settings.freeDelivery - subtotal)} more for <strong>free delivery</strong></div>`
+    : `<div class="cart-goal-msg is-unlocked"><span class="goal-icon">OK</span>Free delivery unlocked</div>`;
 
   if (!items.length) {
     dom.cartItems.innerHTML = `<div class="cart-empty"><h3>Your basket is empty</h3><p>Add fresh picks from the menu.</p></div>`;
@@ -854,6 +901,16 @@ function orderCard(order) {
     cancelled: "Cancelled"
   };
   const timeline = order.timeline || [];
+  const items = Array.isArray(order.items)
+    ? order.items
+    : (() => {
+        try {
+          const parsed = JSON.parse(order.items || "[]");
+          return Array.isArray(parsed) ? parsed : [];
+        } catch {
+          return [];
+        }
+      })();
   return `
     <div class="order-card">
       <div class="order-header">
@@ -861,9 +918,9 @@ function orderCard(order) {
         <span class="order-status ${escapeHtml(order.status)}">${escapeHtml(statusLabels[order.status] || order.status)}</span>
       </div>
       <div class="order-body">
-        ${(order.items || []).map((item) => `
+        ${items.map((item) => `
           <div class="order-item-row">
-            <span>${item.quantity}x ${escapeHtml(item.name)}</span>
+            <span>${item.quantity}x ${escapeHtml(item.name || item.productId || "Item")}</span>
             <span>${fmt(item.quantity * item.unitPrice)}</span>
           </div>
         `).join("")}
@@ -927,7 +984,7 @@ function renderProductDetail(product) {
 
   dom.pdContent.innerHTML = `
     <div class="pd-hero" style="--pd-bg:${product.bg};--pd-accent:${product.color}">
-      ${product.image
+        ${product.image
         ? `<img src="${escapeHtml(product.image)}" class="pd-hero-img" alt="${escapeHtml(product.name)}">`
         : `<span class="pd-hero-emoji">${escapeHtml(product.emoji)}</span>`
       }
@@ -948,35 +1005,35 @@ function renderProductDetail(product) {
           ${'★'.repeat(Math.floor(product.rating || 4.7))}${'☆'.repeat(5 - Math.floor(product.rating || 4.7))}
         </div>
         <span class="pd-rating-num">${Number(product.rating || 4.7).toFixed(1)}</span>
-        <span class="pd-freshness">🌿 ${Number(product.freshness || 96)}% Fresh</span>
+        <span class="pd-freshness">${Number(product.freshness || 96)}% fresh</span>
       </div>
 
       <p class="pd-description">${escapeHtml(product.note || product.description || 'Premium quality product, freshly sourced and hygienically packed for your convenience.')}</p>
 
       <div class="pd-highlights">
         <div class="pd-hl-item">
-          <div class="pd-hl-icon">⚡</div>
+          <div class="pd-hl-icon">ETA</div>
           <div class="pd-hl-text">
             <strong>Express Delivery</strong>
             <span>Within ${product.eta || state.eta} mins</span>
           </div>
         </div>
         <div class="pd-hl-item">
-          <div class="pd-hl-icon">🧊</div>
+          <div class="pd-hl-icon">0-4</div>
           <div class="pd-hl-text">
             <strong>Cold Chain</strong>
             <span>Temperature controlled</span>
           </div>
         </div>
         <div class="pd-hl-item">
-          <div class="pd-hl-icon">🛡️</div>
+          <div class="pd-hl-icon">QA</div>
           <div class="pd-hl-text">
             <strong>Quality Assured</strong>
             <span>100% hygiene certified</span>
           </div>
         </div>
         <div class="pd-hl-item">
-          <div class="pd-hl-icon">🔄</div>
+          <div class="pd-hl-icon">RET</div>
           <div class="pd-hl-text">
             <strong>Easy Returns</strong>
             <span>No questions asked</span>
@@ -984,7 +1041,7 @@ function renderProductDetail(product) {
         </div>
       </div>
 
-      ${product.stock > 0 && product.stock <= 5 ? `<div class="pd-low-stock">🔥 Only ${product.stock} left in stock — order soon!</div>` : ''}
+      ${product.stock > 0 && product.stock <= 5 ? `<div class="pd-low-stock">Only ${product.stock} left in stock. Order soon.</div>` : ''}
       ${product.stock <= 0 ? `<div class="pd-out-of-stock">Currently out of stock</div>` : ''}
 
       ${related.length > 0 ? `
@@ -1102,25 +1159,58 @@ async function placeOrder(event) {
   localStorage.setItem("magicmeat_customer", JSON.stringify(state.customer));
 
   if (paymentMethod === "Razorpay") {
-    const options = {
-      key: "rzp_test_YOUR_KEY_HERE", // User to replace with actual key
-      amount: Math.round(total * 100),
-      currency: "INR",
-      name: "MagicMeat",
-      description: "Order Payment",
-      handler: async function (response) {
-        orderPayload.paymentId = response.razorpay_payment_id;
-        submitOrder(orderPayload);
-      },
-      prefill: { name, contact: phone },
-      theme: { color: "#0F3D2E" }
-    };
-    const rzp = new Razorpay(options);
-    rzp.open();
+    try {
+      const rzpOrder = await api("payment/create-order", {
+        method: "POST",
+        body: JSON.stringify({ amount: Math.round(total * 100) })
+      });
+      
+      if (!rzpOrder || !rzpOrder.order_id) {
+        showToast("Razorpay configuration missing on server.");
+        return;
+      }
+
+      const options = {
+        key: rzpOrder.key,
+        amount: Math.round(total * 100),
+        currency: "INR",
+        name: "MagicMeat",
+        description: "Order Payment",
+        order_id: rzpOrder.order_id,
+        handler: async function (response) {
+          try {
+            const verify = await api("payment/verify", {
+              method: "POST",
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature
+              })
+            });
+            if (verify && verify.success) {
+              orderPayload.paymentId = response.razorpay_payment_id;
+              submitOrder(orderPayload);
+            } else {
+              showToast("Payment verification failed.");
+            }
+          } catch(err) {
+            showToast("Error verifying payment.");
+          }
+        },
+        prefill: { name, contact: phone },
+        theme: { color: "#4A1F24" }
+      };
+      const rzp = new Razorpay(options);
+      rzp.on('payment.failed', function (response){
+        showToast("Payment Failed: " + response.error.description);
+      });
+      rzp.open();
+    } catch (e) {
+      showToast("Error initializing payment");
+    }
   } else {
     submitOrder(orderPayload);
   }
-}
 
 async function submitOrder(payload) {
   try {
@@ -1159,7 +1249,7 @@ function saveAddress() {
   if (dom.locAddress) dom.locAddress.textContent = address;
   if (dom.locModal) dom.locModal.classList.remove("show");
   
-  toast("✅ Address updated successfully");
+  toast("Address updated");
   console.log("Address saved:", address);
 }
 
@@ -1171,12 +1261,82 @@ if (dom.cartDrawerClose) dom.cartDrawerClose.addEventListener("click", closeCart
 if (dom.cartDrawerOverlay) dom.cartDrawerOverlay.addEventListener("click", closeCartDrawer);
 if (dom.drawerCheckoutBtn) dom.drawerCheckoutBtn.addEventListener("click", () => {
   closeCartDrawer();
-  openCheckout();
+  if (!state.token) {
+    dom.authModal.classList.add("show");
+  } else {
+    openCheckout();
+  }
 });
 
-if (dom.checkoutBtn) dom.checkoutBtn.addEventListener("click", openCheckout);
+if (dom.checkoutBtn) dom.checkoutBtn.addEventListener("click", () => {
+  if (!state.token) {
+    // Show auth modal before checkout
+    dom.authModal.classList.add("show");
+  } else {
+    openCheckout();
+  }
+});
 if (dom.checkoutClose) dom.checkoutClose.addEventListener("click", () => dom.checkoutModal.classList.remove("show"));
 if (dom.checkoutForm) dom.checkoutForm.addEventListener("submit", placeOrder);
+
+// Auth Event Listeners
+if (dom.authClose) dom.authClose.addEventListener("click", () => dom.authModal.classList.remove("show"));
+if (dom.showSignupBtn) dom.showSignupBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  dom.loginForm.style.display = "none";
+  dom.signupForm.style.display = "block";
+  dom.authModal.querySelector("#authModalTitle").textContent = "Create Account";
+  dom.authModal.querySelector("#authModalDesc").textContent = "Join MagicMeat for faster checkout.";
+});
+if (dom.showLoginBtn) dom.showLoginBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  dom.signupForm.style.display = "none";
+  dom.loginForm.style.display = "block";
+  dom.authModal.querySelector("#authModalTitle").textContent = "Login / Sign Up";
+  dom.authModal.querySelector("#authModalDesc").textContent = "Enter your details to manage orders and checkout faster.";
+});
+
+if (dom.loginForm) dom.loginForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  try {
+    const res = await api("auth/login", {
+      method: "POST",
+      body: JSON.stringify({ phone: dom.authLoginPhone.value, password: dom.authLoginPassword.value })
+    });
+    if (res.token) {
+      state.token = res.token;
+      state.user = res.user;
+      localStorage.setItem("magicmeat_token", res.token);
+      localStorage.setItem("magicmeat_user", JSON.stringify(res.user));
+      dom.authModal.classList.remove("show");
+      showToast("Logged in successfully!");
+      if (state.cart.size > 0) openCheckout(); // Continue checkout if cart has items
+    }
+  } catch(err) {
+    showToast(err.message || "Login failed");
+  }
+});
+
+if (dom.signupForm) dom.signupForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  try {
+    const res = await api("auth/register", {
+      method: "POST",
+      body: JSON.stringify({ name: dom.authSignupName.value, phone: dom.authSignupPhone.value, password: dom.authSignupPassword.value })
+    });
+    if (res.token) {
+      state.token = res.token;
+      state.user = res.user;
+      localStorage.setItem("magicmeat_token", res.token);
+      localStorage.setItem("magicmeat_user", JSON.stringify(res.user));
+      dom.authModal.classList.remove("show");
+      showToast("Account created successfully!");
+      if (state.cart.size > 0) openCheckout();
+    }
+  } catch(err) {
+    showToast(err.message || "Signup failed");
+  }
+});
 
 // Tab navigation handled via dom.tabs loop above
 if (dom.modalClose) dom.modalClose.addEventListener("click", () => {
@@ -1194,7 +1354,7 @@ if (dom.filterTags) dom.filterTags.forEach(tag => {
     
     state.homeFilter = tag.textContent.trim();
     state.query = ""; // Reset search query when clicking home filters
-    if (dom.searchInp) dom.searchInp.value = "";
+    if (dom.searchInput) dom.searchInput.value = "";
     
     renderFeatured();
     // Scroll home to top to see results
@@ -1373,7 +1533,7 @@ if (!state.customer.address) {
           state.customer.address = fullAddr;
           if (dom.locAddress) dom.locAddress.textContent = fullAddr;
           if (dom.manualAddr) dom.manualAddr.value = fullAddr;
-          toast(`📍 Located: ${realAddress}`);
+          toast(`Located: ${realAddress}`);
         } catch (e) {
           const fallback = "Hazaribagh, Jharkhand";
           state.customer.address = fallback;

@@ -70,7 +70,18 @@ $conn->query("CREATE TABLE IF NOT EXISTS settings (
 
 // Seed default settings if not exists
 $conn->query("INSERT IGNORE INTO settings (k, v) VALUES ('phone_number', '+919876543210')");
-$conn->query("INSERT IGNORE INTO settings (k, v) VALUES ('marquee_text', '⚡ FLASH SALE: FLAT ₹100 OFF ON ORDERS ABOVE ₹599! ⚡ | 🚀 25 MINUTE FRESH DELIVERY GUARANTEED! 🚀')");
+$conn->query("INSERT IGNORE INTO settings (k, v) VALUES ('marquee_text', 'Flat ₹100 off above ₹599 | Fresh delivery in 25-31 minutes')");
+$conn->query("INSERT IGNORE INTO settings (k, v) VALUES ('rzp_key_id', '')");
+$conn->query("INSERT IGNORE INTO settings (k, v) VALUES ('rzp_key_secret', '')");
+
+// Auto-create users table
+$conn->query("CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255),
+    phone VARCHAR(20) UNIQUE,
+    password_hash VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)");
 
 // ROUTING
 if ($method === 'GET' && $path === 'store') {
@@ -111,25 +122,6 @@ if ($method === 'GET' && $path === 'store') {
     exit;
 }
 
-if ($method === 'POST' && $path === 'admin/settings') {
-    if (!isAdmin()) {
-        echo json_encode(["error" => "Unauthorized"]);
-        exit;
-    }
-    $body = getBody();
-    $key = $body['k'] ?? '';
-    $val = $body['v'] ?? '';
-    
-    if ($key) {
-        $stmt = $conn->prepare("INSERT INTO settings (k, v) VALUES (?, ?) ON DUPLICATE KEY UPDATE v = ?");
-        $stmt->bind_param("sss", $key, $val, $val);
-        $stmt->execute();
-        echo json_encode(["success" => true]);
-    } else {
-        echo json_encode(["error" => "Key missing"]);
-    }
-    exit;
-}
 
 elseif ($method === 'GET' && $path === 'orders') {
     $phone = $_GET['phone'] ?? '';
@@ -165,6 +157,94 @@ elseif ($method === 'POST' && $path === 'orders') {
         } else {
             echo json_encode(["error" => "Order failed"]);
         }
+    }
+}
+
+elseif ($method === 'POST' && $path === 'auth/register') {
+    $data = getBody();
+    $name = $data['name'] ?? '';
+    $phone = $data['phone'] ?? '';
+    $pass = $data['password'] ?? '';
+    if (!$name || !$phone || !$pass) {
+        http_response_code(400); echo json_encode(["error" => "Missing fields"]); exit;
+    }
+    $hash = password_hash($pass, PASSWORD_DEFAULT);
+    $stmt = $conn->prepare("INSERT INTO users (name, phone, password_hash) VALUES (?, ?, ?)");
+    $stmt->bind_param("sss", $name, $phone, $hash);
+    if ($stmt->execute()) {
+        $token = base64_encode($stmt->insert_id . ":" . time());
+        echo json_encode(["token" => $token, "user" => ["id" => $stmt->insert_id, "name" => $name, "phone" => $phone]]);
+    } else {
+        http_response_code(400); echo json_encode(["error" => "Phone number already registered"]);
+    }
+}
+
+elseif ($method === 'POST' && $path === 'auth/login') {
+    $data = getBody();
+    $phone = $data['phone'] ?? '';
+    $pass = $data['password'] ?? '';
+    $stmt = $conn->prepare("SELECT * FROM users WHERE phone = ?");
+    $stmt->bind_param("s", $phone);
+    $stmt->execute();
+    $user = $stmt->get_result()->fetch_assoc();
+    if ($user && password_verify($pass, $user['password_hash'])) {
+        $token = base64_encode($user['id'] . ":" . time());
+        echo json_encode(["token" => $token, "user" => ["id" => $user['id'], "name" => $user['name'], "phone" => $user['phone']]]);
+    } else {
+        http_response_code(401); echo json_encode(["error" => "Invalid phone or password"]);
+    }
+}
+
+elseif ($method === 'POST' && $path === 'payment/create-order') {
+    $data = getBody();
+    $amount = intval($data['amount']);
+    
+    $res = $conn->query("SELECT * FROM settings WHERE k IN ('rzp_key_id', 'rzp_key_secret')");
+    $rzp = [];
+    while($row = $res->fetch_assoc()) { $rzp[$row['k']] = $row['v']; }
+    
+    if (empty($rzp['rzp_key_id']) || empty($rzp['rzp_key_secret'])) {
+        http_response_code(500); echo json_encode(["error" => "Razorpay not configured"]); exit;
+    }
+    
+    $ch = curl_init('https://api.razorpay.com/v1/orders');
+    curl_setopt($ch, CURLOPT_USERPWD, $rzp['rzp_key_id'] . ':' . $rzp['rzp_key_secret']);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
+        "amount" => $amount,
+        "currency" => "INR",
+        "receipt" => "rcpt_" . time()
+    ]));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    
+    $response = curl_exec($ch);
+    $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    
+    if ($httpcode == 200) {
+        $order = json_decode($response, true);
+        echo json_encode(["order_id" => $order['id'], "key" => $rzp['rzp_key_id']]);
+    } else {
+        http_response_code(500); echo json_encode(["error" => "Failed to create Razorpay order"]);
+    }
+}
+
+elseif ($method === 'POST' && $path === 'payment/verify') {
+    $data = getBody();
+    $razorpay_order_id = $data['razorpay_order_id'];
+    $razorpay_payment_id = $data['razorpay_payment_id'];
+    $razorpay_signature = $data['razorpay_signature'];
+    
+    $res = $conn->query("SELECT v FROM settings WHERE k = 'rzp_key_secret'");
+    $secret = $res->fetch_assoc()['v'] ?? '';
+    
+    $generated_signature = hash_hmac('sha256', $razorpay_order_id . "|" . $razorpay_payment_id, $secret);
+    
+    if ($generated_signature === $razorpay_signature) {
+        echo json_encode(["success" => true]);
+    } else {
+        http_response_code(400); echo json_encode(["error" => "Signature verification failed"]);
     }
 }
 
@@ -279,7 +359,7 @@ elseif (strpos($path, 'admin/') === 0) {
         $id = "p-" . uniqid();
         $mrp = $p['mrp'] ?? $p['price'];
         $stmt = $conn->prepare("INSERT INTO products (id, name, category, price, mrp, unit, emoji, image, stock, description, rating) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("sssssdsssss", $id, $p['name'], $p['category'], $p['price'], $mrp, $p['unit'], $p['emoji'], $p['image'], $p['stock'], $p['description'], $p['rating']);
+        $stmt->bind_param("ssssssssiss", $id, $p['name'], $p['category'], $p['price'], $mrp, $p['unit'], $p['emoji'], $p['image'], $p['stock'], $p['description'], $p['rating']);
         $stmt->execute();
         echo json_encode(["id" => $id]);
     }
@@ -289,7 +369,7 @@ elseif (strpos($path, 'admin/') === 0) {
         $p = getBody();
         $mrp = $p['mrp'] ?? $p['price'];
         $stmt = $conn->prepare("UPDATE products SET name=?, category=?, price=?, mrp=?, unit=?, emoji=?, image=?, stock=?, description=?, rating=? WHERE id=?");
-        $stmt->bind_param("ssssssissss", $p['name'], $p['category'], $p['price'], $mrp, $p['unit'], $p['emoji'], $p['image'], $p['stock'], $p['description'], $p['rating'], $id);
+        $stmt->bind_param("sssssssiss s", $p['name'], $p['category'], $p['price'], $mrp, $p['unit'], $p['emoji'], $p['image'], $p['stock'], $p['description'], $p['rating'], $id);
         $stmt->execute();
         echo json_encode(["ok" => true]);
     }
