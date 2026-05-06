@@ -464,7 +464,7 @@ async function api(path, options = {}) {
 
 async function loadStore() {
   try {
-    const res = await fetch(`${API_BASE}?path=store`);
+    const res = await fetch(`${API_BASE}?path=store&_=${Date.now()}`);
     const store = await res.json();
     
     state.categories = store.categories || [];
