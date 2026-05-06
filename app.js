@@ -290,14 +290,99 @@ function toast(message) {
 
 function greeting() {
   const hour = new Date().getHours();
+  // Morning: 5 AM - 12 PM
+  // Afternoon: 12 PM - 5 PM
+  // Evening: 5 PM - 9 PM
+  // Night: 9 PM - 5 AM
+  
   const sunIcon = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FFD93D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:text-bottom; margin-left:8px;"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y1="4.22"></line></svg>`;
   const moonIcon = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#E5E7EB" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:text-bottom; margin-left:8px;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
   const cloudSunIcon = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FFD93D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:text-bottom; margin-left:8px;"><path d="M17 18a5 5 0 0 0-10 0"></path><path d="M12 2v1"></path><path x1="4.93" y1="4.93" x2="5.64" y2="5.64"></path><path x1="19.07" y1="4.93" x2="18.36" y2="5.64"></path><path d="M2 12h1"></path><path d="M22 12h1"></path><path x1="4.93" y1="19.07" x2="5.64" y2="18.36"></path><path x1="19.07" y1="19.07" x2="18.36" y2="18.36"></path></svg>`;
+  const starIcon = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FFD93D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:text-bottom; margin-left:8px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
 
   if (hour >= 5 && hour < 12) return `Good morning ${sunIcon}`;
   if (hour >= 12 && hour < 17) return `Good afternoon ${cloudSunIcon}`;
-  if (hour >= 17 && hour < 22) return `Good evening ${moonIcon}`;
-  return "Late night cravings?";
+  if (hour >= 17 && hour < 21) return `Good evening ${moonIcon}`;
+  return `Late night cravings? ${starIcon}`;
+}
+
+function updateTimeAesthetic() {
+  const hour = new Date().getHours();
+  const root = document.documentElement;
+  const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+  
+  let theme = {
+    ink: "#0F3D2E",
+    inkSoft: "#145A3F",
+    surfaceWarm: "#FFFDF0",
+    accent: "#FFD93D",
+    bodyBg: "#E5E1D8",
+    headerBg: "#FFD93D",
+    paper: "#FFFFFF",
+    muted: "#6B8C7E",
+    glass: "rgba(255, 255, 255, 0.8)"
+  };
+
+  if (hour >= 5 && hour < 11) {
+    // Morning: Sunrise Gold (5 AM - 11 AM)
+    theme.ink = "#1A2E05";
+    theme.surfaceWarm = "#FFFDF5";
+    theme.accent = "#FFD93D";
+    theme.bodyBg = "linear-gradient(135deg, #FFF9E1 0%, #F3F4F6 100%)";
+    theme.headerBg = "#FFD93D";
+    theme.glass = "rgba(255, 255, 255, 0.7)";
+  } else if (hour >= 11 && hour < 16) {
+    // Afternoon: Clean Daylight (11 AM - 4 PM)
+    theme.ink = "#0F172A";
+    theme.surfaceWarm = "#FFFFFF";
+    theme.accent = "#FACC15";
+    theme.bodyBg = "#F1F5F9";
+    theme.headerBg = "#FACC15";
+    theme.glass = "rgba(255, 255, 255, 0.85)";
+  } else if (hour >= 16 && hour < 20) {
+    // Evening: Sunset Warmth (4 PM - 8 PM)
+    theme.ink = "#4C0519";
+    theme.inkSoft = "#881337";
+    theme.surfaceWarm = "#FFF1F2";
+    theme.accent = "#FB7185";
+    theme.bodyBg = "linear-gradient(135deg, #FFE4E6 0%, #F3F4F6 100%)";
+    theme.headerBg = "#FB7185";
+    theme.glass = "rgba(255, 241, 242, 0.8)";
+  } else {
+    // Night: Midnight Luxury (8 PM - 5 AM)
+    theme.ink = "#F8FAFC";
+    theme.inkSoft = "#CBD5E1";
+    theme.surfaceWarm = "#020617";
+    theme.accent = "#EAB308";
+    theme.bodyBg = "linear-gradient(135deg, #020617 0%, #0F172A 100%)";
+    theme.headerBg = "#1E293B";
+    theme.paper = "#1E293B";
+    theme.muted = "#94A3B8";
+    theme.glass = "rgba(15, 23, 42, 0.8)";
+  }
+
+  root.style.setProperty("--ink", theme.ink);
+  root.style.setProperty("--ink-soft", theme.inkSoft);
+  root.style.setProperty("--surface-warm", theme.surfaceWarm);
+  root.style.setProperty("--accent", theme.accent);
+  root.style.setProperty("--paper", theme.paper);
+  root.style.setProperty("--muted", theme.muted);
+  
+  document.body.style.background = theme.bodyBg;
+  const header = document.querySelector(".glass-header");
+  if (header) {
+    header.style.background = theme.headerBg;
+    header.style.backdropFilter = "blur(12px)";
+    header.style.webkitBackdropFilter = "blur(12px)";
+  }
+  
+  if (themeColorMeta) themeColorMeta.setAttribute("content", theme.headerBg);
+  
+  if (dom.greetText) dom.greetText.innerHTML = greeting();
+  
+  // Update marquee if exists
+  const marquee = document.querySelector(".marquee-bar");
+  if (marquee) marquee.style.background = theme.headerBg;
 }
 
 function categoryFor(id) {
@@ -1507,7 +1592,9 @@ if (dom.pdBackBtn) dom.pdBackBtn.addEventListener("click", () => {
   switchView(state.previousView || "home");
 });
 
-// Auto-slide logic removed as per user request
+// Auto-update time aesthetic
+updateTimeAesthetic();
+setInterval(updateTimeAesthetic, 60000);
 function initAutoSlider() {
   // Disabled
 }
