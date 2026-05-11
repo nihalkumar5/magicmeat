@@ -1,9 +1,5 @@
 {
-  "version": 2,
-  "routes": [
-    { "src": "/admin", "dest": "/public/admin.html" },
-    { "src": "/uploads/(.*)", "dest": "/public/uploads/$1" },
-    { "src": "/(.*\\.(js|css|png|jpg|jpeg|svg|ico|webp))", "dest": "/public/$1" },
-    { "src": "/", "dest": "/public/index.html" }
+  "rewrites": [
+    { "source": "/admin", "destination": "/admin.html" }
   ]
 }
