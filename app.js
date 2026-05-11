@@ -767,6 +767,9 @@ function cardHTML(product, delay = 0, extraClass = "") {
         </div>
         <div class="product-footer">
           <div class="price-stack">
+            ${product.mrp && product.mrp > product.price 
+              ? `<span class="price-mrp">₹${product.mrp}</span>` 
+              : ''}
             <span class="price-curr">₹</span>
             <span class="price-val">${product.price}</span>
           </div>
