@@ -52,11 +52,15 @@ module.exports = async (req, res) => {
   const pool = getPool();
   await ensureTables(pool);
 
-  // Build route from path segments
-  const pathSegments = req.query.path || [];
-  const route = Array.isArray(pathSegments) ? pathSegments.join('/') : pathSegments;
+  // Build route - parse from URL directly (most reliable on Vercel)
+  const parsedUrl = new URL(req.url, `https://${req.headers.host || 'localhost'}`);
+  const pathname = parsedUrl.pathname;
+  // Remove /api/ prefix to get the route
+  const route = pathname.replace(/^\/api\//, '').replace(/\/$/, '');
   const method = req.method;
   const body = req.body || {};
+  
+  console.log(`[API] ${method} ${pathname} → route: "${route}"`);
 
   try {
     // ═══════════════════════════════════════
@@ -75,7 +79,7 @@ module.exports = async (req, res) => {
 
     // GET /api/orders?phone=xxx
     if (method === 'GET' && route === 'orders') {
-      const phone = req.query.phone || '';
+      const phone = parsedUrl.searchParams.get('phone') || req.query?.phone || '';
       if (!phone) return res.json([]);
       const [orders] = await pool.query('SELECT * FROM orders WHERE phone = ? ORDER BY createdAt DESC', [phone]);
       return res.json(orders);
