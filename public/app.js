@@ -1052,49 +1052,121 @@ function renderOrderTracking() {
 }
 
 function orderCard(order) {
-  const statusLabels = {
-    placed: "Placed",
-    packing: "Packing",
-    out_for_delivery: "Out for delivery",
-    delivered: "Delivered",
-    cancelled: "Cancelled"
+  const statusConfig = {
+    placed: { label: "Order Placed", icon: "📋", color: "#F97316", bg: "#FFF7ED" },
+    packing: { label: "Packing", icon: "📦", color: "#3B82F6", bg: "#EFF6FF" },
+    out_for_delivery: { label: "Out for Delivery", icon: "🛵", color: "#8B5CF6", bg: "#F5F3FF" },
+    delivered: { label: "Delivered", icon: "✅", color: "#059669", bg: "#ECFDF5" },
+    cancelled: { label: "Cancelled", icon: "❌", color: "#DC2626", bg: "#FEF2F2" }
   };
-  const timeline = order.timeline || [];
+  const config = statusConfig[order.status] || statusConfig.placed;
+  
   const items = Array.isArray(order.items)
     ? order.items
-    : (() => {
-        try {
-          const parsed = JSON.parse(order.items || "[]");
-          return Array.isArray(parsed) ? parsed : [];
-        } catch {
-          return [];
-        }
-      })();
-  return `
-    <div class="order-card">
-      <div class="order-header">
-        <span class="order-id">#${escapeHtml(order.id.slice(-8))}</span>
-        <span class="order-status ${escapeHtml(order.status)}">${escapeHtml(statusLabels[order.status] || order.status)}</span>
+    : (() => { try { return JSON.parse(order.items || "[]"); } catch { return []; } })();
+
+  // Resolve product names from state
+  const resolvedItems = items.map(item => {
+    const product = state.products.find(p => p.id === item.productId);
+    const name = item.name || (product ? product.name : item.productId);
+    const price = item.unitPrice || (product ? product.price : 0);
+    return { ...item, name, unitPrice: price };
+  });
+
+  const steps = ["placed", "packing", "out_for_delivery", "delivered"];
+  const currentStep = steps.indexOf(order.status);
+  const isCancelled = order.status === "cancelled";
+  const isActive = !isCancelled && order.status !== "delivered";
+
+  // ETA calculation
+  const orderDate = new Date(order.createdAt);
+  const etaDate = new Date(orderDate.getTime() + 31 * 60000);
+  const now = new Date();
+  const minsLeft = Math.max(0, Math.round((etaDate - now) / 60000));
+  const etaText = isActive ? (minsLeft > 0 ? `~${minsLeft} min` : "Arriving soon!") : "";
+
+  // Format date
+  const dateStr = orderDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  const timeStr = orderDate.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+  const timeline = isCancelled ? '' : `
+    <div class="ot-timeline">
+      ${steps.map((step, i) => {
+        const done = i <= currentStep;
+        const active = i === currentStep && isActive;
+        const label = statusConfig[step].label.split(' ').pop();
+        return `
+          <div class="ot-step ${done ? 'done' : ''} ${active ? 'current' : ''}">
+            <div class="ot-dot">${done ? (active ? statusConfig[step].icon : '✓') : ''}</div>
+            ${i < steps.length - 1 ? `<div class="ot-line ${done && i < currentStep ? 'filled' : ''}"></div>` : ''}
+          </div>`;
+      }).join('')}
+      <div class="ot-labels">
+        ${steps.map(s => `<span>${statusConfig[s].label.split(' ').pop()}</span>`).join('')}
       </div>
-      <div class="order-body">
-        ${items.map((item) => `
-          <div class="order-item-row">
-            <span>${item.quantity}x ${escapeHtml(item.name || item.productId || "Item")}</span>
-            <span>${fmt(item.quantity * item.unitPrice)}</span>
+    </div>`;
+
+  return `
+    <div class="order-card ${isActive ? 'order-active' : ''}">
+      <div class="order-header">
+        <div class="order-id-wrap">
+          <span class="order-id">#${escapeHtml(order.id.slice(-8))}</span>
+          <span class="order-date">${dateStr}, ${timeStr}</span>
+        </div>
+        <span class="order-status-pill" style="background:${config.bg};color:${config.color}">
+          ${config.icon} ${escapeHtml(config.label)}
+        </span>
+      </div>
+      ${isActive && etaText ? `
+        <div class="order-eta-bar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span>Estimated: <strong>${etaText}</strong></span>
+        </div>` : ''}
+      ${timeline}
+      <div class="order-items-list">
+        ${resolvedItems.map(item => `
+          <div class="ot-item">
+            <div class="ot-item-qty">${item.quantity}×</div>
+            <div class="ot-item-name">${escapeHtml(item.name)}</div>
+            <div class="ot-item-price">${fmt(item.quantity * item.unitPrice)}</div>
           </div>
         `).join("")}
       </div>
-      <div class="order-timeline">
-        ${["placed", "packing", "out_for_delivery", "delivered"].map((step) => `
-          <div class="t-dot ${timeline.length && order.status !== "cancelled" && timelineForStatus(order.status).includes(step) ? "active" : ""}"></div>
-        `).join("")}
+      <div class="order-footer-v2">
+        <div class="order-meta">
+          <span class="order-payment">${escapeHtml(order.paymentMethod || 'COD')}</span>
+          ${order.address ? `<span class="order-addr">📍 ${escapeHtml((order.address || '').slice(0, 40))}${(order.address || '').length > 40 ? '...' : ''}</span>` : ''}
+        </div>
+        <div class="order-total-v2">₹${Number(order.total).toFixed(0)}</div>
       </div>
-      <div class="order-footer">
-        <span class="order-time">${new Date(order.createdAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}</span>
-        <span class="order-total">${fmt(order.total)}</span>
-      </div>
-    </div>
-  `;
+      ${order.status === 'delivered' ? `
+        <button class="reorder-btn" onclick="reorderItems('${escapeHtml(order.id)}')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+          Reorder
+        </button>` : ''}
+    </div>`;
+}
+
+function reorderItems(orderId) {
+  const order = state.orders.find(o => o.id === orderId);
+  if (!order) return;
+  const items = Array.isArray(order.items) ? order.items : (() => { try { return JSON.parse(order.items || "[]"); } catch { return []; } })();
+  items.forEach(item => {
+    const product = state.products.find(p => p.id === item.productId);
+    if (product && product.stock > 0) {
+      const existing = state.cart.find(c => c.id === item.productId);
+      if (existing) {
+        existing.qty = Math.min(existing.qty + item.quantity, product.stock);
+      } else {
+        state.cart.push({ id: item.productId, qty: item.quantity });
+      }
+    }
+  });
+  saveCart();
+  renderCart();
+  renderCartBadge();
+  toast("Items added to cart!");
+  switchView("cart");
 }
 
 function timelineForStatus(status) {

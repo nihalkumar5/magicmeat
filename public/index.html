@@ -294,15 +294,24 @@
   </section>
 
   <section id="profile" class="view">
-    <header class="cat-view-header"><h1>My Orders</h1><p class="cat-view-sub" id="profileEmail">Track by phone</p></header>
+    <header class="cat-view-header">
+      <h1>My Orders</h1>
+      <p class="cat-view-sub" id="profileEmail">Track by phone</p>
+    </header>
     <div class="profile-content">
       <div class="track-panel">
         <input type="tel" id="profilePhone" placeholder="Enter phone number"/>
         <button id="trackOrdersBtn" class="primary-btn">Track Orders</button>
       </div>
-      <div class="section-label inline">Active Orders</div>
+      <div class="section-label inline" style="display:flex;align-items:center;gap:8px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Active Orders
+      </div>
       <div id="activeOrders" class="orders-list"></div>
-      <div class="section-label inline">Order History</div>
+      <div class="section-label inline" style="display:flex;align-items:center;gap:8px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        Order History
+      </div>
       <div id="orderHistory" class="orders-list"></div>
       <button id="logoutBtn" class="primary-btn ghost-btn">Clear Tracking</button>
     </div>
