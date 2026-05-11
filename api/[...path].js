@@ -24,6 +24,9 @@ async function ensureTables(pool) {
   await pool.query(`CREATE TABLE IF NOT EXISTS settings (k VARCHAR(50) PRIMARY KEY, v TEXT)`);
   await pool.query(`CREATE TABLE IF NOT EXISTS users (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255), phone VARCHAR(20) UNIQUE, password_hash VARCHAR(255), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`);
   await pool.query(`INSERT IGNORE INTO settings (k, v) VALUES ('phone_number', '+919876543210'), ('free_delivery_threshold', '499'), ('delivery_fee', '29')`);
+  // Ensure orders table has required columns
+  try { await pool.query("ALTER TABLE orders ADD COLUMN paymentMethod VARCHAR(50) DEFAULT 'COD'"); } catch(e) {}
+  try { await pool.query("ALTER TABLE orders ADD COLUMN paymentId VARCHAR(100) DEFAULT ''"); } catch(e) {}
 }
 
 async function readSettings(pool) {
@@ -81,7 +84,7 @@ module.exports = async (req, res) => {
     if (method === 'GET' && route === 'orders') {
       const phone = parsedUrl.searchParams.get('phone') || req.query?.phone || '';
       if (!phone) return res.json([]);
-      const [orders] = await pool.query('SELECT * FROM orders WHERE phone = ? ORDER BY createdAt DESC', [phone]);
+      const [orders] = await pool.query('SELECT * FROM orders WHERE phone = ? ORDER BY created_at DESC', [phone]);
       return res.json(orders);
     }
 
@@ -175,7 +178,7 @@ module.exports = async (req, res) => {
 
     // GET /api/admin/dashboard
     if (method === 'GET' && route === 'admin/dashboard') {
-      const [orders] = await pool.query('SELECT * FROM orders ORDER BY createdAt DESC');
+      const [orders] = await pool.query('SELECT * FROM orders ORDER BY created_at DESC');
       const [products] = await pool.query('SELECT * FROM products');
       const categories = await readCategories(pool);
       const [offers] = await pool.query('SELECT * FROM offers');
