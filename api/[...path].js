@@ -103,6 +103,36 @@ module.exports = async (req, res) => {
       return res.json({ ok: true, message: 'Database initialized' });
     }
 
+    // GET /api/seed (Fresh Start with Premium Products)
+    if (method === 'GET' && route === 'seed') {
+      await ensureTables(pool);
+      await pool.query('DELETE FROM products');
+      await pool.query('DELETE FROM categories');
+      
+      // Seed Categories
+      await pool.query(`INSERT INTO categories (id, name, icon) VALUES 
+        ('chicken', 'Premium Chicken', '🍗'),
+        ('mutton', 'Royal Mutton', '🥩'),
+        ('fish', 'Fine Seafood', '🐟'),
+        ('eggs', 'Organic Eggs', '🥚'),
+        ('veggies', 'Garden Fresh', '🥬')`);
+
+      // Seed Premium Products
+      const products = [
+        ['p1', 'Farm Fresh Chicken Breast', 'chicken', 349, 450, '500g', '🍗', 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?auto=format&fit=crop&q=80&w=400', 50, 'Tender, skinless chicken breast sourced from organic farms.'],
+        ['p2', 'Prime Mutton Curry Cut', 'mutton', 799, 950, '1kg', '🥩', 'https://images.unsplash.com/photo-1603048588665-791ca8aea617?auto=format&fit=crop&q=80&w=400', 30, 'Hand-picked succulent pieces of premium mutton.'],
+        ['p3', 'Atlantic Salmon Steaks', 'fish', 1249, 1500, '2 pcs', '🐟', 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&q=80&w=400', 15, 'Rich, fatty salmon steaks imported from cold Atlantic waters.'],
+        ['p4', 'Organic Brown Eggs', 'eggs', 159, 199, '12 pcs', '🥚', 'https://images.unsplash.com/photo-1582722872445-44c56bb62c8f?auto=format&fit=crop&q=80&w=400', 100, 'Nutrient-rich eggs from free-range hens.'],
+        ['p5', 'Exotic Avocado Pack', 'veggies', 499, 650, '2 pcs', '🥑', 'https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?auto=format&fit=crop&q=80&w=400', 20, 'Creamy Hass avocados, perfect for a healthy breakfast.']
+      ];
+
+      for (const p of products) {
+        await pool.query('INSERT INTO products (id, name, category, price, mrp, unit, emoji, image, stock, description) VALUES (?,?,?,?,?,?,?,?,?,?)', p);
+      }
+
+      return res.json({ ok: true, message: 'Premium products seeded successfully!' });
+    }
+
     // GET /api/test (Connection test)
     if (method === 'GET' && route === 'test') {
       try {
