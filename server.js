@@ -55,7 +55,7 @@ async function ensureAuxTables() {
       mrp DECIMAL(10, 2),
       unit VARCHAR(50),
       emoji VARCHAR(10),
-      image VARCHAR(255),
+      image LONGTEXT,
       stock INT DEFAULT 0,
       description TEXT,
       rating DECIMAL(3, 1) DEFAULT 4.7,
@@ -88,7 +88,7 @@ async function ensureAuxTables() {
       min_order_amount DECIMAL(10, 2) DEFAULT 0,
       color VARCHAR(20),
       emoji VARCHAR(10),
-      image VARCHAR(255)
+      image LONGTEXT
     )
   `);
   await pool.query(`
@@ -119,6 +119,9 @@ async function ensureAuxTables() {
   try { await pool.query("ALTER TABLE orders ADD COLUMN paymentMethod VARCHAR(50) DEFAULT 'COD'"); } catch(e) {}
   try { await pool.query("ALTER TABLE orders ADD COLUMN paymentId VARCHAR(100) DEFAULT ''"); } catch(e) {}
   try { await pool.query("ALTER TABLE orders MODIFY COLUMN items TEXT"); } catch(e) {}
+  
+  try { await pool.query("ALTER TABLE products MODIFY COLUMN image LONGTEXT"); } catch(e) {}
+  try { await pool.query("ALTER TABLE offers MODIFY COLUMN image LONGTEXT"); } catch(e) {}
   
   await pool.query(
     "INSERT IGNORE INTO settings (k, v) VALUES (?, ?), (?, ?), (?, ?), (?, ?)",
@@ -234,40 +237,24 @@ async function routeApi(req, res, url) {
     }
   }
 
-  // ADMIN: IMAGE UPLOAD
+  // ADMIN: IMAGE UPLOAD (DATABASE STORAGE)
   if (req.method === "POST" && pathname === "/api/admin/upload") {
-    console.log("Upload request received");
-    if (!isAdmin(req)) {
-      console.log("Upload failed: Unauthorized");
-      return sendJson(res, 401, { error: "Unauthorized" });
-    }
+    if (!isAdmin(req)) return sendJson(res, 401, { error: "Unauthorized" });
     
-    const uploadDir = path.join(root, "uploads");
-    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-
-    const form = new formidable.IncomingForm({
-      uploadDir,
-      keepExtensions: true,
-      maxFileSize: 10 * 1024 * 1024 // 10MB
-    });
-
+    const form = new formidable.IncomingForm({ maxFileSize: 5 * 1024 * 1024 }); // 5MB limit
     form.parse(req, (err, fields, files) => {
-      if (err) {
-        console.error("Formidable error:", err);
-        return sendJson(res, 400, { error: "Upload failed: " + err.message });
-      }
+      if (err) return sendJson(res, 400, { error: "Upload failed" });
       
       const file = files.image && Array.isArray(files.image) ? files.image[0] : files.image;
-      if (!file) {
-        console.log("Upload failed: No file in 'image' field");
-        console.log("Fields received:", Object.keys(fields));
-        console.log("Files received:", Object.keys(files));
-        return sendJson(res, 400, { error: "No file uploaded" });
-      }
+      if (!file) return sendJson(res, 400, { error: "No file uploaded" });
       
-      const fileName = path.basename(file.filepath);
-      console.log("File uploaded successfully:", fileName);
-      sendJson(res, 200, { url: `/uploads/${fileName}` });
+      try {
+        const data = fs.readFileSync(file.filepath);
+        const base64 = `data:${file.mimetype};base64,${data.toString('base64')}`;
+        sendJson(res, 200, { url: base64 });
+      } catch (e) {
+        sendJson(res, 500, { error: "Encoding failed" });
+      }
     });
     return true;
   }
