@@ -192,7 +192,7 @@ async function routeApi(req, res, url) {
       sendJson(res, 200, { categories, products, featuredOffers, testimonials, settings });
     } catch (e) {
       console.error(e);
-      sendJson(res, 500, { error: "Database error" });
+      sendJson(res, 500, { error: e.message });
     }
     return true;
   }
@@ -205,7 +205,7 @@ async function routeApi(req, res, url) {
       const [orders] = await pool.query("SELECT * FROM orders WHERE phone = ? ORDER BY createdAt DESC", [phone]);
       sendJson(res, 200, orders);
     } catch (e) {
-      sendJson(res, 500, { error: "Database error" });
+      sendJson(res, 500, { error: e.message });
     }
     return true;
   }
@@ -302,7 +302,7 @@ async function routeApi(req, res, url) {
         testimonials
       });
     } catch (e) {
-      sendJson(res, 500, { error: "Database error" });
+      sendJson(res, 500, { error: e.message });
     }
     return true;
   }
