@@ -3,119 +3,126 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-  <title>MagicMeat | Fresh delivery dashboard</title>
-  <meta name="description" content="Fresh meat, seafood, produce and grocery delivery for Hazaribagh."/>
-  <meta name="theme-color" content="#F7F4EE"/>
+  <title>MagicMeat | Premium Fresh Delivery</title>
+  <meta name="description" content="Premium fresh meat, seafood and essentials delivered with care."/>
+  <meta name="theme-color" content="#1A1A1A"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&display=swap" rel="stylesheet"/>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <link rel="stylesheet" href="./styles.css?v=4.6"/>
 </head>
 <body>
 <div id="app-root">
-  <!-- PREMIUM TOP SECTION -->
+  <!-- LUXURY HEADER -->
   <header class="glass-header">
-    <div class="header-left" onclick="switchView('home')" style="cursor: pointer;">
-      <div class="brand-text">
-        <span class="brand-name">MagicMeat</span>
-        <span class="brand-tagline">Fresh delivery</span>
-      </div>
+    <div class="header-left" onclick="switchView('home')">
+      <span class="brand-name">MagicMeat</span>
     </div>
     <div class="header-right">
       <div class="header-eta-chip">
-        <span class="eta-pulse"></span>
+        <span class="eta-dot"></span>
         <span id="etaText">31 min</span>
       </div>
-      <div class="profile-avatar" onclick="switchView('profile')">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-          <circle cx="12" cy="7" r="4"/>
-        </svg>
-      </div>
+      <button class="nav-icon-btn" onclick="switchView('profile')" aria-label="Profile">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </button>
     </div>
   </header>
 
-  <!-- NEW PREMIUM MARQUEE -->
+  <!-- SIDE CART DRAWER -->
+  <div id="cartOverlay" class="drawer-overlay" onclick="toggleCart()"></div>
+  <aside id="cartDrawer" class="cart-drawer">
+    <div class="drawer-header">
+      <h2>Your Selection</h2>
+      <button onclick="toggleCart()" class="close-drawer">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="drawer-body" id="drawerCartList">
+      <!-- Cart items will be rendered here -->
+    </div>
+    <div class="drawer-footer">
+      <div id="drawerPromoSection" class="drawer-promo">
+         <input type="text" id="promoInput" placeholder="Promo code"/>
+         <button id="applyPromoBtn">Apply</button>
+      </div>
+      <div class="drawer-summary">
+        <div class="summary-line"><span>Subtotal</span><span id="drawerSubtotal">₹0</span></div>
+        <div class="summary-line" id="drawerDiscountRow" style="display:none"><span>Discount</span><span id="drawerDiscount">-₹0</span></div>
+        <div class="summary-line"><span>Delivery</span><span id="drawerDelivery">FREE</span></div>
+        <div class="summary-line total"><span>Total</span><span id="drawerTotal">₹0</span></div>
+      </div>
+      <button id="drawerCheckoutBtn" class="premium-checkout-btn">Proceed to Checkout</button>
+    </div>
+  </aside>
+
+  <!-- MARQUEE -->
   <div class="marquee-bar">
     <div class="marquee-content">
-      <span>First order gets 60% off with <b>FRESH60</b></span>
-      <span>Free delivery above ₹499</span>
-      <span>Cold-packed fresh meat delivered in 31 min</span>
-      <span>First order gets 60% off with <b>FRESH60</b></span>
+      <span>Exquisite cuts, delivered fresh in 31 minutes</span>
+      <span>Complimentary delivery on orders above ₹499</span>
+      <span>First order: 60% off with <b>FRESH60</b></span>
+      <span>Exquisite cuts, delivered fresh in 31 minutes</span>
     </div>
   </div>
 
   <!-- HOME VIEW -->
   <section id="home" class="view active">
     <div class="premium-hero-zone">
-      <div class="hero-gradient-bg"></div>
-      <div class="hero-zone-content">
-        <div class="location-row" id="locationBtn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          <span class="location-address" id="locationAddress">Hazaribagh…</span>
-          <svg class="loc-chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
+      <div class="hero-content">
+        <div class="location-badge" id="locationBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span id="locationAddress">Detecting location...</span>
         </div>
-        <h1 id="greetingText" class="hero-greeting">Good morning</h1>
-        <p class="hero-subtitle">What would you like to order today?</p>
-        <div class="search-wrap">
+        <h1 id="greetingText" class="hero-title">Experience Freshness</h1>
+        <p class="hero-sub">The finest cuts and freshest produce, delivered to your doorstep with precision.</p>
+        
+        <div class="premium-search">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="search" id="searchInput" placeholder="Search chicken, fish, veggies..."/>
+          <input type="search" id="searchInput" placeholder="Search for prime cuts, seafood, or greens..."/>
         </div>
 
-        <!-- HERO SLIDER (Dynamic) -->
-        <div class="hero-slider" id="heroSlider" style="margin-top: 32px; padding: 0;"></div>
-        <div class="hero-dots" id="heroDots"></div>
+        <div class="hero-slider-v4" id="heroSlider"></div>
       </div>
-      <div class="hero-mist"></div>
     </div>
 
     <!-- SEARCH RESULTS VIEW -->
-    <div id="searchResults" class="product-grid" style="display:none; margin-top:20px; padding: 0 20px;"></div>
+    <div id="searchResults" class="product-grid" style="display:none; padding: 20px;"></div>
 
     <div id="homeContent">
-      <!-- QUICK CONTACT ACTION (NEW) -->
-      <section class="hero-contact-actions" style="padding: 16px 20px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-        <a href="tel:+919876543210" id="heroCallBtn" class="primary-btn ghost-btn" style="margin-top: 0; padding: 14px 12px; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; border-radius: 16px; font-size: 15px;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-          Call to Order
+      <!-- QUICK ACTIONS -->
+      <section class="quick-actions-v4">
+        <a href="tel:+919876543210" class="action-card">
+          <div class="action-icon call"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+          <span>Call to Order</span>
         </a>
-        <a href="https://wa.me/919876543210" id="heroWaBtn" class="primary-btn" style="margin-top: 0; padding: 14px 12px; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; border-radius: 16px; background: #25D366; color: white; box-shadow: 0 8px 24px rgba(37,211,102,0.25); font-size: 15px;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.72.937 3.659 1.432 5.631 1.433h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-          WhatsApp
+        <a href="https://wa.me/919876543210" class="action-card">
+          <div class="action-icon wa"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.72.937 3.659 1.432 5.631 1.433h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></div>
+          <span>WhatsApp Us</span>
         </a>
       </section>
 
-      <!-- NEW PROMO HUB (Moved Up) -->
-      <section class="promo-hub">
-        <div class="top-offers">
-          <h3>Top Offers for you</h3>
-          <div class="offers-rail-v2" id="offersRail"></div>
-        </div>
-      </section>
-
-      <div class="filter-tags" style="padding-top: 10px; margin-bottom: 0;">
-        <button class="f-tag active">Bestsellers</button>
-        <button class="f-tag">Premium Meats</button>
-        <button class="f-tag">Fresh Produce</button>
-        <button class="f-tag">Daily Groceries</button>
-      </div>
-
-      <!-- HORIZONTAL PRODUCT RAIL (Trending) -->
-      <div class="section-label" style="margin-top: 0;">Trending Now <button class="p-popular-badge" id="shuffleTrending">POPULAR</button></div>
-      <div class="product-rail-h" id="trendingRail"></div>
-
-      <!-- RESTORED CIRCULAR CATEGORIES -->
-      <section class="category-zone">
-        <div class="section-label">Explore by Category <span class="see-all" id="seeAllCats">See All</span></div>
+      <!-- PREMIUM CATEGORIES -->
+      <section class="luxury-categories">
+        <div class="v4-label">Featured Categories <span class="v4-see-all" id="seeAllCats">Explore All</span></div>
         <div class="quick-categories" id="quickCategories"></div>
       </section>
 
-      <div class="section-label">Farm Fresh Picks</div>
+      <!-- PROMO RAIL -->
+      <section class="luxury-promo">
+        <div class="v4-label">Curated Deals</div>
+        <div class="offers-rail-v4" id="offersRail"></div>
+      </section>
+
+      <div class="v4-label">Trending Now</div>
+      <div class="product-grid" id="trendingRail"></div>
+
+      <div class="v4-label">Farm Fresh</div>
       <div class="product-grid" id="featuredGrid"></div>
 
-      <div class="section-label">Ocean's Finest (Seafood)</div>
-      <div class="product-grid" id="seafoodGrid"></div>
+      <div class="v4-label">Premium Seafood</div>
+      <div class="product-grid" id="seafoodGrid"></div>div>
 
       <div class="section-label">Daily Dairy & Essentials</div>
       <div class="product-grid" id="dairyGrid"></div>

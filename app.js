@@ -50,15 +50,19 @@ const dom = {
   homeContent: $("#homeContent"),
   offersRail: $("#offersRail"),
   groceryGrid: $("#groceryGrid"),
-  cartItems: $("#cartItems"),
-  cartSub: $("#cartSubtitle"),
-  subtotal: $("#subtotal"),
-  deliveryFee: $("#deliveryFee"),
-  cartTotal: $("#cartTotal"),
   cartBadge: $("#cartBadge"),
-  cartSummary: $("#cartSummaryBlock"),
-  checkoutBtn: $("#checkoutButton"),
   toast: $("#toast"),
+  
+  // Side Cart Drawer v4
+  cartDrawer: $("#cartDrawer"),
+  cartOverlay: $("#cartOverlay"),
+  drawerCartList: $("#drawerCartList"),
+  drawerSubtotal: $("#drawerSubtotal"),
+  drawerDiscount: $("#drawerDiscount"),
+  drawerDelivery: $("#drawerDelivery"),
+  drawerTotal: $("#drawerTotal"),
+  drawerCheckoutBtn: $("#drawerCheckoutBtn"),
+  
   orderModal: $("#orderModal"),
   modalEta: $("#modalEta"),
   modalOrderId: $("#modalOrderId"),
@@ -85,17 +89,6 @@ const dom = {
   logoutBtn: $("#logoutBtn"),
   pdBackBtn: $("#pdBackBtn"),
   pdContent: $("#productDetailContent"),
-  
-  // Side Cart Drawer
-  cartDrawer: $("#cartDrawer"),
-  cartDrawerOverlay: $("#cartDrawerOverlay"),
-  cartDrawerClose: $("#cartDrawerClose"),
-  drawerCartItems: $("#drawerCartItems"),
-  drawerCartCount: $("#drawerCartCount"),
-  drawerSubtotal: $("#drawerSubtotal"),
-  drawerDeliveryFee: $("#drawerDeliveryFee"),
-  drawerTotal: $("#drawerTotal"),
-  drawerCheckoutBtn: $("#drawerCheckoutBtn"),
   seeAllCats: $("#seeAllCats"),
   offersViewRail: $("#offersViewRail"),
   specialOffersGrid: $("#specialOffersGrid"),
@@ -901,8 +894,28 @@ function renderGroceryGrid() {
     : `<div class="grid-empty"><h3>Nothing here yet</h3><p>Check another category.</p></div>`;
 }
 
+function toggleCart() {
+  if (!dom.cartDrawer) return;
+  const isActive = dom.cartDrawer.classList.contains("active");
+  if (isActive) {
+    dom.cartDrawer.classList.remove("active");
+    dom.cartOverlay.classList.remove("active");
+  } else {
+    renderCart();
+    dom.cartDrawer.classList.add("active");
+    dom.cartOverlay.classList.add("active");
+  }
+}
+
+function openCartDrawer() {
+  if (!dom.cartDrawer) return;
+  renderCart();
+  dom.cartDrawer.classList.add("active");
+  dom.cartOverlay.classList.add("active");
+}
+
 function renderCart() {
-  if (!dom.cartBadge || !dom.cartItems || !dom.cartSummary) return;
+  if (!dom.drawerCartList) return;
   const items = [];
   state.cart.forEach((quantity, id) => {
     const product = state.products.find((entry) => entry.id === id);
@@ -912,43 +925,64 @@ function renderCart() {
   const count = cartCount();
   const subtotal = cartSubtotal();
   const fee = deliveryFeeFor(subtotal);
+  const total = subtotal + fee - state.discount;
 
-  dom.cartBadge.textContent = count;
-  dom.cartBadge.classList.toggle("show", count > 0);
-  dom.cartSub.textContent = `${count} item${count === 1 ? "" : "s"}`;
-
-  // Decision Psychology: Pulse the cart icon for micro-feedback
-  const navCart = document.getElementById('navCartIcon');
-  if (navCart && count > 0) {
-    navCart.classList.remove('cart-pulse');
-    void navCart.offsetWidth; // trigger reflow
-    navCart.classList.add('cart-pulse');
+  if (dom.cartBadge) {
+    dom.cartBadge.textContent = count;
+    dom.cartBadge.classList.toggle("show", count > 0);
   }
 
-  const freeAbove = Number(state.settings.free_delivery_threshold || 499);
-  const goalMsg = fee > 0 
-    ? `<div class="cart-goal-msg"><span class="goal-icon">DEL</span>Add ${fmt(freeAbove - subtotal)} more for <strong>free delivery</strong></div>`
-    : `<div class="cart-goal-msg is-unlocked"><span class="goal-icon">OK</span>Free delivery unlocked</div>`;
-
   if (!items.length) {
-    dom.cartItems.innerHTML = `<div class="cart-empty"><h3>Your basket is empty</h3><p>Add fresh picks from the menu.</p></div>`;
-    dom.cartSummary.style.display = "none";
+    dom.drawerCartList.innerHTML = `
+      <div class="cart-empty-v4">
+        <div class="empty-icon">🧺</div>
+        <h3>Your selection is empty</h3>
+        <p>Explore our premium cuts and fresh produce to fill your basket.</p>
+        <button class="primary-btn" onclick="toggleCart()" style="margin-top:20px;">Start Shopping</button>
+      </div>
+    `;
+    if (dom.drawerSubtotal) dom.drawerSubtotal.textContent = "₹0";
+    if (dom.drawerTotal) dom.drawerTotal.textContent = "₹0";
+    if (dom.drawerDelivery) dom.drawerDelivery.textContent = "FREE";
     state.appliedPromo = null;
     state.discount = 0;
-    if (dom.promoMsg) dom.promoMsg.style.display = "none";
-    if (dom.drawerPromoMsg) dom.drawerPromoMsg.style.display = "none";
     return;
   }
 
-  dom.cartSummary.style.display = "";
-  dom.cartItems.innerHTML = goalMsg + items.map((item) => `
-    <div class="cart-item">
-      <div class="cart-item-img">
+  dom.drawerCartList.innerHTML = items.map((item) => `
+    <div class="drawer-item">
+      <div class="drawer-item-img">
         ${item.image 
           ? `<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}">` 
-          : `<span>${escapeHtml(item.emoji)}</span>`
+          : `<span class="emoji">${escapeHtml(item.emoji)}</span>`
         }
       </div>
+      <div class="drawer-item-info">
+        <h4>${escapeHtml(item.name)}</h4>
+        <span class="unit">${escapeHtml(item.unit)}</span>
+        <div class="drawer-item-price">${fmt(item.price)}</div>
+      </div>
+      <div class="drawer-qty">
+        <button onclick="minusFromCart('${escapeHtml(item.id)}')" class="qty-btn">−</button>
+        <span>${item.quantity}</span>
+        <button onclick="addToCart('${escapeHtml(item.id)}')" class="qty-btn">+</button>
+      </div>
+    </div>
+  `).join("");
+
+  if (dom.drawerSubtotal) dom.drawerSubtotal.textContent = fmt(subtotal);
+  if (dom.drawerDelivery) dom.drawerDelivery.textContent = fee === 0 ? "FREE" : fmt(fee);
+  if (dom.drawerTotal) dom.drawerTotal.textContent = fmt(total);
+  
+  if (dom.drawerDiscount) {
+    if (state.discount > 0) {
+      dom.drawerDiscount.textContent = `-${fmt(state.discount)}`;
+      $("#drawerDiscountRow").style.display = "flex";
+    } else {
+      $("#drawerDiscountRow").style.display = "none";
+    }
+  }
+}      </div>
       <div class="cart-item-info">
         <div class="cart-item-title">${escapeHtml(item.name)}</div>
         <div class="cart-item-meta">${escapeHtml(item.unit)} · ${escapeHtml(categoryFor(item.category).label)}</div>
