@@ -202,7 +202,7 @@ async function routeApi(req, res, url) {
     const phone = url.searchParams.get("phone");
     if (!phone) return sendJson(res, 200, []);
     try {
-      const [orders] = await pool.query("SELECT * FROM orders WHERE phone = ? ORDER BY created_at DESC", [phone]);
+      const [orders] = await pool.query("SELECT * FROM orders WHERE phone = ? ORDER BY createdAt DESC", [phone]);
       sendJson(res, 200, orders);
     } catch (e) {
       sendJson(res, 500, { error: "Database error" });
@@ -286,7 +286,7 @@ async function routeApi(req, res, url) {
   if (req.method === "GET" && pathname === "/api/admin/dashboard") {
     try {
       await ensureAuxTables();
-      const [orders] = await pool.query("SELECT * FROM orders ORDER BY created_at DESC");
+      const [orders] = await pool.query("SELECT * FROM orders ORDER BY createdAt DESC");
       const [products] = await pool.query("SELECT * FROM products");
       const categories = await readCategories();
       const [offers] = await pool.query("SELECT * FROM offers");

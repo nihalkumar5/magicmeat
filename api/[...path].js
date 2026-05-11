@@ -84,8 +84,19 @@ module.exports = async (req, res) => {
     if (method === 'GET' && route === 'orders') {
       const phone = parsedUrl.searchParams.get('phone') || req.query?.phone || '';
       if (!phone) return res.json([]);
-      const [orders] = await pool.query('SELECT * FROM orders WHERE phone = ? ORDER BY created_at DESC', [phone]);
-      return res.json(orders);
+      try {
+        const [orders] = await pool.query('SELECT * FROM orders WHERE phone = ? ORDER BY createdAt DESC', [phone]);
+        return res.json(orders);
+      } catch (e) {
+        console.error('Orders query error:', e.message);
+        // Fallback: try without ORDER BY in case column name differs
+        try {
+          const [orders] = await pool.query('SELECT * FROM orders WHERE phone = ?', [phone]);
+          return res.json(orders);
+        } catch (e2) {
+          return res.status(500).json({ error: e2.message });
+        }
+      }
     }
 
     // POST /api/orders
@@ -178,7 +189,7 @@ module.exports = async (req, res) => {
 
     // GET /api/admin/dashboard
     if (method === 'GET' && route === 'admin/dashboard') {
-      const [orders] = await pool.query('SELECT * FROM orders ORDER BY created_at DESC');
+      const [orders] = await pool.query('SELECT * FROM orders ORDER BY createdAt DESC');
       const [products] = await pool.query('SELECT * FROM products');
       const categories = await readCategories(pool);
       const [offers] = await pool.query('SELECT * FROM offers');
