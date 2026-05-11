@@ -1024,11 +1024,25 @@ function renderCart() {
 
 function renderOrderTracking() {
   if (!dom.activeOrders || !dom.orderHistory) return;
+  
+  // Auto-fill phone from saved customer data (guest checkout)
+  const savedPhone = state.customer ? state.customer.phone : '';
+  if (dom.profilePhone && !dom.profilePhone.value && savedPhone) {
+    dom.profilePhone.value = savedPhone;
+  }
+  
+  // Auto-load orders if we have a phone but no orders loaded yet
+  const currentPhone = dom.profilePhone ? dom.profilePhone.value : savedPhone;
+  if (currentPhone && state.orders.length === 0) {
+    loadOrders(currentPhone);
+    return; // loadOrders will call renderOrderTracking again via renderOrders
+  }
+  
   const activeStatuses = new Set(["placed", "packing", "out_for_delivery"]);
   const active = state.orders.filter((order) => activeStatuses.has(order.status));
   const past = state.orders.filter((order) => !activeStatuses.has(order.status));
 
-  dom.profileEmail.textContent = state.customer.phone ? `Tracking ${state.customer.phone}` : "Track by phone";
+  dom.profileEmail.textContent = currentPhone ? `Tracking ${currentPhone}` : "Track by phone";
   dom.activeOrders.innerHTML = active.length
     ? active.map(orderCard).join("")
     : `<div class="cart-empty compact"><h3>No active orders</h3><p>Your current order status will show here.</p></div>`;
