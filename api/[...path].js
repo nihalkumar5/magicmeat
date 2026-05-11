@@ -53,7 +53,9 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   const pool = getPool();
-  await ensureTables(pool);
+  
+  // Non-blocking table setup — don't let migrations kill the API
+  try { await ensureTables(pool); } catch(e) { console.error('ensureTables warning:', e.message); }
 
   // Build route - parse from URL directly (most reliable on Vercel)
   const parsedUrl = new URL(req.url, `https://${req.headers.host || 'localhost'}`);
