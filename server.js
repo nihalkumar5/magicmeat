@@ -47,12 +47,45 @@ async function ensureAuxTables() {
     )
   `);
   await pool.query(`
+    CREATE TABLE IF NOT EXISTS products (
+      id VARCHAR(50) PRIMARY KEY,
+      name VARCHAR(255),
+      category VARCHAR(50),
+      price DECIMAL(10, 2),
+      mrp DECIMAL(10, 2),
+      unit VARCHAR(50),
+      emoji VARCHAR(10),
+      image VARCHAR(255),
+      stock INT DEFAULT 0,
+      description TEXT,
+      rating DECIMAL(3, 1) DEFAULT 4.7,
+      createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS orders (
+      id VARCHAR(50) PRIMARY KEY,
+      customerName VARCHAR(255),
+      phone VARCHAR(20),
+      address TEXT,
+      total DECIMAL(10, 2),
+      items TEXT,
+      status VARCHAR(50) DEFAULT 'placed',
+      paymentMethod VARCHAR(50) DEFAULT 'COD',
+      paymentId VARCHAR(100),
+      createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS offers (
       id INT AUTO_INCREMENT PRIMARY KEY,
       tag VARCHAR(50),
       title VARCHAR(100),
       subtext VARCHAR(255),
       code VARCHAR(50),
+      discount_type ENUM('fixed', 'percent') DEFAULT 'fixed',
+      discount_value DECIMAL(10, 2) DEFAULT 0,
+      min_order_amount DECIMAL(10, 2) DEFAULT 0,
       color VARCHAR(20),
       emoji VARCHAR(10),
       image VARCHAR(255)
@@ -72,6 +105,15 @@ async function ensureAuxTables() {
       v TEXT
     )
   `);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS users (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      name VARCHAR(255),
+      phone VARCHAR(20) UNIQUE,
+      password_hash VARCHAR(255),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
   await pool.query(
     "INSERT IGNORE INTO settings (k, v) VALUES (?, ?), (?, ?), (?, ?), (?, ?)",
     [
@@ -81,9 +123,6 @@ async function ensureAuxTables() {
       "delivery_fee", "29"
     ]
   );
-  // Ensure orders table has required columns
-  try { await pool.query("ALTER TABLE orders ADD COLUMN paymentMethod VARCHAR(50) DEFAULT 'COD'"); } catch(e) {}
-  try { await pool.query("ALTER TABLE orders ADD COLUMN paymentId VARCHAR(100) DEFAULT ''"); } catch(e) {}
 }
 
 async function readSettings() {
