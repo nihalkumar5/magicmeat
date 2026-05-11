@@ -114,6 +114,12 @@ async function ensureAuxTables() {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
+  
+  // Migration: Ensure orders table has newer columns
+  try { await pool.query("ALTER TABLE orders ADD COLUMN paymentMethod VARCHAR(50) DEFAULT 'COD'"); } catch(e) {}
+  try { await pool.query("ALTER TABLE orders ADD COLUMN paymentId VARCHAR(100) DEFAULT ''"); } catch(e) {}
+  try { await pool.query("ALTER TABLE orders MODIFY COLUMN items TEXT"); } catch(e) {}
+  
   await pool.query(
     "INSERT IGNORE INTO settings (k, v) VALUES (?, ?), (?, ?), (?, ?), (?, ?)",
     [
@@ -298,8 +304,10 @@ async function routeApi(req, res, url) {
 
   // PUBLIC: PLACE ORDER
   if (req.method === "POST" && pathname === "/api/orders") {
+    console.log("[ORDER] Incoming request");
     try {
       const payload = await parseBody(req);
+      console.log("[ORDER] Payload:", JSON.stringify(payload).slice(0, 500));
       const conn = await pool.getConnection();
       await conn.beginTransaction();
 
@@ -307,6 +315,8 @@ async function routeApi(req, res, url) {
         const orderId = `ord-${Date.now()}`;
         const items = payload.items || [];
         
+        if (items.length === 0) throw new Error("Cart is empty");
+
         // Calculate Total and Validate Stock
         let total = 0;
         for (const item of items) {
@@ -329,21 +339,26 @@ async function routeApi(req, res, url) {
         const discount = Number(payload.discount) || 0;
         const adjustedTotal = Math.max(0, finalTotal - discount);
 
+        console.log(`[ORDER] ID: ${orderId}, Total: ${adjustedTotal}, Method: ${pm}`);
+
         await conn.query(
           "INSERT INTO orders (id, customerName, phone, address, total, items, status, paymentMethod, paymentId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
           [orderId, payload.customerName, payload.phone, payload.address, adjustedTotal, JSON.stringify(items), 'placed', pm, pid]
         );
 
         await conn.commit();
-        sendJson(res, 201, { id: orderId, total: finalTotal });
+        console.log("[ORDER] Committed successfully:", orderId);
+        sendJson(res, 201, { id: orderId, total: adjustedTotal });
       } catch (e) {
+        console.error("[ORDER] Logic Error:", e.message);
         await conn.rollback();
         sendJson(res, 400, { error: e.message });
       } finally {
         conn.release();
       }
     } catch (e) {
-      sendJson(res, 500, { error: "Transaction failed" });
+      console.error("[ORDER] Server Error:", e);
+      sendJson(res, 500, { error: "Internal Server Error: " + e.message });
     }
     return true;
   }
@@ -598,6 +613,13 @@ async function routeApi(req, res, url) {
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host || "localhost"}`);
+  console.log(`[REQ] ${req.method} ${url.pathname}`);
+
+  // CORS Headers
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  if (req.method === "OPTIONS") return send(res, 200, "");
 
   // API routes
   if (await routeApi(req, res, url)) return;
