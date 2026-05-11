@@ -86,6 +86,12 @@ $conn->query("CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )");
 
+// Auto-update orders table for new columns
+$conn->query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS paymentMethod VARCHAR(50) DEFAULT 'COD'");
+$conn->query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS paymentId VARCHAR(100) DEFAULT ''");
+$conn->query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS promo_code VARCHAR(50) DEFAULT NULL");
+$conn->query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS discount DECIMAL(10, 2) DEFAULT 0");
+
 // ROUTING
 if ($method === 'GET' && $path === 'store') {
     $res = $conn->query("SELECT * FROM products");
@@ -141,25 +147,19 @@ elseif ($method === 'POST' && $path === 'orders') {
     $items = is_string($data['items']) ? $data['items'] : json_encode($data['items']);
     $pm = $data['paymentMethod'] ?? 'COD';
     $pid = $data['paymentId'] ?? '';
+    $promo = $data['promoCode'] ?? null;
+    $discount = $data['discount'] ?? 0;
     
-    // Attempt to insert with payment fields. If columns don't exist, it will fallback.
-    $stmt = $conn->prepare("INSERT INTO orders (id, customerName, phone, address, total, items, status, paymentMethod, paymentId) VALUES (?, ?, ?, ?, ?, ?, 'placed', ?, ?)");
+    $stmt = $conn->prepare("INSERT INTO orders (id, customerName, phone, address, total, items, status, paymentMethod, paymentId, promo_code, discount) VALUES (?, ?, ?, ?, ?, ?, 'placed', ?, ?, ?, ?)");
     if ($stmt) {
-        $stmt->bind_param("ssssssss", $orderId, $data['customerName'], $data['phone'], $data['address'], $data['total'], $items, $pm, $pid);
+        $stmt->bind_param("ssssssssssd", $orderId, $data['customerName'], $data['phone'], $data['address'], $data['total'], $items, $pm, $pid, $promo, $discount);
         if ($stmt->execute()) {
             echo json_encode(["id" => $orderId, "total" => $data['total']]);
         } else {
             echo json_encode(["error" => "Order failed: " . $conn->error]);
         }
     } else {
-        // Fallback for old schema
-        $stmt = $conn->prepare("INSERT INTO orders (id, customerName, phone, address, total, items, status) VALUES (?, ?, ?, ?, ?, ?, 'placed')");
-        $stmt->bind_param("ssssss", $orderId, $data['customerName'], $data['phone'], $data['address'], $data['total'], $items);
-        if ($stmt->execute()) {
-            echo json_encode(["id" => $orderId, "total" => $data['total']]);
-        } else {
-            echo json_encode(["error" => "Order failed"]);
-        }
+        echo json_encode(["error" => "Internal error: " . $conn->error]);
     }
 }
 

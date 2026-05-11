@@ -67,14 +67,17 @@ async function ensureAuxTables() {
     )
   `);
   await pool.query(
-    "INSERT IGNORE INTO settings (k, v) VALUES (?, ?), (?, ?)",
+    "INSERT IGNORE INTO settings (k, v) VALUES (?, ?), (?, ?), (?, ?), (?, ?)",
     [
-      "phone_number",
-      "+919876543210",
-      "marquee_text",
-      "Flat ₹100 off above ₹599\nFresh delivery in 25-31 minutes\nCold-packed meat and essentials at your doorstep"
+      "phone_number", "+919876543210",
+      "marquee_text", "Flat ₹100 off above ₹599\nFresh delivery in 25-31 minutes\nCold-packed meat and essentials at your doorstep",
+      "free_delivery_threshold", "499",
+      "delivery_fee", "29"
     ]
   );
+  // Ensure orders table has required columns
+  try { await pool.query("ALTER TABLE orders ADD COLUMN paymentMethod VARCHAR(50) DEFAULT 'COD'"); } catch(e) {}
+  try { await pool.query("ALTER TABLE orders ADD COLUMN paymentId VARCHAR(100) DEFAULT ''"); } catch(e) {}
 }
 
 async function readSettings() {
@@ -141,7 +144,11 @@ async function routeApi(req, res, url) {
 
   // ADMIN: IMAGE UPLOAD
   if (req.method === "POST" && pathname === "/api/admin/upload") {
-    if (!isAdmin(req)) return sendJson(res, 401, { error: "Unauthorized" });
+    console.log("Upload request received");
+    if (!isAdmin(req)) {
+      console.log("Upload failed: Unauthorized");
+      return sendJson(res, 401, { error: "Unauthorized" });
+    }
     
     const uploadDir = path.join(root, "uploads");
     if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
@@ -149,15 +156,25 @@ async function routeApi(req, res, url) {
     const form = new formidable.IncomingForm({
       uploadDir,
       keepExtensions: true,
-      maxFileSize: 5 * 1024 * 1024 // 5MB
+      maxFileSize: 10 * 1024 * 1024 // 10MB
     });
 
     form.parse(req, (err, fields, files) => {
-      if (err) return sendJson(res, 400, { error: "Upload failed" });
-      const file = files.image && files.image[0] ? files.image[0] : files.image;
-      if (!file) return sendJson(res, 400, { error: "No file uploaded" });
+      if (err) {
+        console.error("Formidable error:", err);
+        return sendJson(res, 400, { error: "Upload failed: " + err.message });
+      }
+      
+      const file = files.image && Array.isArray(files.image) ? files.image[0] : files.image;
+      if (!file) {
+        console.log("Upload failed: No file in 'image' field");
+        console.log("Fields received:", Object.keys(fields));
+        console.log("Files received:", Object.keys(files));
+        return sendJson(res, 400, { error: "No file uploaded" });
+      }
       
       const fileName = path.basename(file.filepath);
+      console.log("File uploaded successfully:", fileName);
       sendJson(res, 200, { url: `/uploads/${fileName}` });
     });
     return true;
@@ -222,10 +239,13 @@ async function routeApi(req, res, url) {
 
         const pm = payload.paymentMethod || 'COD';
         const pid = payload.paymentId || '';
+        const promoCode = payload.promoCode || null;
+        const discount = Number(payload.discount) || 0;
+        const adjustedTotal = Math.max(0, finalTotal - discount);
 
         await conn.query(
           "INSERT INTO orders (id, customerName, phone, address, total, items, status, paymentMethod, paymentId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-          [orderId, payload.customerName, payload.phone, payload.address, finalTotal, JSON.stringify(items), 'placed', pm, pid]
+          [orderId, payload.customerName, payload.phone, payload.address, adjustedTotal, JSON.stringify(items), 'placed', pm, pid]
         );
 
         await conn.commit();
@@ -418,12 +438,14 @@ async function routeApi(req, res, url) {
       const p = await parseBody(req);
       const id = `p-${randomUUID()}`;
       const mrp = p.mrp || p.price;
+      console.log("Adding product:", p.name);
       await pool.query(
         "INSERT INTO products (id, name, category, price, mrp, unit, emoji, image, stock, description, rating) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [id, p.name, p.category, p.price, mrp, p.unit, p.emoji, p.image, p.stock, p.description, p.rating || 4.7]
       );
       sendJson(res, 201, { id, ...p });
     } catch (e) {
+      console.error("Product creation error:", e);
       sendJson(res, 500, { error: e.message });
     }
     return true;
@@ -431,15 +453,17 @@ async function routeApi(req, res, url) {
 
   if (req.method === "PUT" && pathname.startsWith("/api/admin/products/")) {
     try {
-      const id = pathname.split("/").pop();
+      const id = decodeURIComponent(pathname.split("/").pop());
       const p = await parseBody(req);
       const mrp = p.mrp || p.price;
+      console.log("Updating product:", id, p.name);
       await pool.query(
         "UPDATE products SET name=?, category=?, price=?, mrp=?, unit=?, emoji=?, image=?, stock=?, description=?, rating=? WHERE id=?",
         [p.name, p.category, p.price, mrp, p.unit, p.emoji, p.image, p.stock, p.description, p.rating, id]
       );
       sendJson(res, 200, { ok: true });
     } catch (e) {
+      console.error("Product update error:", e);
       sendJson(res, 500, { error: e.message });
     }
     return true;
@@ -489,26 +513,26 @@ async function routeApi(req, res, url) {
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host || "localhost"}`);
 
-  // Support for PHP-style routing api.php?path=...
-  if (url.pathname === "/api.php") {
-    const phpPath = url.searchParams.get("path");
-    if (phpPath) {
-      // Mock the pathname for routeApi
-      const mockUrl = new URL(url.href);
-      mockUrl.pathname = "/api/" + phpPath;
-      if (await routeApi(req, res, mockUrl)) return;
-    }
-  }
-
+  // API routes
   if (await routeApi(req, res, url)) return;
 
-  const requestedPath = url.pathname === "/" ? "/index.html" : (url.pathname === "/admin" ? "/admin.html" : url.pathname);
-  const filePath = path.join(root, requestedPath);
+  // Static files from /public/
+  let requestedPath = url.pathname;
+  if (requestedPath === "/") requestedPath = "/index.html";
+  if (requestedPath === "/admin") requestedPath = "/admin.html";
+  
+  // Try /public/ first, then root directory
+  const publicPath = path.join(root, "public", requestedPath);
+  const rootPath = path.join(root, requestedPath);
 
-  fs.readFile(filePath, (err, content) => {
-    if (err) return send(res, 404, "Not found");
-    send(res, 200, content, types[path.extname(filePath)] || "application/octet-stream");
+  fs.readFile(publicPath, (err, content) => {
+    if (!err) return send(res, 200, content, types[path.extname(publicPath)] || "application/octet-stream");
+    // Fallback to root
+    fs.readFile(rootPath, (err2, content2) => {
+      if (err2) return send(res, 404, "Not found");
+      send(res, 200, content2, types[path.extname(rootPath)] || "application/octet-stream");
+    });
   });
 });
 
-server.listen(port, () => console.log(`MagicMeat (MySQL) running at http://localhost:${port}`));
+server.listen(port, () => console.log(`MagicMeat v3.0 running at http://localhost:${port}`));

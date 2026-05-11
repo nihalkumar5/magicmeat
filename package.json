@@ -1,11 +1,11 @@
 {
   "name": "magicmeat",
-  "version": "1.0.0",
-  "description": "",
+  "version": "3.0.0",
+  "description": "MagicMeat - Fresh delivery platform",
   "main": "server.js",
   "scripts": {
     "dev": "node server.js",
-    "test": "node --check server.js && node --check www/app.js"
+    "start": "node server.js"
   },
   "repository": {
     "type": "git",
@@ -19,9 +19,9 @@
   },
   "homepage": "https://github.com/nihalkumar5/magicmeat#readme",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "dotenv": "^17.4.2",
     "formidable": "^3.5.4",
-    "multer": "^2.1.1",
     "mysql2": "^3.22.3"
   }
 }

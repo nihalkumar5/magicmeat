@@ -45,6 +45,9 @@ CREATE TABLE IF NOT EXISTS offers (
     title VARCHAR(100),
     subtext VARCHAR(255),
     code VARCHAR(50),
+    discount_type ENUM('fixed', 'percent') DEFAULT 'fixed',
+    discount_value DECIMAL(10, 2) DEFAULT 0,
+    min_order_amount DECIMAL(10, 2) DEFAULT 0,
     color VARCHAR(20),
     emoji VARCHAR(10),
     image VARCHAR(255)
@@ -77,6 +80,8 @@ CREATE TABLE IF NOT EXISTS settings (
 
 INSERT IGNORE INTO settings (k, v) VALUES 
 ('phone_number', '+919876543210'),
+('free_delivery_threshold', '499'),
+('delivery_fee', '29'),
 ('marquee_text', 'Flat ₹100 off above ₹599\nFresh delivery in 25-31 minutes\nCold-packed meat and essentials at your doorstep');
 
 -- 7. Users Table
