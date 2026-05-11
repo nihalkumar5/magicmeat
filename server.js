@@ -15,10 +15,16 @@ const pool = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
-  database: process.env.DB_NAME,
+  database: process.env.DB_NAME || 'test',
+  port: process.env.DB_PORT || 4000,
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
+  ssl: {
+    rejectUnauthorized: true,
+    minVersion: 'TLSv1.2'
+  },
+  connectTimeout: 20000
 });
 
 const defaultCategories = [
@@ -141,6 +147,47 @@ function isAdmin(req) {
 
 async function routeApi(req, res, url) {
   const pathname = url.pathname;
+
+  // SYSTEM: INIT DATABASE
+  if (req.method === "GET" && pathname === "/api/init") {
+    try {
+      await ensureAuxTables();
+      return sendJson(res, 200, { ok: true, message: "Database initialized" });
+    } catch (e) {
+      return sendJson(res, 500, { error: e.message });
+    }
+  }
+
+  // SYSTEM: SEED DATA
+  if (req.method === "GET" && pathname === "/api/seed") {
+    try {
+      await ensureAuxTables();
+      await pool.query('DELETE FROM products');
+      await pool.query('DELETE FROM categories');
+      
+      await pool.query(`INSERT INTO categories (id, name, icon) VALUES 
+        ('chicken', 'Premium Chicken', '🍗'),
+        ('mutton', 'Royal Mutton', '🥩'),
+        ('fish', 'Fine Seafood', '🐟'),
+        ('eggs', 'Organic Eggs', '🥚'),
+        ('veggies', 'Garden Fresh', '🥬')`);
+
+      const products = [
+        ['p1', 'Farm Fresh Chicken Breast', 'chicken', 349, 450, '500g', '🍗', 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?auto=format&fit=crop&q=80&w=400', 50, 'Tender, skinless chicken breast sourced from organic farms.'],
+        ['p2', 'Prime Mutton Curry Cut', 'mutton', 799, 950, '1kg', '🥩', 'https://images.unsplash.com/photo-1603048588665-791ca8aea617?auto=format&fit=crop&q=80&w=400', 30, 'Hand-picked succulent pieces of premium mutton.'],
+        ['p3', 'Atlantic Salmon Steaks', 'fish', 1249, 1500, '2 pcs', '🐟', 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&q=80&w=400', 15, 'Rich, fatty salmon steaks imported from cold Atlantic waters.'],
+        ['p4', 'Organic Brown Eggs', 'eggs', 159, 199, '12 pcs', '🥚', 'https://images.unsplash.com/photo-1582722872445-44c56bb62c8f?auto=format&fit=crop&q=80&w=400', 100, 'Nutrient-rich eggs from free-range hens.'],
+        ['p5', 'Exotic Avocado Pack', 'veggies', 499, 650, '2 pcs', '🥑', 'https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?auto=format&fit=crop&q=80&w=400', 20, 'Creamy Hass avocados, perfect for a healthy breakfast.']
+      ];
+
+      for (const p of products) {
+        await pool.query('INSERT INTO products (id, name, category, price, mrp, unit, emoji, image, stock, description) VALUES (?,?,?,?,?,?,?,?,?,?)', p);
+      }
+      return sendJson(res, 200, { ok: true, message: "Premium products seeded successfully!" });
+    } catch (e) {
+      return sendJson(res, 500, { error: e.message });
+    }
+  }
 
   // ADMIN: IMAGE UPLOAD
   if (req.method === "POST" && pathname === "/api/admin/upload") {
